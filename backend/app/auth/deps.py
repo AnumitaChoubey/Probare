@@ -11,7 +11,7 @@ from app.db.session import get_db
 from app.db.models.user import User
 from app.auth.security import ALGORITHM
 
-reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/api/login")
+reusable_oauth2 = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 async def get_current_user(
     db: Annotated[AsyncSession, Depends(get_db)],
