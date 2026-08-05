@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useCallback, createContext, useContext } from 'react'
 import { colors, radius, shadow, fontSize } from './tokens'
 
 type ToastType = 'success' | 'error' | 'warning' | 'info'
@@ -16,10 +16,10 @@ interface ToastProps {
 }
 
 const typeConfig: Record<ToastType, { icon: string; bg: string; color: string }> = {
-  success: { icon: '✅', bg: '#f0fdf4', color: '#166534' },
-  error:   { icon: '❌', bg: '#fef2f2', color: '#991b1b' },
-  warning: { icon: '⚠️', bg: '#fffbeb', color: '#92400e' },
-  info:    { icon: 'ℹ️', bg: '#eff6ff', color: '#1e40af' },
+  success: { icon: '✓', bg: '#f0fdf4', color: '#166534' },
+  error:   { icon: '✕', bg: '#fef2f2', color: '#991b1b' },
+  warning: { icon: '⚠', bg: '#fffbeb', color: '#92400e' },
+  info:    { icon: 'ℹ', bg: '#eff6ff', color: '#1e40af' },
 }
 
 function ToastItem({ toast, onDismiss }: { toast: ToastMessage; onDismiss: (id: string) => void }) {
@@ -49,8 +49,7 @@ function ToastItem({ toast, onDismiss }: { toast: ToastMessage; onDismiss: (id: 
   )
 }
 
-/** Render this once in AppShell or at the root level. */
-export function Toast({ toasts, onDismiss }: ToastProps) {
+function Toast({ toasts, onDismiss }: ToastProps) {
   return (
     <div style={{
       position: 'fixed', bottom: 24, right: 24, zIndex: 9999,
@@ -63,11 +62,15 @@ export function Toast({ toasts, onDismiss }: ToastProps) {
   )
 }
 
-// --- useToast hook (convenience) ---
-// Usage: const { toasts, addToast, dismissToast } = useToast()
-import { useState, useCallback } from 'react'
+interface ToastContextType {
+  toasts: ToastMessage[]
+  addToast: (type: ToastType, message: string, duration?: number) => void
+  dismissToast: (id: string) => void
+}
 
-export function useToast() {
+const ToastContext = createContext<ToastContextType | null>(null)
+
+export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
   const addToast = useCallback((type: ToastType, message: string, duration?: number) => {
@@ -79,5 +82,18 @@ export function useToast() {
     setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
-  return { toasts, addToast, dismissToast }
+  return (
+    <ToastContext.Provider value={{ toasts, addToast, dismissToast }}>
+      {children}
+      <Toast toasts={toasts} onDismiss={dismissToast} />
+    </ToastContext.Provider>
+  )
+}
+
+export function useToast() {
+  const context = useContext(ToastContext)
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider')
+  }
+  return context
 }
