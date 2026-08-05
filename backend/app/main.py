@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.auth.router import router as auth_router
 
 app = FastAPI(
     title="QEMS — Quality Error Management System",
@@ -14,6 +15,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 
 # ── P1: Foundation routers — added by Person 1 ────────────────────────────────
 # from app.auth.routes import router as auth_router
