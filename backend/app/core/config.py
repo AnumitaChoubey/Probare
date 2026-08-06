@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     
     @property
     def ASYNC_DATABASE_URI(self) -> str:
-        return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        url = f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        if "neon.tech" in self.POSTGRES_SERVER:
+            url += "?ssl=require"
+        return url
 
 settings = Settings()

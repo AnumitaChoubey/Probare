@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.auth.router import router as auth_router
+from app.errors.router import router as errors_router
 import app.db.models  # ensure models are loaded in registry
 
 app = FastAPI(
@@ -18,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(errors_router, prefix="/errors", tags=["Errors"])
 
 # ── P1: Foundation routers — added by Person 1 ────────────────────────────────
 # from app.auth.routes import router as auth_router

@@ -10,8 +10,8 @@ from app.admin._audit import log_config_change, serialize_model
 from app.db.models.escalation_matrix import EscalationMatrix
 from app.db.session import get_db
 
-from app.auth.dependencies import get_current_user  # noqa: assumed path
-from app.rbac.dependencies import require_role       # noqa: assumed path
+from app.auth.deps import get_current_user  # noqa: assumed path
+from app.rbac.deps import require_role       # noqa: assumed path
 
 router = APIRouter(prefix="/admin/escalation-matrix", tags=["admin-escalation-matrix"])
 

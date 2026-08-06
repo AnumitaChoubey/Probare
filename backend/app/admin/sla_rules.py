@@ -13,8 +13,8 @@ from app.db.models.sla_rule import SLARule
 from app.db.session import get_db
 
 
-from app.auth.dependencies import get_current_user  
-from app.rbac.dependencies import require_role       
+from app.auth.deps import get_current_user  
+from app.rbac.deps import require_role       
 
 router = APIRouter(prefix="/admin/sla-rules", tags=["admin-sla-rules"])
 
