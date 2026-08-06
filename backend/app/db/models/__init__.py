@@ -7,6 +7,8 @@ from app.db.models.sub_category import SubCategory
 from app.db.models.error import Error
 from app.db.models.error_status_history import ErrorStatusHistory
 from app.db.models.qa_error_id_sequence import QaErrorIdSequence
+from app.db.models.rebuttal import Rebuttal
+from app.db.models.decision import Decision
 
 # Expose models for SQLAlchemy registry
-__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence"]
+__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence","QaErrorIdSequence", "Rebuttal", "Decision"]
