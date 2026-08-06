@@ -47,6 +47,25 @@ async def seed_db():
             session.add(UserRole(user_id=admin_user.id, role_id=admin_role.id))
             await session.commit()
             
+        # Seed LOBs and Categories for testing
+        from app.db.models.lob import Lob
+        from app.db.models.category import Category
+        
+        result = await session.execute(select(Lob).where(Lob.code == "BILL"))
+        lob = result.scalar_one_or_none()
+        if not lob:
+            lob = Lob(code="BILL", name="Billing Operations", is_active=True)
+            session.add(lob)
+            await session.commit()
+            await session.refresh(lob)
+            
+        result = await session.execute(select(Category).where(Category.name == "Duplicate Billing"))
+        cat = result.scalar_one_or_none()
+        if not cat:
+            cat = Category(lob_id=lob.id, name="Duplicate Billing", is_active=True, requires_evidence_at_severity=["CRITICAL", "HIGH"])
+            session.add(cat)
+            await session.commit()
+            
     print("Database seeded successfully!")
 
 if __name__ == "__main__":
