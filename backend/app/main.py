@@ -4,10 +4,27 @@ from app.auth.router import router as auth_router
 from app.errors.router import router as errors_router
 import app.db.models  # ensure models are loaded in registry
 
+from contextlib import asynccontextmanager
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.jobs.sla_engine import run_sla_engine
+
+# Initialize the scheduler
+scheduler = AsyncIOScheduler()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    scheduler.add_job(run_sla_engine, "interval", minutes=1, id="sla_engine_job")
+    scheduler.start()
+    yield
+    # Shutdown
+    scheduler.shutdown()
+
 app = FastAPI(
     title="QEMS — Quality Error Management System",
     version="1.0.0",
     description="Backend API for the QEMS platform",
+    lifespan=lifespan
 )
 
 app.add_middleware(
