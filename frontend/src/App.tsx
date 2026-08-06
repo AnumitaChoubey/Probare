@@ -16,7 +16,7 @@ import LoginPage from './features/person1_foundation/LoginPage'
 
 // ── P4: Dashboards & Admin routes — Person 4 adds one route line per screen ──
 // import { TeamDashboard } from './features/person4_dashboards_admin/dashboards/TeamDashboard'
-// import { OpsDashboard } from './features/person4_dashboards_admin/dashboards/OpsDashboard'
+import OpsDashboard from './features/person4_dashboards_admin/dashboards/OpsDashboard'
 // import { LeadershipDashboard } from './features/person4_dashboards_admin/dashboards/LeadershipDashboard'
 // import { EscalationsView } from './features/person4_dashboards_admin/escalations/EscalationsView'
 // import { ReportsExport } from './features/person4_dashboards_admin/reports/ReportsExport'
@@ -37,7 +37,11 @@ export default function App() {
 
         {/* ── P1: Foundation routes ─────────────────────────────────────────── */}
         <Route element={<AppShell />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        {/*temporarily removing login <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+         <Route
+    path="/"
+    element={<OpsDashboard />}
+/>
           {/* <Route path="/dashboard"    element={<AuditorDashboard />} /> */}
           {/* <Route path="/errors/new"   element={<LogNewErrorForm />} /> */}
           {/* <Route path="/errors/:id"   element={<ErrorDetail />} /> */}
