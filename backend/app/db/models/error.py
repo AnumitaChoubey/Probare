@@ -53,3 +53,42 @@ class Error(Base):
         Index("idx_errors_owner_user_id", "owner_user_id"),
         Index("idx_errors_created_at", "created_at"),
     )
+
+    @property
+    def sla_state(self) -> dict:
+        if self.is_draft or not self.sla_clock_started_at:
+            return {"elapsed_pct": 0.0, "state": "green"}
+            
+        if self.status.startswith("CLOSED_"):
+            # If closed, we could calculate final pct based on closed_at,
+            # but usually it's considered frozen.
+            return {"elapsed_pct": 0.0, "state": "green"}
+            
+        # Determine applicable window
+        if self.status == "REBUTTAL_SUBMITTED_PENDING_QA_REVIEW":
+            window_hours = self.sla_decision_window_hours_snapshot
+        else:
+            window_hours = self.sla_rebuttal_window_hours_snapshot
+            
+        if window_hours <= 0:
+            return {"elapsed_pct": 0.0, "state": "green"}
+            
+        # Calculate elapsed hours
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
+        
+        # Ensure sla_clock_started_at is timezone aware for subtraction
+        start_time = self.sla_clock_started_at
+        if start_time.tzinfo is None:
+            start_time = start_time.replace(tzinfo=timezone.utc)
+            
+        elapsed_hours = (now - start_time).total_seconds() / 3600.0
+        elapsed_pct = (elapsed_hours / window_hours) * 100.0
+        
+        state = "green"
+        if elapsed_pct >= 100.0:
+            state = "red"
+        elif elapsed_pct >= 70.0:
+            state = "amber"
+            
+        return {"elapsed_pct": round(elapsed_pct, 1), "state": state}
