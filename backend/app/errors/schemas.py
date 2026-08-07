@@ -130,3 +130,16 @@ class ErrorDraftUpdate(BaseModel):
 class ErrorStatusUpdate(BaseModel):
     to_status: str
     reason: str
+
+class ErrorHistoryResponse(BaseModel):
+    id: uuid.UUID
+    error_id: uuid.UUID
+    from_status: str
+    to_status: str
+    performed_by_user_id: Optional[uuid.UUID]
+    performed_by_system: bool
+    reason: Optional[str]
+    occurred_at: datetime
+
+    class Config:
+        from_attributes = True
