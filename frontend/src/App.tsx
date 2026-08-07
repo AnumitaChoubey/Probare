@@ -37,14 +37,25 @@ export default function App() {
 
         {/* ── P1: Foundation routes ─────────────────────────────────────────── */}
         <Route element={<AppShell />}>
+<<<<<<< HEAD
+        {/*temporarily removing login <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
+         <Route
+    path="/"
+    element={<OpsDashboard />}
+/>
+          {/* <Route path="/dashboard"    element={<AuditorDashboard />} /> */}
+          {/* <Route path="/errors/new"   element={<LogNewErrorForm />} /> */}
+          {/* <Route path="/errors/:id"   element={<ErrorDetail />} /> */}
+=======
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard"    element={<AuditorDashboard />} />
           <Route path="/errors/new"   element={<LogNewErrorForm />} />
           <Route path="/errors/:id"   element={<ErrorDetail />} />
+>>>>>>> main
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
           {/* <Route path="/team-dashboard"       element={<TeamDashboard />} /> */}
-          <Route path="/ops-dashboard" element={<OpsDashboard />} />
+          {/* <Route path="/ops-dashboard"        element={<OpsDashboard />} /> */}
           {/* <Route path="/leadership-dashboard" element={<LeadershipDashboard />} /> */}
           {/* <Route path="/escalations"          element={<EscalationsView />} /> */}
           {/* <Route path="/reports"              element={<ReportsExport />} /> */}

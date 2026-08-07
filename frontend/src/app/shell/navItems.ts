@@ -15,14 +15,13 @@ export const navItems: NavItem[] = [
   { label: 'Log New Error',  route: '/errors/new',  icon: 'FilePlus',        requiredRoles: ['AUD'] },
 
   // ── P4: Dashboards & Admin nav entries ──────────────────────────────────────
-  // All three "Dashboard" labels are intentionally the same string — role
-  // filtering below means a given logged-in user only ever sees ONE of
-  // these three at a time, so there's no ambiguity, and it matches the
-  // reference's single generic "Dashboard" item instead of spelling out
-  // which variant (cleaner, more consistent with the rest of the sidebar).
-  { label: 'Dashboard', route: '/team-dashboard',       icon: 'BarChart2',  requiredRoles: ['QAL'] },
-  { label: 'Dashboard', route: '/ops-dashboard',        icon: 'Activity',   requiredRoles: ['OPS_MGR'] },
-  { label: 'Dashboard', route: '/leadership-dashboard', icon: 'TrendingUp', requiredRoles: ['QA_GOV', 'ADMIN', 'AUDITOR_RO'] },
+  // Distinct labels — a logged-in user can legitimately hold MULTIPLE roles
+  // at once (e.g. both QAL and OPS_MGR), so more than one of these can be
+  // visible simultaneously for the same person. Identical labels would make
+  // them indistinguishable in that case — learned this the hard way.
+  { label: 'Team Dashboard',       route: '/team-dashboard',       icon: 'BarChart2',  requiredRoles: ['QAL'] },
+  { label: 'Ops Dashboard',        route: '/ops-dashboard',        icon: 'Activity',   requiredRoles: ['OPS_MGR'] },
+  { label: 'Leadership Dashboard', route: '/leadership-dashboard', icon: 'TrendingUp', requiredRoles: ['QA_GOV', 'ADMIN', 'AUDITOR_RO'] },
 
   { label: 'Escalations', route: '/escalations', icon: 'AlertTriangle', requiredRoles: ['QAL', 'QA_GOV'] },
   { label: 'Reports',     route: '/reports',     icon: 'FileText',      requiredRoles: ['QAL', 'QA_GOV', 'ADMIN', 'AUDITOR_RO'] },
