@@ -6,7 +6,7 @@ import AppShell from './app/shell/AppShell'
 import LoginPage from './features/person1_foundation/LoginPage'
 // import AuditorDashboard from './features/person1_foundation/AuditorDashboard'
 // import { LogNewErrorForm } from './features/person1_foundation/LogNewErrorForm'
-// import { ErrorDetail } from './features/person1_foundation/ErrorDetail'
+import ErrorDetail from './features/person1_foundation/ErrorDetail'
 
 // ── P2: Rebuttal & Decision routes — Person 2 adds one route line here ────────
 // (no top-level routes needed — P2's components slot into ErrorDetail tabs)
@@ -40,7 +40,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           {/* <Route path="/dashboard"    element={<AuditorDashboard />} /> */}
           {/* <Route path="/errors/new"   element={<LogNewErrorForm />} /> */}
-          {/* <Route path="/errors/:id"   element={<ErrorDetail />} /> */}
+          <Route path="/errors/:id"   element={<ErrorDetail />} />
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
           {/* <Route path="/team-dashboard"       element={<TeamDashboard />} /> */}

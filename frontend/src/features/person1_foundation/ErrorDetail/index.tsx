@@ -1,19 +1,8 @@
-// ErrorDetail/index.tsx — ⚠️ SHARED SHELL (P1 owns it)
-//
-// RULES for this file:
-//   - P1 builds and owns OverviewTab + HistoryTab.
-//   - P2 adds ONE import line for RespondTab/DecisionTab when ready.
-//   - P3 adds ONE import line for EvidenceTab when ready.
-//   - No other edits by P2/P3/P4 — the shell structure is frozen.
-//
-// ── P2 adds their import line here ───────────────────────────────────────────
-// import RespondTab from '../../person2_rebuttal_decision/RespondTab'
-// import DecisionTab from '../../person2_rebuttal_decision/DecisionTab'
-//
-// ── P3 adds their import line here ───────────────────────────────────────────
-// import EvidenceTab from '../../person3_evidence_notifications/EvidenceTab'
-//
-import React, { useState } from 'react'
+// ErrorDetail/index.tsx
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { fetchErrorDetail } from '../../../lib/api/errorsApi'
+import { useAuth } from '../../person1_foundation/useAuth'
 
 // P1-owned tab components (implemented in Sprint 2)
 import OverviewTab from '../OverviewTab'
@@ -28,21 +17,54 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'history',   label: 'History' },
 ]
 
-interface ErrorDetailProps {
-  errorId: string
-}
-
-export default function ErrorDetail({ errorId }: ErrorDetailProps) {
+export default function ErrorDetail() {
+  const { id: errorId } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState<TabId>('overview')
+  const { token } = useAuth()
+  const [error, setError] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  useEffect(() => {
+    if (!token || !errorId) return
+    setLoading(true)
+    fetchErrorDetail(token, errorId)
+      .then(data => {
+        setError(data)
+        setLoading(false)
+      })
+      .catch(err => {
+        setErrorMsg(err.message)
+        setLoading(false)
+      })
+  }, [token, errorId])
+
+  if (loading) return <div style={{ padding: 24 }}>Loading error details...</div>
+  if (errorMsg) return <div style={{ padding: 24, color: 'red' }}>{errorMsg}</div>
+  if (!error) return null
+
+  // SLA formatting
+  const pct = error.sla_state?.elapsed_pct ?? 0
+  const stateColor = error.sla_state?.state === 'red' ? '#ef4444' : error.sla_state?.state === 'amber' ? '#f59e0b' : '#22c55e'
+  const isBreached = error.status === 'SLA_BREACHED_ESCALATED'
+  const slaText = isBreached ? `Breached - Escalated Level ${error.current_escalation_level}` : `${pct.toFixed(1)}% SLA elapsed`
 
   return (
     <div>
-      {/* Header band — implemented by P1 in TASK DETAIL-1 */}
-      <div style={{ padding: '16px 0', borderBottom: '1px solid #e2e8f0', marginBottom: 16 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a' }}>
-          {/* TODO (P1 Sprint 2): render qa_error_id, status badge, severity chip, aging indicator */}
-          Error Detail — {errorId}
+      {/* Header band */}
+      <div style={{ padding: '16px 0', borderBottom: '1px solid #e2e8f0', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+          {error.qa_error_id}
         </h1>
+        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: '#e2e8f0', color: '#475569' }}>
+          {error.status.replace(/_/g, ' ')}
+        </span>
+        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: error.severity === 'HIGH' || error.severity === 'CRITICAL' ? '#fee2e2' : '#fef3c7', color: error.severity === 'HIGH' || error.severity === 'CRITICAL' ? '#991b1b' : '#92400e' }}>
+          {error.severity}
+        </span>
+        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: '#f8fafc', color: stateColor, border: `1px solid ${stateColor}` }}>
+          {slaText}
+        </span>
       </div>
 
       {/* Tab bar */}
@@ -67,29 +89,23 @@ export default function ErrorDetail({ errorId }: ErrorDetailProps) {
       {/* Tab content */}
       <div>
         {activeTab === 'overview' && (
-          // P1-owned OverviewTab — all Section A/B/C fields read-only
-          <OverviewTab errorId={errorId} />
+          <OverviewTab errorData={error} />
         )}
 
         {activeTab === 'respond' && (
-          // ── SLOT FOR P2 ── Replace this placeholder with <RespondTab errorId={errorId} />
-          // when Person 2's component is ready and their import line is added above.
           <div style={{ padding: 24, background: '#f8fafc', borderRadius: 8, color: '#94a3b8' }}>
-            <em>Respond / Decision tab — Person 2&apos;s component will render here.</em>
+            <em>Respond / Decision tab - Person 2's component will render here.</em>
           </div>
         )}
 
         {activeTab === 'evidence' && (
-          // ── SLOT FOR P3 ── Replace this placeholder with <EvidenceTab errorId={errorId} />
-          // when Person 3's component is ready and their import line is added above.
           <div style={{ padding: 24, background: '#f8fafc', borderRadius: 8, color: '#94a3b8' }}>
-            <em>Evidence tab — Person 3&apos;s component will render here.</em>
+            <em>Evidence tab - Person 3's component will render here.</em>
           </div>
         )}
 
         {activeTab === 'history' && (
-          // P1-owned HistoryTab
-          <HistoryTab errorId={errorId} />
+          <HistoryTab errorId={error.id} />
         )}
       </div>
     </div>
