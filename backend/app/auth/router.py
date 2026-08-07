@@ -23,8 +23,7 @@ async def login_access_token(
     """
     # Find user by username
     result = await db.execute(
-        select(User).options(selectinload(User.user_roles).selectinload(User.user_roles.prop.mapper.class_.role))
-        .where(User.username == form_data.username)
+        select(User).where(User.username == form_data.username)
     )
     user = result.scalar_one_or_none()
     
@@ -62,8 +61,7 @@ async def read_users_me(
     """
     # Fetch roles efficiently
     result = await db.execute(
-        select(User).options(selectinload(User.user_roles).selectinload(User.user_roles.prop.mapper.class_.role))
-        .where(User.id == current_user.id)
+        select(User).where(User.id == current_user.id)
     )
     user = result.scalar_one()
     roles = [ur.role.code for ur in user.user_roles]

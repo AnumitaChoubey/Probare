@@ -4,9 +4,9 @@ import AppShell from './app/shell/AppShell'
 
 // ── P1: Foundation routes — added by Person 1 ────────────────────────────────
 import LoginPage from './features/person1_foundation/LoginPage'
-// import AuditorDashboard from './features/person1_foundation/AuditorDashboard'
-// import { LogNewErrorForm } from './features/person1_foundation/LogNewErrorForm'
-// import { ErrorDetail } from './features/person1_foundation/ErrorDetail'
+import AuditorDashboard from './features/person1_foundation/AuditorDashboard'
+import LogNewErrorForm from './features/person1_foundation/LogNewErrorForm'
+import ErrorDetail from './features/person1_foundation/ErrorDetail'
 
 // ── P2: Rebuttal & Decision routes — Person 2 adds one route line here ────────
 // (no top-level routes needed — P2's components slot into ErrorDetail tabs)
@@ -37,18 +37,14 @@ export default function App() {
 
         {/* ── P1: Foundation routes ─────────────────────────────────────────── */}
         <Route element={<AppShell />}>
-        {/*temporarily removing login <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
-         <Route
-    path="/"
-    element={<OpsDashboard />}
-/>
-          {/* <Route path="/dashboard"    element={<AuditorDashboard />} /> */}
-          {/* <Route path="/errors/new"   element={<LogNewErrorForm />} /> */}
-          {/* <Route path="/errors/:id"   element={<ErrorDetail />} /> */}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/dashboard"    element={<AuditorDashboard />} />
+          <Route path="/errors/new"   element={<LogNewErrorForm />} />
+          <Route path="/errors/:id"   element={<ErrorDetail />} />
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
           {/* <Route path="/team-dashboard"       element={<TeamDashboard />} /> */}
-          {/* <Route path="/ops-dashboard"        element={<OpsDashboard />} /> */}
+          <Route path="/ops-dashboard" element={<OpsDashboard />} />
           {/* <Route path="/leadership-dashboard" element={<LeadershipDashboard />} /> */}
           {/* <Route path="/escalations"          element={<EscalationsView />} /> */}
           {/* <Route path="/reports"              element={<ReportsExport />} /> */}
