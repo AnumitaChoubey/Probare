@@ -1,8 +1,8 @@
-// ErrorDetail/index.tsx
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { fetchErrorDetail } from '../../../lib/api/errorsApi'
 import { useAuth } from '../../person1_foundation/useAuth'
+import { colors } from '../../../design-system/tokens'
 
 // P1-owned tab components (implemented in Sprint 2)
 import OverviewTab from '../OverviewTab'
@@ -39,36 +39,36 @@ export default function ErrorDetail() {
       })
   }, [token, errorId])
 
-  if (loading) return <div style={{ padding: 24 }}>Loading error details...</div>
-  if (errorMsg) return <div style={{ padding: 24, color: 'red' }}>{errorMsg}</div>
+  if (loading) return <div style={{ padding: 24, color: colors.textSecondary }}>Loading error details...</div>
+  if (errorMsg) return <div style={{ padding: 24, color: colors.danger }}>{errorMsg}</div>
   if (!error) return null
 
   // SLA formatting
   const pct = error.sla_state?.elapsed_pct ?? 0
-  const stateColor = error.sla_state?.state === 'red' ? '#ef4444' : error.sla_state?.state === 'amber' ? '#f59e0b' : '#22c55e'
+  const stateColor = error.sla_state?.state === 'red' ? colors.danger : error.sla_state?.state === 'amber' ? colors.warning : colors.success
   const isBreached = error.status === 'SLA_BREACHED_ESCALATED'
   const slaText = isBreached ? `Breached - Escalated Level ${error.current_escalation_level}` : `${pct.toFixed(1)}% SLA elapsed`
 
   return (
     <div>
       {/* Header band */}
-      <div style={{ padding: '16px 0', borderBottom: '1px solid #e2e8f0', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+      <div style={{ padding: '16px 0', borderBottom: `1px solid ${colors.border}`, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: colors.textPrimary, margin: 0 }}>
           {error.qa_error_id}
         </h1>
-        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: '#e2e8f0', color: '#475569' }}>
+        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: colors.surfaceAlt, color: colors.textSecondary, border: `1px solid ${colors.border}` }}>
           {error.status.replace(/_/g, ' ')}
         </span>
-        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: error.severity === 'HIGH' || error.severity === 'CRITICAL' ? '#fee2e2' : '#fef3c7', color: error.severity === 'HIGH' || error.severity === 'CRITICAL' ? '#991b1b' : '#92400e' }}>
+        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: error.severity === 'HIGH' || error.severity === 'CRITICAL' ? colors.danger + '22' : colors.warning + '22', color: error.severity === 'HIGH' || error.severity === 'CRITICAL' ? colors.danger : colors.warning }}>
           {error.severity}
         </span>
-        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: '#f8fafc', color: stateColor, border: `1px solid ${stateColor}` }}>
+        <span style={{ padding: '4px 8px', borderRadius: 12, fontSize: 12, fontWeight: 600, background: colors.surface, color: stateColor, border: `1px solid ${stateColor}` }}>
           {slaText}
         </span>
       </div>
 
       {/* Tab bar */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '2px solid #e2e8f0', marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 4, borderBottom: `2px solid ${colors.border}`, marginBottom: 20 }}>
         {TABS.map((tab) => (
           <button
             key={tab.id}
@@ -76,8 +76,8 @@ export default function ErrorDetail() {
             style={{
               padding: '8px 20px', border: 'none', cursor: 'pointer',
               background: 'none', fontSize: 14, fontWeight: 500,
-              color: activeTab === tab.id ? '#6366f1' : '#64748b',
-              borderBottom: activeTab === tab.id ? '2px solid #6366f1' : '2px solid transparent',
+              color: activeTab === tab.id ? colors.primary : colors.textSecondary,
+              borderBottom: activeTab === tab.id ? `2px solid ${colors.primary}` : '2px solid transparent',
               marginBottom: -2,
             }}
           >
@@ -93,13 +93,13 @@ export default function ErrorDetail() {
         )}
 
         {activeTab === 'respond' && (
-          <div style={{ padding: 24, background: '#f8fafc', borderRadius: 8, color: '#94a3b8' }}>
+          <div style={{ padding: 24, background: colors.surfaceAlt, borderRadius: 8, color: colors.textMuted }}>
             <em>Respond / Decision tab - Person 2's component will render here.</em>
           </div>
         )}
 
         {activeTab === 'evidence' && (
-          <div style={{ padding: 24, background: '#f8fafc', borderRadius: 8, color: '#94a3b8' }}>
+          <div style={{ padding: 24, background: colors.surfaceAlt, borderRadius: 8, color: colors.textMuted }}>
             <em>Evidence tab - Person 3's component will render here.</em>
           </div>
         )}

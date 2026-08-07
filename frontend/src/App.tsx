@@ -4,8 +4,8 @@ import AppShell from './app/shell/AppShell'
 
 // ── P1: Foundation routes — added by Person 1 ────────────────────────────────
 import LoginPage from './features/person1_foundation/LoginPage'
-// import AuditorDashboard from './features/person1_foundation/AuditorDashboard'
-// import { LogNewErrorForm } from './features/person1_foundation/LogNewErrorForm'
+import AuditorDashboard from './features/person1_foundation/AuditorDashboard'
+import LogNewErrorForm from './features/person1_foundation/LogNewErrorForm'
 import ErrorDetail from './features/person1_foundation/ErrorDetail'
 
 // ── P2: Rebuttal & Decision routes — Person 2 adds one route line here ────────
@@ -38,8 +38,8 @@ export default function App() {
         {/* ── P1: Foundation routes ─────────────────────────────────────────── */}
         <Route element={<AppShell />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          {/* <Route path="/dashboard"    element={<AuditorDashboard />} /> */}
-          {/* <Route path="/errors/new"   element={<LogNewErrorForm />} /> */}
+          <Route path="/dashboard"    element={<AuditorDashboard />} />
+          <Route path="/errors/new"   element={<LogNewErrorForm />} />
           <Route path="/errors/:id"   element={<ErrorDetail />} />
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
