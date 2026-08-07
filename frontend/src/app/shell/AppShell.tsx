@@ -13,12 +13,6 @@ import { useAuth } from '../../features/person1_foundation/useAuth'
  * P1 owns this file. Do not edit unless you are Person 1.
  */
 export default function AppShell() {
-<<<<<<< HEAD
-  // TODO (P1 — Sprint 1): replace with real useAuth() data
-  const userFullName = ''
-  const userRoles: string[] = ['OPS_MGR', 'QAL', 'QA_GOV', 'ADMIN', 'AUDITOR_RO', 'AUD']
-  const handleLogout = () => { /* clear token, navigate to /login */ }
-=======
   const { user, logout } = useAuth()
   const navigate = useNavigate()
 
@@ -29,7 +23,6 @@ export default function AppShell() {
 
   const userFullName = user?.full_name || ''
   const userRoles = user?.roles || []
->>>>>>> main
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
