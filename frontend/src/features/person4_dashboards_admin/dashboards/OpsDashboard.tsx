@@ -1,39 +1,36 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
-  LineChart, Line, PieChart, Pie, XAxis, YAxis, CartesianGrid,
-  Tooltip as RTooltip, ResponsiveContainer, Cell, BarChart, Bar,
+  LineChart, Line, AreaChart, Area, PieChart, Pie, XAxis, YAxis, CartesianGrid,
+  Tooltip as RTooltip, ResponsiveContainer, Cell, BarChart, Bar, ReferenceDot,
 } from "recharts";
 import {
-  Search, Bell, Settings, ChevronDown, AlertTriangle, ListChecks,
+  ChevronDown, AlertTriangle, ListChecks,
   Clock, Siren, RotateCcw, ArrowUpRight, ArrowDownRight, Flame,
 } from "lucide-react";
 
-interface SlaRailProps {
-  pct: number;
-  state: string;
-}
+/* ---------------------------------------------------------------
+   WHY THIS VERSION LOOKS DIFFERENT FROM WHAT YOU PASTED
 
-interface ComplianceRingProps {
-  pct: number;
-}
+   The version you had used Tailwind utility classes (className="flex
+   items-center gap-4 rounded-2xl p-6" etc.) for almost all layout and
+   spacing. If Tailwind isn't compiling in your build — unconfigured
+   content paths, missing PostCSS wiring, etc. — every one of those
+   classes silently does nothing, and you get raw stacked <div>s with
+   no layout at all. That's exactly what your screenshot shows.
 
-interface TabItemProps {
-  label: string;
-  active?: boolean;
-}
+   This version uses plain inline `style={{...}}` objects for every
+   layout property instead. It will render correctly regardless of
+   whether Tailwind is working in your project, because it doesn't
+   depend on Tailwind at all.
+--------------------------------------------------------------- */
 
+interface SlaRailProps { pct: number; state: "red" | "amber" | "green"; }
+interface ComplianceRingProps { pct: number; }
 interface KpiCardProps {
-  label: string;
-  value: string;
-  delta: string;
-  up: boolean;
-  icon: React.ElementType;
-  warn: boolean;
+  label: string; value: string; delta: string; up: boolean;
+  icon: React.ElementType; warn: boolean;
 }
-
-interface FilterChipProps {
-  label: string;
-}
+interface FilterChipProps { label: string; }
 
 const T = {
   navy: "#101A2E",
@@ -54,9 +51,11 @@ const T = {
   hair: "#E7E1D2",
 };
 
+const FONT = "'Inter', 'Avenir', 'Segoe UI', ui-sans-serif, system-ui";
+
 const slaCompliance = { pct: 76, delta: "+2.3%", breachedShare: "9%" };
 
-const kpis = [
+const kpis: KpiCardProps[] = [
   { label: "Escalated Issues", value: "18", delta: "+5.9%", up: true, icon: Siren, warn: true },
   { label: "Overdue Errors", value: "23", delta: "+12.5%", up: true, icon: AlertTriangle, warn: true },
   { label: "Open Errors", value: "162", delta: "-4.2%", up: false, icon: ListChecks, warn: false },
@@ -72,7 +71,7 @@ const monthlyTrend = [
   { m: "May", logged: 61, closed: 63, reopened: 4 },
   { m: "Jun", logged: 68, closed: 65, reopened: 5 },
   { m: "Jul", logged: 66, closed: 70, reopened: 3 },
-  { m: "Aug", logged: 71, closed: 68, reopened: 4 },
+  { m: "Aug", logged: 66, closed: 68, reopened: 4 },
 ];
 
 const severity = [
@@ -82,9 +81,9 @@ const severity = [
   { name: "Low", value: 80, color: T.navy },
 ];
 
-const criticalErrors = [
+const criticalErrors: Array<{ id: string; desc: string; dept: string; owner: string; pct: number; state: "red" | "amber" | "green"; due: string; }> = [
   { id: "ERR-2291", desc: "Duplicate payout on claim batch #4471", dept: "Claims Ops", owner: "R. Iyer", pct: 96, state: "red", due: "1h 12m" },
-  { id: "ERR-2287", desc: "Missing KYC attestation, retail onboarding", dept: "Compliance", owner: "M. Fenwick", pct: 91, state: "red", due: "2h 40m" },
+  { id: "ERR-2287", desc: "Missing KYC attestation, retail onboarding", dept: "Compliance", owner: "Fenwick", pct: 91, state: "red", due: "2h 40m" },
   { id: "ERR-2280", desc: "Rate mismatch on renewal quote set", dept: "Underwriting", owner: "S. Okafor", pct: 84, state: "amber", due: "6h 05m" },
   { id: "ERR-2274", desc: "Data lag, nightly reconciliation feed", dept: "Finance Ops", owner: "T. Alvarez", pct: 78, state: "amber", due: "9h 20m" },
   { id: "ERR-2266", desc: "Incorrect tax code on invoice run", dept: "Finance Ops", owner: "R. Iyer", pct: 71, state: "amber", due: "13h 50m" },
@@ -116,22 +115,25 @@ const escalations = [
 const stateColor = (s: string): string => (s === "red" ? T.red : s === "amber" ? T.amber : T.green);
 const stateSoft = (s: string): string => (s === "red" ? T.redSoft : s === "amber" ? T.amberSoft : T.greenSoft);
 
+/* ---------------------------------------------------------------
+   SUBCOMPONENTS — all inline-styled
+--------------------------------------------------------------- */
+
 function SlaRail({ pct, state }: SlaRailProps) {
   return (
-    <div className="w-28">
-      <div className="relative h-1.5 rounded-full overflow-hidden" style={{ background: T.hair }}>
-        <div className="absolute inset-y-0 left-0" style={{ width: "60%", background: T.greenSoft }} />
-        <div className="absolute inset-y-0" style={{ left: "60%", width: "25%", background: T.amberSoft }} />
-        <div className="absolute inset-y-0" style={{ left: "85%", width: "15%", background: T.redSoft }} />
-        <div
-          className="absolute -top-[3px] h-3 w-[3px] rounded-full"
-          style={{ left: `calc(${Math.min(pct, 100)}% - 1.5px)`, background: stateColor(state) }}
-        />
+    <div style={{ width: 112 }}>
+      <div style={{ position: "relative", height: 6, borderRadius: 999, overflow: "hidden", background: T.hair }}>
+        <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: "60%", background: T.greenSoft }} />
+        <div style={{ position: "absolute", top: 0, bottom: 0, left: "60%", width: "25%", background: T.amberSoft }} />
+        <div style={{ position: "absolute", top: 0, bottom: 0, left: "85%", width: "15%", background: T.redSoft }} />
+        <div style={{
+          position: "absolute", top: -3, height: 12, width: 3, borderRadius: 999,
+          left: `calc(${Math.min(pct, 100)}% - 1.5px)`, background: stateColor(state),
+        }} />
       </div>
     </div>
   );
 }
-
 
 function ComplianceRing({ pct }: ComplianceRingProps) {
   const r = 34, c = 2 * Math.PI * r;
@@ -143,46 +145,33 @@ function ComplianceRing({ pct }: ComplianceRingProps) {
         strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c}
         strokeLinecap="round" transform="rotate(-90 43 43)"
       />
-      <text x="43" y="48" textAnchor="middle" fill="#fff" fontSize="18" fontWeight="600">{pct}%</text>
+      <text x="43" y="48" textAnchor="middle" fill="#fff" fontSize="18" fontWeight={600}>{pct}%</text>
     </svg>
-  );
-}
-
-function TabItem({ label, active }: TabItemProps) {
-  return (
-    <div
-      className="pb-4 -mb-px text-[13.5px] cursor-pointer"
-      style={{
-        color: active ? "#fff" : "rgba(255,255,255,0.55)",
-        borderBottom: active ? `2px solid ${T.gold}` : "2px solid transparent",
-      }}
-    >
-      {label}
-    </div>
   );
 }
 
 function KpiCard({ label, value, delta, up, icon: Icon, warn }: KpiCardProps) {
   return (
-    <div className="rounded-2xl p-5 flex flex-col gap-4" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
-      <div className="flex items-center justify-between">
-        <div
-          className="h-9 w-9 rounded-xl flex items-center justify-center"
-          style={{ background: warn ? T.redSoft : T.beige, color: warn ? T.red : T.gold }}
-        >
+    <div style={{ borderRadius: 16, padding: 20, display: "flex", flexDirection: "column", gap: 16, background: T.card, border: `1px solid ${T.hair}` }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{
+          height: 36, width: 36, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
+          background: warn ? T.redSoft : T.beige, color: warn ? T.red : T.gold,
+        }}>
           <Icon size={17} strokeWidth={1.8} />
         </div>
-        <div
-          className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
-          style={{ color: up ? T.red : T.green, background: up ? T.redSoft : T.greenSoft }}
-        >
+        <div style={{
+          display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 500,
+          padding: "4px 8px", borderRadius: 999,
+          color: up ? T.red : T.green, background: up ? T.redSoft : T.greenSoft,
+        }}>
           {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
           {delta}
         </div>
       </div>
       <div>
-        <div className="text-[24px] leading-none font-semibold tabular-nums" style={{ color: T.ink }}>{value}</div>
-        <div className="text-[12.5px] mt-1.5" style={{ color: T.slate }}>{label}</div>
+        <div style={{ fontSize: 24, lineHeight: 1, fontWeight: 600, color: T.ink }}>{value}</div>
+        <div style={{ fontSize: 12.5, marginTop: 6, color: T.slate }}>{label}</div>
       </div>
     </div>
   );
@@ -190,132 +179,130 @@ function KpiCard({ label, value, delta, up, icon: Icon, warn }: KpiCardProps) {
 
 function FilterChip({ label }: FilterChipProps) {
   return (
-    <div className="flex items-center gap-1.5 text-[13px] px-3 py-2 rounded-lg cursor-pointer"
-      style={{ background: T.card, border: `1px solid ${T.hair}`, color: T.ink }}>
+    <div style={{
+      display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "8px 12px",
+      borderRadius: 8, cursor: "pointer", background: T.card, border: `1px solid ${T.hair}`, color: T.ink,
+    }}>
       {label} <ChevronDown size={13} color={T.slate} />
     </div>
   );
 }
 
+/* ---------------------------------------------------------------
+   MAIN COMPONENT
+--------------------------------------------------------------- */
+
 export default function OpsDashboard() {
   const maxDept = useMemo(() => Math.max(...departments.map((d) => d.value)), []);
+  const peakMonth = useMemo(
+    () => monthlyTrend.reduce((max, cur) => (cur.logged > max.logged ? cur : max), monthlyTrend[0]),
+    []
+  );
+
+  // NOTE: no <header> here on purpose. AppShell (Person 1's shared shell) already
+  // renders the app's real top nav + sidebar around every routed page — this
+  // component only needs to return its own page CONTENT, not a second nav bar.
+  // If you ever need this dashboard to render standalone (e.g. outside AppShell,
+  // for a design preview), that's what the earlier full-header version was for.
 
   return (
-    <div className="w-full min-h-screen flex flex-col" style={{ background: T.cream, fontFamily: "'Inter', ui-sans-serif, system-ui" }}>
+    <div style={{ width: "100%", minHeight: "100%", background: T.cream, fontFamily: FONT }}>
+      <main style={{ padding: "4px 4px 32px", display: "flex", flexDirection: "column", gap: 24 }}>
 
-      {/* ================= TOP RIBBON — replaces the left sidebar ================= */}
-      <header style={{ background: T.navy }}>
-        <div className="flex items-center justify-between px-6 h-14">
-          <div className="flex items-center gap-9">
-            <div className="flex items-center gap-2.5">
-              {/* LINE 210 — logo placeholder. Swap this block for the real mark,
-                  e.g. <img src="/probare-mark.svg" className="h-7 w-7" alt="Probare" /> */}
-              <div className="h-7 w-7 rounded-md flex items-center justify-center" style={{ background: T.gold }}>
-                <span className="text-[12px] font-bold" style={{ color: T.navy }}>P</span>
-              </div>
-              <span className="text-white font-semibold text-[15px] tracking-tight">Probare</span>
-            </div>
-            <nav className="flex items-center gap-7 h-14 items-end pb-0">
-              <TabItem label="Overview" active />
-              <TabItem label="Escalations" />
-              <TabItem label="Reports" />
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 w-64 px-3 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.08)" }}>
-              <Search size={14} color="rgba(255,255,255,0.55)" />
-              <input placeholder="Search errors, IDs…" className="bg-transparent outline-none text-[13px] flex-1 text-white placeholder:text-white/40" />
-            </div>
-            <div className="h-9 w-9 rounded-lg flex items-center justify-center relative cursor-pointer" style={{ background: "rgba(255,255,255,0.08)" }}>
-              <Bell size={15} color="#fff" />
-              <span className="absolute -top-1 -right-1 h-3.5 w-3.5 text-[8.5px] flex items-center justify-center rounded-full text-white font-medium" style={{ background: T.red }}>3</span>
-            </div>
-            <div className="h-9 w-9 rounded-lg flex items-center justify-center cursor-pointer" style={{ background: "rgba(255,255,255,0.08)" }}>
-              <Settings size={15} color="#fff" />
-            </div>
-            <div className="flex items-center gap-2 pl-1">
-              <div className="h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-semibold" style={{ background: T.gold, color: T.navy }}>YP</div>
-              <div className="leading-tight">
-                <div className="text-[12.5px] text-white">Yasaswini P.</div>
-                <div className="text-[10.5px]" style={{ color: "rgba(255,255,255,0.5)" }}>Operations Manager</div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* thin sub-bar to echo the reference's two-tone ribbon */}
-        <div className="h-1" style={{ background: T.navySoft }} />
-      </header>
-
-      {/*  MAIN */}
-      <main className="flex-1 px-8 py-7 flex flex-col gap-6">
-        <div className="flex items-end justify-between">
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <div>
-            <div className="text-[12px] mb-1" style={{ color: T.slate }}>Operations / Overview</div>
-            <div className="text-[22px] font-semibold tracking-tight" style={{ color: T.ink }}>Operations Dashboard</div>
+            <div style={{ fontSize: 12, marginBottom: 4, color: T.slate }}>Operations / Overview</div>
+            <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.3px", color: T.ink }}>Operations Dashboard</div>
           </div>
-          <div className="text-[12px]" style={{ color: T.slate }}>Last updated 4 minutes ago</div>
+          <div style={{ fontSize: 12, color: T.slate }}>Last updated 4 minutes ago</div>
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: 12, borderRadius: 12, background: T.card, border: `1px solid ${T.hair}` }}>
           {["Date Range", "LOB", "Category", "Subcategory", "Severity", "Status", "Assigned Team"].map((f) => (
             <FilterChip key={f} label={f} />
           ))}
-          <div className="flex items-center gap-1.5 text-[13px] ml-auto cursor-pointer" style={{ color: T.slate }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, marginLeft: "auto", cursor: "pointer", color: T.slate }}>
             <RotateCcw size={13} /> Reset
           </div>
-          <div className="text-[13px] font-medium px-4 py-2 rounded-lg text-white cursor-pointer" style={{ background: T.navy }}>
+          <div style={{ fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: 8, color: "#fff", cursor: "pointer", background: T.navy }}>
             Apply Filters
           </div>
         </div>
 
-        {/* KPI row */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          <div className="md:col-span-2 rounded-2xl p-5 flex items-center gap-4" style={{ background: T.navy }}>
+        {/* KPI row — minmax-based grid so it reflows cleanly with the sidebar's real width taken into account, instead of assuming full viewport */}
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(260px, 300px) repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
+          <div style={{ borderRadius: 16, padding: 20, display: "flex", alignItems: "center", gap: 16, background: T.navy }}>
             <ComplianceRing pct={slaCompliance.pct} />
             <div>
-              <div className="text-[11.5px]" style={{ color: "rgba(255,255,255,0.55)" }}>SLA Compliance</div>
-              <div className="text-[11px] mb-1.5" style={{ color: "rgba(255,255,255,0.4)" }}>Rolling 30 days</div>
-              <div className="text-[12px]" style={{ color: "#8FD4A8" }}>↗ {slaCompliance.delta} vs. last period</div>
-              <div className="text-[11px] mt-1" style={{ color: "rgba(255,255,255,0.4)" }}>{slaCompliance.breachedShare} of open errors currently breached</div>
+              <div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.55)" }}>SLA Compliance</div>
+              <div style={{ fontSize: 11, marginBottom: 6, color: "rgba(255,255,255,0.4)" }}>Rolling 30 days</div>
+              <div style={{ fontSize: 12, color: "#8FD4A8" }}>↗ {slaCompliance.delta} vs. last period</div>
+              <div style={{ fontSize: 11, marginTop: 4, color: "rgba(255,255,255,0.4)" }}>{slaCompliance.breachedShare} of open errors currently breached</div>
             </div>
           </div>
           {kpis.map((k) => (
-            <div key={k.label} className="md:col-span-1">
-              <KpiCard {...k} />
-            </div>
+            <KpiCard key={k.label} {...k} />
           ))}
         </div>
 
         {/* Trends & Distribution */}
         <div>
-          <div className="text-[15px] font-semibold mb-3" style={{ color: T.ink }}>Trends &amp; Distribution</div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <div className="lg:col-span-2 rounded-2xl p-6" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
-              <div className="text-[14px] font-semibold" style={{ color: T.ink }}>Monthly Error Trend</div>
-              <div className="text-[12px] mb-3" style={{ color: T.slate }}>Logged vs. closed vs. reopened, last 8 months</div>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: T.ink }}>Trends &amp; Distribution</div>
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 2fr) minmax(260px, 1fr)", gap: 20 }}>
+            <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Monthly Error Trend</div>
+              <div style={{ fontSize: 12, marginBottom: 12, color: T.slate }}>Logged vs. closed vs. reopened, last 8 months</div>
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={monthlyTrend} margin={{ top: 6, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={monthlyTrend} margin={{ top: 30, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="loggedGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={T.gold} stopOpacity={0.35} />
+                      <stop offset="100%" stopColor={T.gold} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid vertical={false} stroke={T.hair} />
                   <XAxis dataKey="m" tick={{ fontSize: 11, fill: T.slate }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: T.slate }} axisLine={false} tickLine={false} />
                   <RTooltip contentStyle={{ borderRadius: 10, border: `1px solid ${T.hair}`, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="logged" name="Logged" stroke={T.navy} strokeWidth={2} dot={false} />
+                  <Area type="monotone" dataKey="logged" name="Logged" stroke={T.gold} strokeWidth={2.5} fill="url(#loggedGrad)" dot={false} />
                   <Line type="monotone" dataKey="closed" name="Closed" stroke={T.green} strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="reopened" name="Reopened" stroke={T.red} strokeWidth={2} dot={false} />
-                </LineChart>
+                  <ReferenceDot
+                    x={peakMonth.m}
+                    y={peakMonth.logged}
+                    r={4}
+                    fill={T.gold}
+                    stroke="#fff"
+                    strokeWidth={2}
+                    label={{
+                      value: `${peakMonth.logged} · ${peakMonth.m}`,
+                      position: "top",
+                      fill: "#fff",
+                      fontSize: 11,
+                      fontWeight: 600,
+                      style: {
+                        // Recharts doesn't support a real "bubble" background out of the box —
+                        // this is a reasonable approximation using a stroked text outline.
+                        paintOrder: "stroke",
+                        stroke: T.navy,
+                        strokeWidth: 6,
+                        strokeLinejoin: "round",
+                      },
+                    }}
+                  />
+                </AreaChart>
               </ResponsiveContainer>
-              <div className="flex gap-5 mt-2 text-[12px]" style={{ color: T.slate }}>
-                <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: T.navy }} />Logged</span>
-                <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: T.green }} />Closed</span>
-                <span className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: T.red }} />Reopened</span>
+              <div style={{ display: "flex", gap: 20, marginTop: 8, fontSize: 12, color: T.slate }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ height: 6, width: 6, borderRadius: 999, background: T.gold }} />Logged</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ height: 6, width: 6, borderRadius: 999, background: T.green }} />Closed</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ height: 6, width: 6, borderRadius: 999, background: T.red }} />Reopened</span>
               </div>
             </div>
 
-            <div className="rounded-2xl p-6" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
-              <div className="text-[14px] font-semibold" style={{ color: T.ink }}>Errors by Severity</div>
-              <div className="text-[12px] mb-1" style={{ color: T.slate }}>Operational risk breakdown</div>
+            <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Errors by Severity</div>
+              <div style={{ fontSize: 12, marginBottom: 4, color: T.slate }}>Operational risk breakdown</div>
               <ResponsiveContainer width="100%" height={190}>
                 <PieChart>
                   <Pie data={severity} dataKey="value" innerRadius={52} outerRadius={74} paddingAngle={2}>
@@ -324,10 +311,10 @@ export default function OpsDashboard() {
                   <RTooltip contentStyle={{ borderRadius: 10, border: `1px solid ${T.hair}`, fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-1 text-[12px]" style={{ color: T.slate }}>
+              <div style={{ display: "flex", flexWrap: "wrap", columnGap: 16, rowGap: 6, marginTop: 4, fontSize: 12, color: T.slate }}>
                 {severity.map((s) => (
-                  <span key={s.name} className="flex items-center gap-1.5">
-                    <span className="h-1.5 w-1.5 rounded-full" style={{ background: s.color }} />{s.name}
+                  <span key={s.name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <span style={{ height: 6, width: 6, borderRadius: 999, background: s.color }} />{s.name}
                   </span>
                 ))}
               </div>
@@ -336,37 +323,38 @@ export default function OpsDashboard() {
         </div>
 
         {/* Needs attention table */}
-        <div className="rounded-2xl p-6" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
-          <div className="flex items-center justify-between mb-5">
+        <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <div>
-              <div className="text-[15px] font-semibold" style={{ color: T.ink }}>Needs Immediate Attention</div>
-              <div className="text-[12.5px] mt-0.5" style={{ color: T.slate }}>Ranked by SLA elapsed time</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>Needs Immediate Attention</div>
+              <div style={{ fontSize: 12.5, marginTop: 2, color: T.slate }}>Ranked by SLA elapsed time</div>
             </div>
-            <div className="flex items-center gap-1.5 text-[12.5px] font-medium" style={{ color: T.red }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 500, color: T.red }}>
               <Flame size={14} /> 5 breaching within 24h
             </div>
           </div>
-          <table className="w-full text-sm">
+          <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", minWidth: 720, fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
-              <tr className="text-left text-[11.5px] uppercase tracking-wide" style={{ color: T.slate }}>
-                <th className="pb-3 font-medium">ID</th>
-                <th className="pb-3 font-medium">Description</th>
-                <th className="pb-3 font-medium">Department</th>
-                <th className="pb-3 font-medium">Owner</th>
-                <th className="pb-3 font-medium">SLA Aging</th>
-                <th className="pb-3 font-medium text-right">Time to Breach</th>
+              <tr style={{ textAlign: "left", fontSize: 11.5, textTransform: "uppercase", letterSpacing: "0.4px", color: T.slate }}>
+                <th style={{ paddingBottom: 12, fontWeight: 500 }}>ID</th>
+                <th style={{ paddingBottom: 12, fontWeight: 500 }}>Description</th>
+                <th style={{ paddingBottom: 12, fontWeight: 500 }}>Department</th>
+                <th style={{ paddingBottom: 12, fontWeight: 500 }}>Owner</th>
+                <th style={{ paddingBottom: 12, fontWeight: 500 }}>SLA Aging</th>
+                <th style={{ paddingBottom: 12, fontWeight: 500, textAlign: "right" }}>Time to Breach</th>
               </tr>
             </thead>
             <tbody>
               {criticalErrors.map((e) => (
-                <tr key={e.id} className="border-t" style={{ borderColor: T.hair }}>
-                  <td className="py-3.5 font-medium" style={{ color: T.ink }}>{e.id}</td>
-                  <td className="py-3.5 pr-6" style={{ color: T.ink }}>{e.desc}</td>
-                  <td className="py-3.5" style={{ color: T.slate }}>{e.dept}</td>
-                  <td className="py-3.5" style={{ color: T.slate }}>{e.owner}</td>
-                  <td className="py-3.5"><SlaRail pct={e.pct} state={e.state} /></td>
-                  <td className="py-3.5 text-right">
-                    <span className="px-2.5 py-1 rounded-full text-[12px] font-medium" style={{ background: stateSoft(e.state), color: stateColor(e.state) }}>
+                <tr key={e.id} style={{ borderTop: `1px solid ${T.hair}` }}>
+                  <td style={{ padding: "14px 0", fontWeight: 500, color: T.ink }}>{e.id}</td>
+                  <td style={{ padding: "14px 24px 14px 0", color: T.ink }}>{e.desc}</td>
+                  <td style={{ padding: "14px 0", color: T.slate }}>{e.dept}</td>
+                  <td style={{ padding: "14px 0", color: T.slate }}>{e.owner}</td>
+                  <td style={{ padding: "14px 0" }}><SlaRail pct={e.pct} state={e.state} /></td>
+                  <td style={{ padding: "14px 0", textAlign: "right" }}>
+                    <span style={{ padding: "4px 10px", borderRadius: 999, fontSize: 12, fontWeight: 500, background: stateSoft(e.state), color: stateColor(e.state) }}>
                       {e.due}
                     </span>
                   </td>
@@ -374,31 +362,32 @@ export default function OpsDashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
 
         {/* Departments + Owners + Escalations */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-          <div className="rounded-2xl p-6" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
-            <div className="text-[15px] font-semibold mb-0.5" style={{ color: T.ink }}>Departments by Volume</div>
-            <div className="text-[12.5px] mb-4" style={{ color: T.slate }}>Open errors, this quarter</div>
-            <div className="flex flex-col gap-3">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+          <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2, color: T.ink }}>Departments by Volume</div>
+            <div style={{ fontSize: 12.5, marginBottom: 16, color: T.slate }}>Open errors, this quarter</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {departments.map((d) => (
                 <div key={d.name}>
-                  <div className="flex justify-between text-[12.5px] mb-1">
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
                     <span style={{ color: T.ink }}>{d.name}</span>
-                    <span className="tabular-nums" style={{ color: T.slate }}>{d.value}</span>
+                    <span style={{ color: T.slate }}>{d.value}</span>
                   </div>
-                  <div className="h-1.5 rounded-full" style={{ background: T.beige }}>
-                    <div className="h-1.5 rounded-full" style={{ width: `${(d.value / maxDept) * 100}%`, background: T.gold }} />
+                  <div style={{ height: 6, borderRadius: 999, background: T.beige }}>
+                    <div style={{ height: 6, borderRadius: 999, width: `${(d.value / maxDept) * 100}%`, background: T.gold }} />
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="rounded-2xl p-6" style={{ background: T.card, border: `1px solid ${T.hair}` }}>
-            <div className="text-[15px] font-semibold mb-0.5" style={{ color: T.ink }}>Owner Workload</div>
-            <div className="text-[12.5px] mb-2" style={{ color: T.slate }}>Open items assigned right now</div>
+          <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2, color: T.ink }}>Owner Workload</div>
+            <div style={{ fontSize: 12.5, marginBottom: 8, color: T.slate }}>Open items assigned right now</div>
             <ResponsiveContainer width="100%" height={190}>
               <BarChart data={owners} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
                 <XAxis type="number" hide />
@@ -411,25 +400,26 @@ export default function OpsDashboard() {
             </ResponsiveContainer>
           </div>
 
-          <div className="rounded-2xl p-6" style={{ background: T.navy }}>
-            <div className="flex items-center gap-2 mb-0.5">
+          <div style={{ borderRadius: 16, padding: 24, background: T.navy }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
               <Siren size={15} color={T.goldSoft} />
-              <div className="text-[15px] font-semibold text-white">Escalation Queue</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>Escalation Queue</div>
             </div>
-            <div className="text-[12.5px] mb-4" style={{ color: "rgba(255,255,255,0.5)" }}>Waiting on next-level response</div>
-            <div className="flex flex-col gap-3">
+            <div style={{ fontSize: 12.5, marginBottom: 16, color: "rgba(255,255,255,0.5)" }}>Waiting on next-level response</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {escalations.map((e) => (
-                <div key={e.id} className="rounded-xl p-3.5" style={{ background: "rgba(255,255,255,0.06)" }}>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[13px] font-medium text-white">{e.id}</span>
-                    <span className="text-[11.5px]" style={{ color: T.goldSoft }}>{e.waiting}</span>
+                <div key={e.id} style={{ borderRadius: 12, padding: 14, background: "rgba(255,255,255,0.06)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, color: "#fff" }}>{e.id}</span>
+                    <span style={{ fontSize: 11.5, color: T.goldSoft }}>{e.waiting}</span>
                   </div>
-                  <div className="text-[12px] mt-1" style={{ color: "rgba(255,255,255,0.55)" }}>{e.level} · {e.owner}</div>
+                  <div style={{ fontSize: 12, marginTop: 4, color: "rgba(255,255,255,0.55)" }}>{e.level} · {e.owner}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
+
       </main>
     </div>
   );

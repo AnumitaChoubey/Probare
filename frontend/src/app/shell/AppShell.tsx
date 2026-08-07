@@ -14,7 +14,7 @@ import Footer from './Footer'
 export default function AppShell() {
   // TODO (P1 — Sprint 1): replace with real useAuth() data
   const userFullName = ''
-  const userRoles: string[] = []
+  const userRoles: string[] = ['OPS_MGR', 'QAL', 'QA_GOV', 'ADMIN', 'AUDITOR_RO', 'AUD']
   const handleLogout = () => { /* clear token, navigate to /login */ }
 
   return (
