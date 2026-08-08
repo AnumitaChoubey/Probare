@@ -44,7 +44,7 @@ export default function App() {
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
           {/* <Route path="/team-dashboard"       element={<TeamDashboard />} /> */}
-          {/* <Route path="/ops-dashboard"        element={<OpsDashboard />} /> */}
+          <Route path="/ops-dashboard"        element={<OpsDashboard />} />
           {/* <Route path="/leadership-dashboard" element={<LeadershipDashboard />} /> */}
           {/* <Route path="/escalations"          element={<EscalationsView />} /> */}
           {/* <Route path="/reports"              element={<ReportsExport />} /> */}
