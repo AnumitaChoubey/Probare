@@ -1,6 +1,6 @@
 from datetime import datetime
 from sqlalchemy import Column, BigInteger, String, DateTime, ForeignKey, CheckConstraint, Text
-from app.db.base import Base
+from app.db.base_class import Base
 
 class NotificationsLog(Base):
     __tablename__ = "notifications_log"
