@@ -16,7 +16,7 @@ import ErrorDetail from './features/person1_foundation/ErrorDetail'
 
 // ── P4: Dashboards & Admin routes — Person 4 adds one route line per screen ──
 // import { TeamDashboard } from './features/person4_dashboards_admin/dashboards/TeamDashboard'
-// import { OpsDashboard } from './features/person4_dashboards_admin/dashboards/OpsDashboard'
+import OpsDashboard from './features/person4_dashboards_admin/dashboards/OpsDashboard'
 // import { LeadershipDashboard } from './features/person4_dashboards_admin/dashboards/LeadershipDashboard'
 // import { EscalationsView } from './features/person4_dashboards_admin/escalations/EscalationsView'
 // import { ReportsExport } from './features/person4_dashboards_admin/reports/ReportsExport'
