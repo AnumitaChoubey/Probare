@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-from backend.app.db.session import get_db
-from backend.app.db.models.notification_template import NotificationTemplate
+from app.db.session import get_db
+from app.db.models.notification_template import NotificationTemplate
 
 router = APIRouter(prefix="/admin/notification-templates", tags=["Admin Notifications"])
 

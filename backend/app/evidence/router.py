@@ -6,11 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Q
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from backend.app.db.session import get_db
-from backend.app.db.models.evidence_file import EvidenceFile
-from backend.app.db.models.evidence_access_log import EvidenceAccessLog
-from backend.app.evidence.storage import storage
-from backend.app.evidence.schemas import (
+from app.db.session import get_db
+from app.db.models.evidence_file import EvidenceFile
+from app.db.models.evidence_access_log import EvidenceAccessLog
+from app.evidence.storage import storage
+from app.evidence.schemas import (
     EvidenceFileResponse,
     EvidenceListGrouped,
     MalwareScanWebhookRequest,

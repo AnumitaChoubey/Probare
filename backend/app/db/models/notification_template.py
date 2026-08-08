@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Integer, Boolean, Text
-from backend.app.db.base import Base
+from app.db.base import Base
 
 class NotificationTemplate(Base):
     __tablename__ = "notification_templates"

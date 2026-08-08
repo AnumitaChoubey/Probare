@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, BigInteger, String, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
-from backend.app.db.base import Base
+from app.db.base import Base
 
 class EvidenceAccessLog(Base):
     __tablename__ = "evidence_access_log"

@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from datetime import datetime
 
-from backend.app.db.session import get_db
-from backend.app.db.models.in_app_notification import InAppNotification
-from backend.app.notifications.worker import notification_worker
+from app.db.session import get_db
+from app.db.models.in_app_notification import InAppNotification
+from app.notifications.worker import notification_worker
 
 router = APIRouter(prefix="/notifications", tags=["Notifications"])
 

@@ -2,10 +2,10 @@ import logging
 from datetime import datetime
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
-from backend.app.db.models.notification_template import NotificationTemplate
-from backend.app.db.models.notifications_log import NotificationsLog
-from backend.app.db.models.in_app_notification import InAppNotification
-from backend.app.email.client import email_client
+from app.db.models.notification_template import NotificationTemplate
+from app.db.models.notifications_log import NotificationsLog
+from app.db.models.in_app_notification import InAppNotification
+from app.email.client import email_client
 
 logger = logging.getLogger("notification_worker")
 
