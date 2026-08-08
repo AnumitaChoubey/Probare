@@ -1,6 +1,7 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppShell from './app/shell/AppShell'
+import ComingSoon from './app/shell/ComingSoon'
 
 // ── P1: Foundation routes — added by Person 1 ────────────────────────────────
 import LoginPage from './features/person1_foundation/LoginPage'
@@ -43,18 +44,12 @@ export default function App() {
           <Route path="/errors/:id"   element={<ErrorDetail />} />
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
-          {/* <Route path="/team-dashboard"       element={<TeamDashboard />} /> */}
+          <Route path="/team-dashboard"       element={<ComingSoon title="Team Dashboard" />} />
           <Route path="/ops-dashboard"        element={<OpsDashboard />} />
-          {/* <Route path="/leadership-dashboard" element={<LeadershipDashboard />} /> */}
-          {/* <Route path="/escalations"          element={<EscalationsView />} /> */}
-          {/* <Route path="/reports"              element={<ReportsExport />} /> */}
-          {/* <Route path="/admin/lobs"            element={<LobsCategories />} /> */}
-          {/* <Route path="/admin/ownership"       element={<OwnershipMapping />} /> */}
-          {/* <Route path="/admin/sla-rules"       element={<SlaRules />} /> */}
-          {/* <Route path="/admin/escalation"      element={<EscalationMatrix />} /> */}
-          {/* <Route path="/admin/working-hours"   element={<WorkingHoursHolidays />} /> */}
-          {/* <Route path="/admin/users"           element={<UsersRoles />} /> */}
-          {/* <Route path="/admin/config-history"  element={<ConfigHistory />} /> */}
+          <Route path="/leadership-dashboard" element={<ComingSoon title="Leadership Dashboard" />} />
+          <Route path="/escalations"          element={<ComingSoon title="Escalations" />} />
+          <Route path="/reports"              element={<ComingSoon title="Reports" />} />
+          <Route path="/admin/*"              element={<ComingSoon title="Admin Panel" />} />
         </Route>
 
         {/* Catch-all */}
