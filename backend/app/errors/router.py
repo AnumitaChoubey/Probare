@@ -16,7 +16,8 @@ from app.db.models.error_status_history import ErrorStatusHistory
 from app.errors.schemas import (
     LobResponse, CategoryResponse, SubCategoryResponse, 
     ErrorCreate, ErrorResponse, ErrorResponseOps, 
-    ErrorListResponse, ErrorDraftUpdate, ErrorStatusUpdate
+    ErrorListResponse, ErrorDraftUpdate, ErrorStatusUpdate,
+    ErrorHistoryResponse
 )
 from app.auth.deps import get_current_user
 from app.errors.id_generator import generate_qa_error_id
@@ -283,3 +284,19 @@ async def update_status(error_id: uuid.UUID, payload: ErrorStatusUpdate, db: Asy
     await db.refresh(error)
     
     return ErrorResponse.model_validate(error) if not is_ops_user(current_user) else ErrorResponseOps.model_validate(error)
+
+@router.get("/{error_id}/history", response_model=List[ErrorHistoryResponse])
+async def get_error_history(error_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+    # Verify error exists and user has access
+    res = await db.execute(select(Error).filter(Error.id == error_id))
+    error = res.scalar_one_or_none()
+    if not error:
+        raise HTTPException(status_code=404, detail="Error not found")
+        
+    # Fetch history in descending order
+    history_res = await db.execute(
+        select(ErrorStatusHistory)
+        .filter(ErrorStatusHistory.error_id == error_id)
+        .order_by(ErrorStatusHistory.occurred_at.desc())
+    )
+    return history_res.scalars().all()

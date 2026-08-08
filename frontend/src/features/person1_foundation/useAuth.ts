@@ -22,8 +22,6 @@ function getStoredToken(): string | null {
 }
 
 function parseUserFromToken(token: string): AuthUser | null {
-  // TODO (P1 Sprint 1): decode JWT payload → extract user_id, full_name, roles
-  // Example (replace with real JWT decode):
   try {
     const payload = JSON.parse(atob(token.split('.')[1]))
     return {

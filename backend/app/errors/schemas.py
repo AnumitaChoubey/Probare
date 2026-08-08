@@ -72,6 +72,7 @@ class ErrorResponse(BaseModel):
     updated_at: datetime
     submitted_at: Optional[datetime]
     closed_at: Optional[datetime]
+    sla_state: dict
 
     class Config:
         from_attributes = True
@@ -102,6 +103,7 @@ class ErrorResponseOps(BaseModel):
     updated_at: datetime
     submitted_at: Optional[datetime]
     closed_at: Optional[datetime]
+    sla_state: dict
 
     class Config:
         from_attributes = True
@@ -128,3 +130,16 @@ class ErrorDraftUpdate(BaseModel):
 class ErrorStatusUpdate(BaseModel):
     to_status: str
     reason: str
+
+class ErrorHistoryResponse(BaseModel):
+    id: uuid.UUID
+    error_id: uuid.UUID
+    from_status: str
+    to_status: str
+    performed_by_user_id: Optional[uuid.UUID]
+    performed_by_system: bool
+    reason: Optional[str]
+    occurred_at: datetime
+
+    class Config:
+        from_attributes = True

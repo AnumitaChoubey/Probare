@@ -1,8 +1,9 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import TopBar from './TopBar'
 import LeftNav from './LeftNav'
 import Footer from './Footer'
+import { useAuth } from '../../features/person1_foundation/useAuth'
 
 /**
  * AppShell — wraps every authenticated page.
@@ -12,10 +13,16 @@ import Footer from './Footer'
  * P1 owns this file. Do not edit unless you are Person 1.
  */
 export default function AppShell() {
-  // TODO (P1 — Sprint 1): replace with real useAuth() data
-  const userFullName = ''
-  const userRoles: string[] = []
-  const handleLogout = () => { /* clear token, navigate to /login */ }
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
+
+  const userFullName = user?.full_name || ''
+  const userRoles = user?.roles || []
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
