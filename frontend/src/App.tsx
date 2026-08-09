@@ -16,9 +16,9 @@ import ErrorDetail from './features/person1_foundation/ErrorDetail'
 // (no top-level routes needed — P3's components slot into ErrorDetail tabs + TopBar)
 
 // ── P4: Dashboards & Admin routes — Person 4 adds one route line per screen ──
-// import { TeamDashboard } from './features/person4_dashboards_admin/dashboards/TeamDashboard'
+import TeamDashboard from './features/person4_dashboards_admin/dashboards/TeamDashboard'
 import OpsDashboard from './features/person4_dashboards_admin/dashboards/OpsDashboard'
-// import { LeadershipDashboard } from './features/person4_dashboards_admin/dashboards/LeadershipDashboard'
+import LeadershipDashboard from './features/person4_dashboards_admin/dashboards/LeadershipDashboard'
 // import { EscalationsView } from './features/person4_dashboards_admin/escalations/EscalationsView'
 // import { ReportsExport } from './features/person4_dashboards_admin/reports/ReportsExport'
 // import { LobsCategories } from './features/person4_dashboards_admin/admin/LobsCategories'
@@ -44,9 +44,9 @@ export default function App() {
           <Route path="/errors/:id"   element={<ErrorDetail />} />
 
           {/* ── P4: Dashboards & Admin routes — Person 4 appends here ──────── */}
-          <Route path="/team-dashboard"       element={<ComingSoon title="Team Dashboard" />} />
+          <Route path="/team-dashboard"       element={<TeamDashboard />} />
           <Route path="/ops-dashboard"        element={<OpsDashboard />} />
-          <Route path="/leadership-dashboard" element={<ComingSoon title="Leadership Dashboard" />} />
+          <Route path="/leadership-dashboard" element={<LeadershipDashboard />} />
           <Route path="/escalations"          element={<ComingSoon title="Escalations" />} />
           <Route path="/reports"              element={<ComingSoon title="Reports" />} />
           <Route path="/admin/*"              element={<ComingSoon title="Admin Panel" />} />
