@@ -8,6 +8,7 @@ import LoginPage from './features/person1_foundation/LoginPage'
 import AuditorDashboard from './features/person1_foundation/AuditorDashboard'
 import LogNewErrorForm from './features/person1_foundation/LogNewErrorForm'
 import ErrorDetail from './features/person1_foundation/ErrorDetail'
+import AdminLayout from './features/person4_dashboards_admin/admin/AdminLayout'
 
 // ── P2: Rebuttal & Decision routes — Person 2 adds one route line here ────────
 // (no top-level routes needed — P2's components slot into ErrorDetail tabs)
@@ -19,7 +20,7 @@ import ErrorDetail from './features/person1_foundation/ErrorDetail'
 import TeamDashboard from './features/person4_dashboards_admin/dashboards/TeamDashboard'
 import OpsDashboard from './features/person4_dashboards_admin/dashboards/OpsDashboard'
 import LeadershipDashboard from './features/person4_dashboards_admin/dashboards/LeadershipDashboard'
-// import { EscalationsView } from './features/person4_dashboards_admin/escalations/EscalationsView'
+import EscalationsView from './features/person4_dashboards_admin/escalations/EscalationsView'
 // import { ReportsExport } from './features/person4_dashboards_admin/reports/ReportsExport'
 // import { LobsCategories } from './features/person4_dashboards_admin/admin/LobsCategories'
 // import { OwnershipMapping } from './features/person4_dashboards_admin/admin/OwnershipMapping'
@@ -47,9 +48,9 @@ export default function App() {
           <Route path="/team-dashboard"       element={<TeamDashboard />} />
           <Route path="/ops-dashboard"        element={<OpsDashboard />} />
           <Route path="/leadership-dashboard" element={<LeadershipDashboard />} />
-          <Route path="/escalations"          element={<ComingSoon title="Escalations" />} />
+          <Route path="/admin"                element={<AdminLayout />} />
+          <Route path="/escalations"          element={<EscalationsView />} />
           <Route path="/reports"              element={<ComingSoon title="Reports" />} />
-          <Route path="/admin/*"              element={<ComingSoon title="Admin Panel" />} />
         </Route>
 
         {/* Catch-all */}
