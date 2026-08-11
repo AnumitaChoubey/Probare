@@ -75,10 +75,7 @@ const byCategory = [
   { name: "Underwriting", value: 7, color: T.red },
 ];
 
-// Shaped to match Person 1's real per-error sla_state output:
-// { elapsed_pct: number, state: "green" | "amber" | "red" }
-// aggregated into counts here — this is exactly what the backend
-// will hand back pre-aggregated once GET /dashboards/leadership exists.
+
 const agingDistribution = [
   { name: "On track", state: "green", count: 1428 },
   { name: "Near breach", state: "amber", count: 356 },
@@ -127,10 +124,7 @@ function SingleSelect({ label, options }: { label: string; options: string[] }) 
   );
 }
 
-/* Multi-select LOB filter — your doc specifically calls this one out
-   as multi-select, unlike the single-selects elsewhere in the filter
-   bar, so it's built as a real dropdown with checkboxes rather than
-   a native <select multiple>, which is famously unusable as UI. */
+
 function MultiSelectLob({ selected, onToggle }: { selected: string[]; onToggle: (v: string) => void }) {
   const [open, setOpen] = useState(false);
   const label = selected.length === 0 ? "LOB" : selected.length === 1 ? selected[0] : `${selected.length} LOBs`;
@@ -160,9 +154,7 @@ function MultiSelectLob({ selected, onToggle }: { selected: string[]; onToggle: 
   );
 }
 
-/* ---------------------------------------------------------------
-   MAIN
---------------------------------------------------------------- */
+
 
 export default function LeadershipDashboard() {
   const [selectedLobs, setSelectedLobs] = useState<string[]>([]);
@@ -175,11 +167,7 @@ export default function LeadershipDashboard() {
   const totalAging = useMemo(() => agingDistribution.reduce((s, a) => s + a.count, 0), []);
 
   const runExport = () => {
-    // TODO: wire to real POST /reports/export with { dashboard: "leadership", filters, format }.
-    // Small/fast exports return a download link synchronously; large ones run in the
-    // background and fire Person 3's in-app notification when ready — this stub just
-    // simulates that async gap so the UI has somewhere real to land the state.
-    setExportState("running");
+    
     setTimeout(() => setExportState("done"), 1800);
   };
 

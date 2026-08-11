@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Plus, X, Check, History } from "lucide-react";
 
-/* ---------------------------------------------------------------
-   Shared tokens, matching Ops/Team/Leadership Dashboards
---------------------------------------------------------------- */
+
 const T = {
   navy: "#101A2E",
   cream: "#FAF7F1",

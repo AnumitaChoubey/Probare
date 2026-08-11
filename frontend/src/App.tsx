@@ -20,7 +20,7 @@ import TeamDashboard from './features/person4_dashboards_admin/dashboards/TeamDa
 import OpsDashboard from './features/person4_dashboards_admin/dashboards/OpsDashboard'
 import LeadershipDashboard from './features/person4_dashboards_admin/dashboards/LeadershipDashboard'
 import EscalationsView from './features/person4_dashboards_admin/escalations/EscalationsView'
-// import { ReportsExport } from './features/person4_dashboards_admin/reports/ReportsExport'
+import ReportsExport from './features/person4_dashboards_admin/reports/ReportsExport'
 // import { LobsCategories } from './features/person4_dashboards_admin/admin/LobsCategories'
 // import { OwnershipMapping } from './features/person4_dashboards_admin/admin/OwnershipMapping'
 // import { SlaRules } from './features/person4_dashboards_admin/admin/SlaRules'
@@ -49,7 +49,7 @@ export default function App() {
           <Route path="/leadership-dashboard" element={<LeadershipDashboard />} />
           <Route path="/admin" element={<AdminLayout />} />
           <Route path="/escalations" element={<EscalationsView />} />
-          {/* <Route path="/reports"              element={<ReportsExport />} /> */}
+          <Route path="/reports" element={<ReportsExport />} />
           {/* <Route path="/admin/lobs"           element={<LobsCategories />} /> */}
           {/* <Route path="/admin/ownership"      element={<OwnershipMapping />} /> */}
           {/* <Route path="/admin/sla-rules"      element={<SlaRules />} /> */}
