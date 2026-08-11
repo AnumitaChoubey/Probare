@@ -4,23 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import probareLogo from '../../design-system/probare-logo.png'
 
 // ── P3 adds ONE import line here when NotificationBell is ready ───────────────
-// import NotificationBell from '../../features/person3_evidence_notifications/NotificationBell'
-
-/** Placeholder rendered in TopBar until P3 delivers the real NotificationBell component. */
-function NotificationBellSlot() {
-  return (
-    <button
-      aria-label="Notifications (coming soon)"
-      style={{
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        padding: '0 8px',
-      }}
-    >
-    </button>
-  )
-}
+import NotificationBell from '../../features/person3_evidence_notifications/NotificationBell'
 
 interface TopBarProps {
   userFullName?: string
@@ -80,7 +64,7 @@ export default function TopBar({ userFullName = '', onLogout }: TopBarProps) {
       {/* Right — bell + user */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {/* ── P3 replaces this slot with <NotificationBell /> ────────────── */}
-        <NotificationBellSlot />
+        <NotificationBell />
 
         <span style={{ fontSize: 14 }}>{userFullName}</span>
 
