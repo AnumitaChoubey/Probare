@@ -8,21 +8,7 @@ import {
   Clock, Siren, RotateCcw, ArrowUpRight, ArrowDownRight, Flame,
 } from "lucide-react";
 
-/* ---------------------------------------------------------------
-   WHY THIS VERSION LOOKS DIFFERENT FROM WHAT YOU PASTED
 
-   The version you had used Tailwind utility classes (className="flex
-   items-center gap-4 rounded-2xl p-6" etc.) for almost all layout and
-   spacing. If Tailwind isn't compiling in your build — unconfigured
-   content paths, missing PostCSS wiring, etc. — every one of those
-   classes silently does nothing, and you get raw stacked <div>s with
-   no layout at all. That's exactly what your screenshot shows.
-
-   This version uses plain inline `style={{...}}` objects for every
-   layout property instead. It will render correctly regardless of
-   whether Tailwind is working in your project, because it doesn't
-   depend on Tailwind at all.
---------------------------------------------------------------- */
 
 interface SlaRailProps { pct: number; state: "red" | "amber" | "green"; }
 interface ComplianceRingProps { pct: number; }

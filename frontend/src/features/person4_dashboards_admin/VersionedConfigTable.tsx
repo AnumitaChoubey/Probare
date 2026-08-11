@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { Plus, X, Check, History } from "lucide-react";
 
-/* ---------------------------------------------------------------
-   Shared tokens, matching Ops/Team/Leadership Dashboards
---------------------------------------------------------------- */
+
 const T = {
   navy: "#101A2E",
   cream: "#FAF7F1",
@@ -35,21 +33,6 @@ export interface VersionedConfigTableProps {
   onAddVersion: (values: Record<string, string>) => void;
 }
 
-/**
- * Shared pattern for every versioned config screen (SLA Rules,
- * Ownership Mapping, Escalation Matrix) — per your doc: "Edit" never
- * updates in place, it always inserts a new version. This component
- * only handles the UI part of that contract; the actual insert-new
- * / close-old logic already lives in your backend endpoints
- * (admin/sla_rules.py etc.) — onAddVersion should call your real
- * POST endpoint, not mutate state locally in production.
- *
- * NOTE: form fields below render as plain text inputs for every
- * column, regardless of real type. Fields that are actually UUIDs
- * (lob_id, category_id) should become real dropdowns fetched from
- * Person 1's /lobs and /categories endpoints — this is a functional
- * stub, not the final form.
- */
 export default function VersionedConfigTable({ title, description, columns, rows, onAddVersion }: VersionedConfigTableProps) {
   const [showForm, setShowForm] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});

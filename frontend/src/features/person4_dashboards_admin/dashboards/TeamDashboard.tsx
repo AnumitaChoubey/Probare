@@ -9,11 +9,7 @@ import {
   ArrowUpRight, ArrowDownRight, UserX, Check,
 } from "lucide-react";
 
-/* ---------------------------------------------------------------
-   Same palette/tokens as OpsDashboard.tsx — kept in sync deliberately
-   so both dashboards read as one product, not two different apps.
-   If you ever centralize these into a shared theme file, update both.
---------------------------------------------------------------- */
+
 const T = {
   navy: "#101A2E",
   cream: "#FAF7F1",
