@@ -1,11 +1,12 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 from app.auth.router import router as auth_router
 from app.errors.router import router as errors_router
-import app.db.models  # ensure models are loaded in registry
-
-from contextlib import asynccontextmanager
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.dashboards import operations
 from app.jobs.sla_engine import run_sla_engine
 
 # Initialize the scheduler
@@ -38,6 +39,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(errors_router, prefix="/errors", tags=["Errors"])
 
+app.include_router(operations.router)
 # ── P1: Foundation routers ─ added by Person 1 ──────────────────────────────
 # from app.auth.routes import router as auth_router
 # from app.errors.routes import router as errors_router
@@ -59,10 +61,10 @@ app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
 # app.include_router(decision_router,  prefix="/errors", tags=["Decision"])
 
 # ── P3: Evidence & Notifications routers — added by Person 3 ─────────────────
-# from app.evidence.routes import router as evidence_router
-# from app.notifications.routes import router as notifications_router
-# app.include_router(evidence_router,       prefix="/errors",        tags=["Evidence"])
-# app.include_router(notifications_router,  prefix="/notifications", tags=["Notifications"])
+from app.evidence.router import router as evidence_router
+from app.notifications.router import router as notifications_router
+app.include_router(evidence_router,       prefix="/errors",        tags=["Evidence"])
+app.include_router(notifications_router,  prefix="/notifications", tags=["Notifications"])
 
 # ── P4: Search, Dashboards, Reports, Admin routers — added by Person 4 ────────
 # from app.search.routes import router as search_router
@@ -85,8 +87,8 @@ app.include_router(escalation_router,     prefix="/admin/escalation-matrix", tag
 # app.include_router(config_history_router, prefix="/admin/config-history", tags=["Admin"])
 
 # ── P3: Notification templates — added by Person 3 ───────────────────────────
-# from app.admin.notification_templates import router as notif_templates_router
-# app.include_router(notif_templates_router, prefix="/admin/notification-templates", tags=["Admin"])
+from app.admin.notification_templates import router as notif_templates_router
+app.include_router(notif_templates_router, prefix="/admin/notification-templates", tags=["Admin"])
 
 
 @app.get("/health", tags=["Health"])

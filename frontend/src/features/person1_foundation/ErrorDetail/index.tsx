@@ -8,6 +8,9 @@ import { colors } from '../../../design-system/tokens'
 import OverviewTab from '../OverviewTab'
 import HistoryTab from '../HistoryTab'
 
+// P3-owned tab components
+import EvidenceTab from '../../person3_evidence_notifications/EvidenceTab'
+
 type TabId = 'overview' | 'respond' | 'evidence' | 'history'
 
 const TABS: { id: TabId; label: string }[] = [
@@ -99,9 +102,7 @@ export default function ErrorDetail() {
         )}
 
         {activeTab === 'evidence' && (
-          <div style={{ padding: 24, background: colors.surfaceAlt, borderRadius: 8, color: colors.textMuted }}>
-            <em>Evidence tab - Person 3's component will render here.</em>
-          </div>
+          <EvidenceTab errorId={error.id} />
         )}
 
         {activeTab === 'history' && (
