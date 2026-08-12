@@ -1,11 +1,12 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 from app.auth.router import router as auth_router
 from app.errors.router import router as errors_router
-import app.db.models  # ensure models are loaded in registry
-
-from contextlib import asynccontextmanager
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from app.dashboards import operations
 from app.jobs.sla_engine import run_sla_engine
 
 # Initialize the scheduler
@@ -38,6 +39,8 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(errors_router, prefix="/errors", tags=["Errors"])
 
+
+app.include_router(operations.router)
 # ── P1: Foundation routers — added by Person 1 ────────────────────────────────
 # from app.auth.routes import router as auth_router
 # from app.errors.routes import router as errors_router
