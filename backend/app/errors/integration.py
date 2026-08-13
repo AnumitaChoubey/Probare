@@ -21,7 +21,7 @@ async def get_ownership_mapping(request: Request, lob_id: uuid.UUID, category_id
                 data = resp.json()
                 if data and len(data) > 0:
                     # P4's endpoint returns a list of mappings. We take the first one.
-                    return uuid.UUID(data[0]["owner_user_id"])
+                    return uuid.UUID(data[0]["default_owner_user_id"])
     except Exception as e:
         logger.error(f"Failed to fetch ownership mapping: {e}")
     
