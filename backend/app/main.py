@@ -30,7 +30,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite dev server
+    allow_origins=[
+        "http://localhost:5173", 
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,19 +44,18 @@ app.add_middleware(
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(errors_router, prefix="/errors", tags=["Errors"])
 
-
 app.include_router(operations.router)
-# ── P1: Foundation routers — added by Person 1 ────────────────────────────────
+# ── P1: Foundation routers ─ added by Person 1 ──────────────────────────────
 # from app.auth.routes import router as auth_router
 # from app.errors.routes import router as errors_router
 # from app.admin.lobs import router as lobs_router
-# from app.admin.categories import router as categories_router
+from app.admin.categories import router as categories_router
 # from app.admin.sub_categories import router as sub_categories_router
 # from app.admin.users import router as users_router
 # app.include_router(auth_router,        prefix="/auth",       tags=["Auth"])
 # app.include_router(errors_router,      prefix="/errors",     tags=["Errors"])
 # app.include_router(lobs_router,        prefix="/admin/lobs", tags=["Admin"])
-# app.include_router(categories_router,  prefix="/admin/categories", tags=["Admin"])
+app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
 # app.include_router(sub_categories_router, prefix="/admin/sub-categories", tags=["Admin"])
 # app.include_router(users_router,       prefix="/admin/users", tags=["Admin"])
 
@@ -71,18 +75,18 @@ app.include_router(notifications_router,  prefix="/notifications", tags=["Notifi
 # from app.search.routes import router as search_router
 # from app.dashboards.routes import router as dashboards_router
 # from app.reports.routes import router as reports_router
-# from app.admin.ownership_mapping import router as ownership_router
-# from app.admin.sla_rules import router as sla_router
-# from app.admin.escalation_matrix import router as escalation_router
+from app.admin.ownership_mapping import router as ownership_router
+from app.admin.sla_rules import router as sla_router
+from app.admin.escalation_matrix import router as escalation_router
 # from app.admin.working_hours import router as working_hours_router
 # from app.admin.holidays import router as holidays_router
 # from app.admin.config_history import router as config_history_router
 # app.include_router(search_router,         prefix="/errors",               tags=["Search"])
 # app.include_router(dashboards_router,     prefix="/dashboards",           tags=["Dashboards"])
 # app.include_router(reports_router,        prefix="/reports",              tags=["Reports"])
-# app.include_router(ownership_router,      prefix="/admin/ownership-mapping", tags=["Admin"])
-# app.include_router(sla_router,            prefix="/admin/sla-rules",      tags=["Admin"])
-# app.include_router(escalation_router,     prefix="/admin/escalation-matrix", tags=["Admin"])
+app.include_router(ownership_router,      prefix="/admin/ownership-mapping", tags=["Admin"])
+app.include_router(sla_router,            prefix="/admin/sla-rules",      tags=["Admin"])
+app.include_router(escalation_router,     prefix="/admin/escalation-matrix", tags=["Admin"])
 # app.include_router(working_hours_router,  prefix="/admin/working-hours",  tags=["Admin"])
 # app.include_router(holidays_router,       prefix="/admin/holidays",       tags=["Admin"])
 # app.include_router(config_history_router, prefix="/admin/config-history", tags=["Admin"])
