@@ -43,3 +43,48 @@ async def acknowledge_error(
     )
 
     return {"message": "Error acknowledged successfully", "new_status": "OPEN_PENDING_RESPONSE"}
+
+from pydantic import BaseModel
+from typing import Optional
+
+
+class AcceptRequest(BaseModel):
+    acknowledgement_comment: Optional[str] = None
+
+
+@router.post("/{error_id}/accept")
+async def accept_error(
+    error_id: UUID,
+    payload: AcceptRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        Error.__table__.select().where(Error.id == error_id)
+    )
+    error = result.fetchone()
+
+    if not error:
+        raise HTTPException(status_code=404, detail="Error not found")
+
+    if current_user.id != error.owner_user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Only the resolved owner can accept this error"
+        )
+
+    allowed_statuses = ["OPEN_PENDING_ACK", "OPEN_PENDING_RESPONSE", "SLA_BREACHED_ESCALATED"]
+    if error.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot accept error in status '{error.status}'"
+        )
+
+    updated_error = await update_status(
+        error_id=error_id,
+        payload=ErrorStatusUpdate(to_status="ACCEPTED_PENDING_CLOSURE"),
+        db=db,
+        current_user=current_user,
+    )
+
+    return {"message": "Error accepted successfully", "new_status": "ACCEPTED_PENDING_CLOSURE"}
