@@ -181,3 +181,102 @@ async def rebut_error(
     )
 
     return {"message": "Rebuttal submitted successfully", "cycle_number": new_cycle_number, "new_status": "REBUTTAL_SUBMITTED_PENDING_QA_REVIEW"}    
+
+from app.db.models.decision import Decision
+
+
+class DecisionRequest(BaseModel):
+    decision: str
+    rationale: str
+    partial_breakdown: Optional[str] = None
+
+
+@router.post("/{error_id}/decision")
+async def decide_error(
+    error_id: UUID,
+    payload: DecisionRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        Error.__table__.select().where(Error.id == error_id)
+    )
+    error = result.fetchone()
+
+    if not error:
+        raise HTTPException(status_code=404, detail="Error not found")
+
+    is_original_logger = current_user.id == error.logged_by_user_id
+    is_qa_lead = any(role.code == "QAL" for role in current_user.roles)
+
+    if not (is_original_logger or is_qa_lead):
+        raise HTTPException(
+            status_code=403,
+            detail="Only the original logger or a QA Lead can record a decision"
+        )
+
+    closed_statuses = ["CLOSED_UPHELD", "CLOSED_OVERTURNED", "CLOSED_PARTIAL"]
+    if error.status in closed_statuses:
+        raise HTTPException(
+            status_code=409,
+            detail="This error is already closed"
+        )
+
+    if error.status == "ACCEPTED_PENDING_CLOSURE":
+        if payload.decision != "UPHELD":
+            raise HTTPException(
+                status_code=422,
+                detail={"code": "INVALID_DECISION_FOR_STATE", "message": "Only UPHELD is valid when the owner has accepted the finding"}
+            )
+    elif error.status != "REBUTTAL_SUBMITTED_PENDING_QA_REVIEW":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot record a decision while error is in status '{error.status}'"
+        )
+
+    if len(payload.rationale) < 20:
+        raise HTTPException(
+            status_code=400,
+            detail="Rationale must be at least 20 characters"
+        )
+
+    if payload.decision == "PARTIALLY_UPHELD" and not payload.partial_breakdown:
+        raise HTTPException(
+            status_code=400,
+            detail="Partial breakdown is required when decision is PARTIALLY_UPHELD"
+        )
+
+    existing_rebuttal = await db.execute(
+        Rebuttal.__table__.select().where(
+            Rebuttal.error_id == error_id
+        ).order_by(Rebuttal.cycle_number.desc())
+    )
+    last_rebuttal = existing_rebuttal.fetchone()
+    current_cycle = last_rebuttal.cycle_number if last_rebuttal else 1
+
+    new_decision = Decision(
+        error_id=error_id,
+        cycle_number=current_cycle,
+        decision=payload.decision,
+        rationale=payload.rationale,
+        partial_breakdown=payload.partial_breakdown,
+        decided_by_user_id=current_user.id,
+    )
+    db.add(new_decision)
+    await db.commit()
+
+    status_map = {
+        "UPHELD": "CLOSED_UPHELD",
+        "OVERTURNED": "CLOSED_OVERTURNED",
+        "PARTIALLY_UPHELD": "CLOSED_PARTIAL",
+    }
+    new_status = status_map[payload.decision]
+
+    updated_error = await update_status(
+        error_id=error_id,
+        payload=ErrorStatusUpdate(to_status=new_status),
+        db=db,
+        current_user=current_user,
+    )
+
+    return {"message": "Decision recorded successfully", "decision": payload.decision, "new_status": new_status}
