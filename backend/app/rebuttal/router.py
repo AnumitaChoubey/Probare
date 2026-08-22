@@ -280,3 +280,111 @@ async def decide_error(
     )
 
     return {"message": "Decision recorded successfully", "decision": payload.decision, "new_status": new_status}
+
+class ReopenRequest(BaseModel):
+    reason: str
+
+
+@router.post("/{error_id}/reopen")
+async def reopen_error(
+    error_id: UUID,
+    payload: ReopenRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        Error.__table__.select().where(Error.id == error_id)
+    )
+    error = result.fetchone()
+
+    if not error:
+        raise HTTPException(status_code=404, detail="Error not found")
+
+    is_qa_lead = any(role.code == "QAL" for role in current_user.roles)
+    if not is_qa_lead:
+        raise HTTPException(
+            status_code=403,
+            detail="Only a QA Lead can reopen an error"
+        )
+
+    closed_statuses = ["CLOSED_UPHELD", "CLOSED_OVERTURNED", "CLOSED_PARTIAL"]
+    if error.status not in closed_statuses:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot reopen error in status '{error.status}'"
+        )
+
+    if not payload.reason or not payload.reason.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="A reason is required to reopen an error"
+        )
+
+    await update_status(
+        error_id=error_id,
+        payload=ErrorStatusUpdate(to_status="REOPENED"),
+        db=db,
+        current_user=current_user,
+    )
+
+    await update_status(
+        error_id=error_id,
+        payload=ErrorStatusUpdate(to_status="REBUTTAL_SUBMITTED_PENDING_QA_REVIEW"),
+        db=db,
+        current_user=current_user,
+    )
+
+    return {"message": "Error reopened successfully", "new_status": "REBUTTAL_SUBMITTED_PENDING_QA_REVIEW"}
+
+class RebuttalCorrectionRequest(BaseModel):
+    reason: str
+
+
+@router.post("/{error_id}/rebuttal-correction")
+async def rebuttal_correction(
+    error_id: UUID,
+    payload: RebuttalCorrectionRequest,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        Error.__table__.select().where(Error.id == error_id)
+    )
+    error = result.fetchone()
+
+    if not error:
+        raise HTTPException(status_code=404, detail="Error not found")
+
+    is_auditor = any(role.code == "AUD" for role in current_user.roles)
+    is_qa_lead = any(role.code == "QAL" for role in current_user.roles)
+
+    if not (is_auditor or is_qa_lead):
+        raise HTTPException(
+            status_code=403,
+            detail="Only an Auditor or QA Lead can request a rebuttal correction"
+        )
+
+    allowed_statuses = ["OPEN_PENDING_ACK", "OPEN_PENDING_RESPONSE"]
+    if error.status not in allowed_statuses:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot request a correction while error is in status '{error.status}'"
+        )
+
+    if not payload.reason or not payload.reason.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="A reason is required for a rebuttal correction"
+        )
+
+    # Move status back to OPEN_PENDING_RESPONSE to reopen the owner's edit window.
+    # This is a simple, pragmatic implementation of the "one-time re-edit window"
+    # described in the spec, rather than a separate transient flag/column.
+    await update_status(
+        error_id=error_id,
+        payload=ErrorStatusUpdate(to_status="OPEN_PENDING_RESPONSE"),
+        db=db,
+        current_user=current_user,
+    )
+
+    return {"message": "Rebuttal correction window opened", "reason": payload.reason}
