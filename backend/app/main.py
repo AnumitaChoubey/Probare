@@ -36,8 +36,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(errors_router, prefix="/errors", tags=["Errors"])
+
 
 
 app.include_router(operations.router)
@@ -48,8 +47,8 @@ app.include_router(operations.router)
 # from app.admin.categories import router as categories_router
 # from app.admin.sub_categories import router as sub_categories_router
 # from app.admin.users import router as users_router
-# app.include_router(auth_router,        prefix="/auth",       tags=["Auth"])
-# app.include_router(errors_router,      prefix="/errors",     tags=["Errors"])
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(errors_router, prefix="/errors", tags=["Errors"])
 # app.include_router(lobs_router,        prefix="/admin/lobs", tags=["Admin"])
 # app.include_router(categories_router,  prefix="/admin/categories", tags=["Admin"])
 # app.include_router(sub_categories_router, prefix="/admin/sub-categories", tags=["Admin"])

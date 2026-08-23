@@ -3,7 +3,7 @@ import {
   Layers, GitBranch, Timer, ShieldAlert, Clock, Users, History as HistoryIcon,
 } from "lucide-react";
 import VersionedConfigTable from "../VersionedConfigTable";
-
+import ConfigHistory from "./ConfigHistory";
 const T = {
   navy: "#101A2E",
   cream: "#FAF7F1",
@@ -29,12 +29,7 @@ const tabs: { key: TabKey; label: string; icon: React.ElementType; live: boolean
   { key: "history",    label: "Config History",        icon: HistoryIcon, live: false },
 ];
 
-/* ---------------------------------------------------------------
-   MOCK DATA — matches the exact column shapes from your own doc's
-   "Database Tables You Own — Exact Columns" section. Swap for real
-   GET calls to /admin/ownership-mapping, /admin/sla-rules,
-   /admin/escalation-matrix once wired.
---------------------------------------------------------------- */
+
 
 interface OwnershipRow {
   lob_id: string;
@@ -194,7 +189,7 @@ export default function AdminLayout() {
 
           {active === "hours" && <ComingSoonPanel label="Working Hours & Holidays" />}
           {active === "users" && <ComingSoonPanel label="Users & Roles" />}
-          {active === "history" && <ComingSoonPanel label="Config History" />}
+          {active === "history" && <ConfigHistory />}
         </div>
 
       </main>
