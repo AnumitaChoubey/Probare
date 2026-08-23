@@ -13,7 +13,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from app.core.config import settings  # assumed: exposes ERRORS_SERVICE_BASE_URL
-from app.auth.dependencies import get_current_user  # noqa: fix path once confirmed, same as your admin/*.py files
+from app.auth.deps import get_current_user
 
 router = APIRouter(prefix="/dashboards", tags=["dashboards-operations"])
 
