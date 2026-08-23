@@ -8,7 +8,7 @@ from app.auth.router import router as auth_router
 from app.errors.router import router as errors_router
 from app.dashboards import operations
 from app.jobs.sla_engine import run_sla_engine
-
+from app.dashboards import team
 # Initialize the scheduler
 scheduler = AsyncIOScheduler()
 
@@ -69,6 +69,7 @@ app.include_router(notifications_router,  prefix="/notifications", tags=["Notifi
 # ── P4: Search, Dashboards, Reports, Admin routers — added by Person 4 ────────
 # from app.search.routes import router as search_router
 # from app.dashboards.routes import router as dashboards_router
+app.include_router(team.router)
 # from app.reports.routes import router as reports_router
 # from app.admin.ownership_mapping import router as ownership_router
 # from app.admin.sla_rules import router as sla_router
