@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import VersionedConfigTable from "../VersionedConfigTable";
 import ConfigHistory from "./ConfigHistory";
+import LobsCategories from "./LobsCategories";
 const T = {
   navy: "#101A2E",
   cream: "#FAF7F1",
@@ -127,7 +128,7 @@ export default function AdminLayout() {
 
         {/* Content */}
         <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
-          {active === "lobs" && <ComingSoonPanel label="LOBs & Categories" />}
+          {active === "lobs" && <LobsCategories />}
 
           {active === "ownership" && (
             <VersionedConfigTable
@@ -186,7 +187,7 @@ export default function AdminLayout() {
               onAddVersion={(values) => setEscalation((prev) => [...prev, values as any])}
             />
           )}
-
+          {active === "lobs" && <LobsCategories />}
           {active === "hours" && <ComingSoonPanel label="Working Hours & Holidays" />}
           {active === "users" && <ComingSoonPanel label="Users & Roles" />}
           {active === "history" && <ConfigHistory />}
