@@ -9,6 +9,7 @@ from app.errors.router import router as errors_router
 from app.dashboards import operations
 from app.jobs.sla_engine import run_sla_engine
 from app.dashboards import team
+from app.dashboards import leadership
 # Initialize the scheduler
 scheduler = AsyncIOScheduler()
 
@@ -70,6 +71,7 @@ app.include_router(notifications_router,  prefix="/notifications", tags=["Notifi
 # from app.search.routes import router as search_router
 # from app.dashboards.routes import router as dashboards_router
 app.include_router(team.router)
+app.include_router(leadership.router)
 # from app.reports.routes import router as reports_router
 # from app.admin.ownership_mapping import router as ownership_router
 # from app.admin.sla_rules import router as sla_router
