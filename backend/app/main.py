@@ -69,7 +69,7 @@ app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
 from app.evidence.router import router as evidence_router
 from app.notifications.router import router as notifications_router
 app.include_router(evidence_router,       prefix="/errors",        tags=["Evidence"])
-app.include_router(notifications_router,  prefix="/notifications", tags=["Notifications"])
+app.include_router(notifications_router,  tags=["Notifications"])
 
 # ── P4: Search, Dashboards, Reports, Admin routers — added by Person 4 ────────
 # from app.search.routes import router as search_router
@@ -84,16 +84,16 @@ from app.admin.escalation_matrix import router as escalation_router
 # app.include_router(search_router,         prefix="/errors",               tags=["Search"])
 # app.include_router(dashboards_router,     prefix="/dashboards",           tags=["Dashboards"])
 # app.include_router(reports_router,        prefix="/reports",              tags=["Reports"])
-app.include_router(ownership_router,      prefix="/admin/ownership-mapping", tags=["Admin"])
-app.include_router(sla_router,            prefix="/admin/sla-rules",      tags=["Admin"])
-app.include_router(escalation_router,     prefix="/admin/escalation-matrix", tags=["Admin"])
+app.include_router(ownership_router,      tags=["Admin"])
+app.include_router(sla_router,            tags=["Admin"])
+app.include_router(escalation_router,     tags=["Admin"])
 # app.include_router(working_hours_router,  prefix="/admin/working-hours",  tags=["Admin"])
 # app.include_router(holidays_router,       prefix="/admin/holidays",       tags=["Admin"])
 # app.include_router(config_history_router, prefix="/admin/config-history", tags=["Admin"])
 
 # ── P3: Notification templates — added by Person 3 ───────────────────────────
 from app.admin.notification_templates import router as notif_templates_router
-app.include_router(notif_templates_router, prefix="/admin/notification-templates", tags=["Admin"])
+app.include_router(notif_templates_router, tags=["Admin"])
 
 
 @app.get("/health", tags=["Health"])
