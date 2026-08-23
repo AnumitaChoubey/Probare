@@ -5,6 +5,7 @@ import {
 import VersionedConfigTable from "../VersionedConfigTable";
 import ConfigHistory from "./ConfigHistory";
 import LobsCategories from "./LobsCategories";
+import UsersRoles from "./UsersRoles";
 const T = {
   navy: "#101A2E",
   cream: "#FAF7F1",
@@ -191,6 +192,7 @@ export default function AdminLayout() {
           {active === "hours" && <ComingSoonPanel label="Working Hours & Holidays" />}
           {active === "users" && <ComingSoonPanel label="Users & Roles" />}
           {active === "history" && <ConfigHistory />}
+          {active === "users" && <UsersRoles />}
         </div>
 
       </main>
