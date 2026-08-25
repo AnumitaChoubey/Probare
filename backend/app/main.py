@@ -8,7 +8,8 @@ from app.auth.router import router as auth_router
 from app.errors.router import router as errors_router
 from app.dashboards import operations
 from app.jobs.sla_engine import run_sla_engine
-
+from app.dashboards import team
+from app.dashboards import leadership
 # Initialize the scheduler
 scheduler = AsyncIOScheduler()
 
@@ -41,8 +42,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(errors_router, prefix="/errors", tags=["Errors"])
+
 
 app.include_router(operations.router)
 # ── P1: Foundation routers ─ added by Person 1 ──────────────────────────────
@@ -52,8 +52,8 @@ app.include_router(operations.router)
 from app.admin.categories import router as categories_router
 # from app.admin.sub_categories import router as sub_categories_router
 # from app.admin.users import router as users_router
-# app.include_router(auth_router,        prefix="/auth",       tags=["Auth"])
-# app.include_router(errors_router,      prefix="/errors",     tags=["Errors"])
+app.include_router(auth_router, prefix="/auth", tags=["Auth"])
+app.include_router(errors_router, prefix="/errors", tags=["Errors"])
 # app.include_router(lobs_router,        prefix="/admin/lobs", tags=["Admin"])
 app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
 # app.include_router(sub_categories_router, prefix="/admin/sub-categories", tags=["Admin"])
@@ -74,6 +74,8 @@ app.include_router(notifications_router,  tags=["Notifications"])
 # ── P4: Search, Dashboards, Reports, Admin routers — added by Person 4 ────────
 # from app.search.routes import router as search_router
 # from app.dashboards.routes import router as dashboards_router
+app.include_router(team.router)
+app.include_router(leadership.router)
 # from app.reports.routes import router as reports_router
 from app.admin.ownership_mapping import router as ownership_router
 from app.admin.sla_rules import router as sla_router
