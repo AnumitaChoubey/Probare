@@ -4,6 +4,7 @@ from sqlalchemy import (
     Column, String, ForeignKey, Integer, Boolean, Text, Date, DateTime, BigInteger, CheckConstraint, Index
 )
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
 class Error(Base):
@@ -43,6 +44,13 @@ class Error(Base):
     updated_at = Column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     submitted_at = Column(DateTime(timezone=True), nullable=True)
     closed_at = Column(DateTime(timezone=True), nullable=True)
+
+    decisions = relationship(
+        "Decision",
+        primaryjoin="Error.id == Decision.error_id",
+        order_by="desc(Decision.cycle_number)",
+        viewonly=True
+    )
 
     __table_args__ = (
         CheckConstraint("severity IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')", name="chk_severity"),
@@ -91,4 +99,13 @@ class Error(Base):
         elif elapsed_pct >= 70.0:
             state = "amber"
             
-        return {"elapsed_pct": round(elapsed_pct, 1), "state": state}
+        return {
+            "elapsed_pct": min(round(elapsed_pct, 1), 100.0),
+            "state": state
+        }
+
+    @property
+    def latest_decision(self) -> str | None:
+        if self.decisions:
+            return self.decisions[0].decision
+        return None

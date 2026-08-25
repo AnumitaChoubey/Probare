@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func
+from sqlalchemy.orm import selectinload
 
 from app.db.session import get_db
 from app.db.models.lob import Lob
@@ -57,7 +58,7 @@ async def list_errors(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    query = select(Error)
+    query = select(Error).options(selectinload(Error.decisions))
     
     if status:
         query = query.filter(Error.status == status)
@@ -98,7 +99,7 @@ async def list_errors(
 
 @router.get("/{error_id}", response_model=Union[ErrorResponse, ErrorResponseOps])
 async def get_error(error_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
-    res = await db.execute(select(Error).filter(Error.id == error_id))
+    res = await db.execute(select(Error).options(selectinload(Error.decisions)).filter(Error.id == error_id))
     error = res.scalar_one_or_none()
     if not error:
         raise HTTPException(status_code=404, detail="Error not found")

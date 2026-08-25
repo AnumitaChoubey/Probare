@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
 from app.core.config import settings  # noqa: confirm real setting name, see operations.py
-from app.auth.dependencies import get_current_user  # noqa: confirm real path, see operations.py
+from app.auth.deps import get_current_user
 
 router = APIRouter(prefix="/dashboards", tags=["dashboards-team"])
 

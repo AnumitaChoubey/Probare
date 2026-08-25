@@ -73,6 +73,7 @@ class ErrorResponse(BaseModel):
     submitted_at: Optional[datetime]
     closed_at: Optional[datetime]
     sla_state: dict
+    latest_decision: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -104,6 +105,7 @@ class ErrorResponseOps(BaseModel):
     submitted_at: Optional[datetime]
     closed_at: Optional[datetime]
     sla_state: dict
+    latest_decision: Optional[str] = None
 
     class Config:
         from_attributes = True
