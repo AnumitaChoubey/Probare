@@ -86,7 +86,9 @@ app.include_router(notifications_router,  prefix="/notifications", tags=["Notifi
 
 # ── P3: Notification templates — added by Person 3 ───────────────────────────
 from app.admin.notification_templates import router as notif_templates_router
+from app.admin.evidence_rules import router as evidence_rules_router
 app.include_router(notif_templates_router, prefix="/admin/notification-templates", tags=["Admin"])
+app.include_router(evidence_rules_router, prefix="/admin/evidence-rules", tags=["Admin"])
 
 
 @app.get("/health", tags=["Health"])

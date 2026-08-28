@@ -14,6 +14,7 @@ from app.db.models.evidence_access_log import EvidenceAccessLog
 from app.db.models.notification_template import NotificationTemplate
 from app.db.models.notifications_log import NotificationsLog
 from app.db.models.in_app_notification import InAppNotification
+from app.db.models.evidence_rule import EvidenceRule
 
 # Expose models for SQLAlchemy registry
-__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence","QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification"]
+__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule"]
