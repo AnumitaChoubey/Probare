@@ -10,6 +10,7 @@ from app.dashboards import operations
 from app.jobs.sla_engine import run_sla_engine
 from app.dashboards import team
 from app.dashboards import leadership
+from app.admin import config_history
 # Initialize the scheduler
 scheduler = AsyncIOScheduler()
 
@@ -54,6 +55,7 @@ from app.admin.categories import router as categories_router
 # from app.admin.users import router as users_router
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(errors_router, prefix="/errors", tags=["Errors"])
+app.include_router(config_history.router)
 # app.include_router(lobs_router,        prefix="/admin/lobs", tags=["Admin"])
 app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
 # app.include_router(sub_categories_router, prefix="/admin/sub-categories", tags=["Admin"])
