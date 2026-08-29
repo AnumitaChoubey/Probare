@@ -20,6 +20,7 @@ from app.db.models.config_change_history import ConfigChangeHistory
 from app.db.models.sla_rule import SLARule
 from app.db.models.escalation_matrix import EscalationMatrix
 from app.db.models.ownership_mapping import OwnershipMapping
+from app.db.models.working_hours_calendar import WorkingHoursCalendar
 
 # Expose models for SQLAlchemy registry
-__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule", "Holiday", "ConfigChangeHistory", "SLARule", "EscalationMatrix", "OwnershipMapping"]
+__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule", "Holiday", "ConfigChangeHistory", "SLARule", "EscalationMatrix", "OwnershipMapping", "WorkingHoursCalendar"]

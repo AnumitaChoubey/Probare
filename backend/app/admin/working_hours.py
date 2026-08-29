@@ -6,14 +6,15 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin._audit import log_config_change, serialize_model
 from app.db.models.working_hours_calendar import WorkingHoursCalendar
 from app.db.session import get_db
 
-from app.auth.dependencies import get_current_user  # noqa: confirm real path
-from app.rbac.dependencies import require_role  # noqa: confirm real path
+from app.auth.deps import get_current_user  
+from app.rbac.deps import require_role  
 
 router = APIRouter(prefix="/admin/working-hours", tags=["admin-working-hours"])
 
@@ -37,21 +38,23 @@ class WorkingHoursCreate(BaseModel):
 
 
 @router.get("", response_model=list[WorkingHoursOut])
-def list_working_hours(
+async def list_working_hours(
     region_code: Optional[str] = Query(default=None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    query = db.query(WorkingHoursCalendar)
+    query = select(WorkingHoursCalendar)
     if region_code:
         query = query.filter(WorkingHoursCalendar.region_code == region_code)
-    return query.order_by(WorkingHoursCalendar.region_code).all()
+    query = query.order_by(WorkingHoursCalendar.region_code)
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
 @router.post("", response_model=WorkingHoursOut, status_code=201)
-def upsert_working_hours(
+async def upsert_working_hours(
     payload: WorkingHoursCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(require_role("ADMIN")),
 ):
     """
@@ -60,7 +63,9 @@ def upsert_working_hours(
     place (still logged to config_change_history so there's an audit
     trail, just no old-row-preservation like the versioned configs).
     """
-    existing = db.query(WorkingHoursCalendar).filter(WorkingHoursCalendar.region_code == payload.region_code).first()
+    query = select(WorkingHoursCalendar).filter(WorkingHoursCalendar.region_code == payload.region_code)
+    result = await db.execute(query)
+    existing = result.scalars().first()
 
     old_value = serialize_model(existing) if existing else None
 
@@ -79,7 +84,7 @@ def upsert_working_hours(
         )
         db.add(row)
 
-    db.flush()
+    await db.flush()
 
     log_config_change(
         db,
@@ -90,6 +95,6 @@ def upsert_working_hours(
         changed_by_user_id=current_user.id,
     )
 
-    db.commit()
-    db.refresh(row)
+    await db.commit()
+    await db.refresh(row)
     return row
