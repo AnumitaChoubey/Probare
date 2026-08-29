@@ -27,7 +27,7 @@ from sqlalchemy.orm import Session
 from app.db.models.config_change_history import ConfigChangeHistory
 from app.db.session import get_db
 
-from app.auth.dependencies import get_current_user  # noqa: confirm real path, see dashboards/*.py
+from app.auth.deps import get_current_user
 
 router = APIRouter(prefix="/admin/config-history", tags=["admin-config-history"])
 

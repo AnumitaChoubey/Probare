@@ -1,10 +1,10 @@
-
 import uuid
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, model_validator
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin._audit import log_config_change, serialize_model
 from app.db.models.escalation_matrix import EscalationMatrix
@@ -48,35 +48,39 @@ class EscalationMatrixCreate(BaseModel):
 
 
 @router.get("", response_model=List[EscalationMatrixOut])
-def list_escalation_matrix(
+async def list_escalation_matrix(
     lob_id: Optional[uuid.UUID] = Query(default=None),
     active_only: bool = Query(default=True),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
-    query = db.query(EscalationMatrix)
+    query = select(EscalationMatrix)
     if lob_id is not None:
         query = query.filter(EscalationMatrix.lob_id == lob_id)
     if active_only:
         query = query.filter(EscalationMatrix.is_active.is_(True))
-    return query.order_by(EscalationMatrix.lob_id, EscalationMatrix.escalation_level).all()
+    
+    query = query.order_by(EscalationMatrix.lob_id, EscalationMatrix.escalation_level)
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
 @router.post("", response_model=EscalationMatrixOut, status_code=201)
-def create_escalation_level(
+async def create_escalation_level(
     payload: EscalationMatrixCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(require_role("ADMIN")),
 ):
-    collision = (
-        db.query(EscalationMatrix)
+    result = await db.execute(
+        select(EscalationMatrix)
         .filter(
             EscalationMatrix.lob_id == payload.lob_id,
             EscalationMatrix.escalation_level == payload.escalation_level,
             EscalationMatrix.is_active.is_(True),
         )
-        .first()
     )
+    collision = result.scalars().first()
+    
     if collision is not None:
         raise HTTPException(
             status_code=409,
@@ -93,7 +97,7 @@ def create_escalation_level(
         is_active=True,
     )
     db.add(new_row)
-    db.flush()
+    await db.flush()
 
     log_config_change(
         db,
@@ -104,6 +108,6 @@ def create_escalation_level(
         changed_by_user_id=current_user.id,
     )
 
-    db.commit()
-    db.refresh(new_row)
+    await db.commit()
+    await db.refresh(new_row)
     return new_row

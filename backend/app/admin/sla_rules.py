@@ -1,12 +1,11 @@
-
 import uuid
 from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin._audit import log_config_change, serialize_model
 from app.db.models.sla_rule import SLARule
@@ -44,12 +43,12 @@ class SLARuleCreate(BaseModel):
 
 #endpoints
 @router.get("", response_model=List[SLARuleOut])
-def list_sla_rules(
+async def list_sla_rules(
     lob_id: Optional[uuid.UUID] = Query(default=None),
     category_id: Optional[uuid.UUID] = Query(default=None),
     severity: Optional[str] = Query(default=None),
     active_only: bool = Query(default=True, description="Only rows with effective_to IS NULL"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
     filters = []
@@ -62,30 +61,34 @@ def list_sla_rules(
     if active_only:
         filters.append(SLARule.effective_to.is_(None))
 
-    query = db.query(SLARule)
+    query = select(SLARule)
     if filters:
         query = query.filter(and_(*filters))
-    return query.order_by(SLARule.effective_from.desc()).all()
+    query = query.order_by(SLARule.effective_from.desc())
+    
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
 @router.post("", response_model=SLARuleOut, status_code=201)
-def create_sla_rule(
+async def create_sla_rule(
     payload: SLARuleCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(require_role("ADMIN")),
 ):
     now = datetime.utcnow()
 
-    previous = (
-        db.query(SLARule)
+    result = await db.execute(
+        select(SLARule)
         .filter(
             SLARule.lob_id == payload.lob_id,
             SLARule.category_id == payload.category_id,
             SLARule.severity == payload.severity,
             SLARule.effective_to.is_(None),
         )
-        .first()
     )
+    previous = result.scalars().first()
+    
     old_value = None
     if previous is not None:
         old_value = serialize_model(previous)
@@ -102,7 +105,7 @@ def create_sla_rule(
         effective_to=None,
     )
     db.add(new_rule)
-    db.flush()  
+    await db.flush()  
 
     log_config_change(
         db,
@@ -113,6 +116,6 @@ def create_sla_rule(
         changed_by_user_id=current_user.id,
     )
 
-    db.commit()
-    db.refresh(new_rule)
+    await db.commit()
+    await db.refresh(new_rule)
     return new_rule
