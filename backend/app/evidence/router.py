@@ -4,10 +4,12 @@ from typing import Optional, List
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query, Response
 from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from app.db.session import get_db
 from app.db.models.evidence_file import EvidenceFile
+from app.db.models.evidence_rule import EvidenceRule
 from app.db.models.evidence_access_log import EvidenceAccessLog
 from app.evidence.storage import storage
 from app.evidence.schemas import (
@@ -18,13 +20,7 @@ from app.evidence.schemas import (
 
 router = APIRouter(tags=["Evidence"])
 
-ALLOWED_FILE_TYPES = {
-    "image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif",
-    "application/pdf", "text/plain", "text/csv",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-}
-MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024  # 25 MB
+# We will fetch dynamic rules from EvidenceRule instead of hardcoding
 
 @router.post("/errors/{error_id}/evidence", response_model=EvidenceFileResponse, status_code=201)
 async def upload_evidence(
@@ -32,7 +28,7 @@ async def upload_evidence(
     stage: str = Form("ORIGINAL_LOGGING"),
     uploaded_by_user_id: str = Form("user-default-1"),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     EVID-1: Upload evidence file attached to an error (or 'draft' for pre-error creation).
@@ -41,9 +37,17 @@ async def upload_evidence(
     if stage not in ["ORIGINAL_LOGGING", "REBUTTAL", "DECISION"]:
         raise HTTPException(status_code=400, detail="Invalid stage. Must be ORIGINAL_LOGGING, REBUTTAL, or DECISION.")
 
+    res = await db.execute(select(EvidenceRule).filter(EvidenceRule.id == 1))
+    rule = res.scalar_one_or_none()
+    max_size = rule.max_file_size_bytes if rule else 25 * 1024 * 1024
+    allowed_types = rule.allowed_file_types if rule else []
+
+    if allowed_types and file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail=f"File type '{file.content_type}' is not allowed.")
+
     content = await file.read()
-    if len(content) > MAX_FILE_SIZE_BYTES:
-        raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size of 25MB.")
+    if len(content) > max_size:
+        raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size.")
 
     storage_uri, checksum, file_size = storage.save_file(file.filename, content)
 
@@ -67,8 +71,8 @@ async def upload_evidence(
     )
 
     db.add(evidence)
-    db.commit()
-    db.refresh(evidence)
+    await db.commit()
+    await db.refresh(evidence)
 
     return evidence
 
@@ -78,7 +82,7 @@ async def upload_draft_evidence(
     stage: str = Form("ORIGINAL_LOGGING"),
     uploaded_by_user_id: str = Form("user-default-1"),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Pre-error upload path allowing Person 1's New Error Form to attach files before error_id is issued.
@@ -93,36 +97,39 @@ async def upload_draft_evidence(
 
 
 @router.post("/internal/webhooks/malware-scan-result")
-def malware_scan_webhook(payload: MalwareScanWebhookRequest, db: Session = Depends(get_db)):
+async def malware_scan_webhook(payload: MalwareScanWebhookRequest, db: AsyncSession = Depends(get_db)):
     """
     EVID-2: Internal malware scanner result webhook callback.
     """
     if payload.status not in ["CLEAN", "INFECTED", "FAILED"]:
         raise HTTPException(status_code=400, detail="Invalid scan status")
 
-    evidence = db.query(EvidenceFile).filter_by(id=payload.evidence_id).first()
+    res = await db.execute(select(EvidenceFile).filter(EvidenceFile.id == payload.evidence_id))
+    evidence = res.scalar_one_or_none()
     if not evidence:
         raise HTTPException(status_code=404, detail="Evidence file not found")
 
     evidence.malware_scan_status = payload.status
-    db.commit()
+    await db.commit()
     return {"message": "Malware scan status updated", "id": evidence.id, "status": evidence.malware_scan_status}
 
 
 @router.get("/errors/{error_id}/evidence", response_model=EvidenceListGrouped)
-def list_evidence_for_error(
+async def list_evidence_for_error(
     error_id: str,
     stage: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     EVID-3: Get evidence files for an error, grouped by stage.
     """
-    query = db.query(EvidenceFile).filter(EvidenceFile.error_id == error_id)
+    query = select(EvidenceFile).filter(EvidenceFile.error_id == error_id)
     if stage:
         query = query.filter(EvidenceFile.stage == stage)
 
-    files = query.order_by(EvidenceFile.uploaded_at.desc()).all()
+    query = query.order_by(EvidenceFile.uploaded_at.desc())
+    res = await db.execute(query)
+    files = res.scalars().all()
 
     auditor_evidence = [f for f in files if f.stage == "ORIGINAL_LOGGING"]
     rebuttal_evidence = [f for f in files if f.stage == "REBUTTAL"]
@@ -136,16 +143,17 @@ def list_evidence_for_error(
 
 
 @router.get("/evidence/{evidence_id}/download")
-def download_evidence(
+async def download_evidence(
     evidence_id: str,
     user_id: str = Query("user-default-1"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     EVID-4: Download or stream evidence file.
     Hard blocks with 403 if malware_scan_status != 'CLEAN'. Logs access log.
     """
-    evidence = db.query(EvidenceFile).filter_by(id=evidence_id).first()
+    res = await db.execute(select(EvidenceFile).filter(EvidenceFile.id == evidence_id))
+    evidence = res.scalar_one_or_none()
     if not evidence:
         raise HTTPException(status_code=404, detail="Evidence file not found")
 
@@ -163,7 +171,7 @@ def download_evidence(
         accessed_at=datetime.utcnow(),
     )
     db.add(log_entry)
-    db.commit()
+    await db.commit()
 
     filepath = storage.get_file_path(evidence.storage_uri)
     if not os.path.exists(filepath):
@@ -181,17 +189,28 @@ async def supersede_evidence(
     evidence_id: str,
     uploaded_by_user_id: str = Form("user-default-1"),
     file: UploadFile = File(...),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     EVID-5: Supersede an existing evidence file with a corrected replacement.
     Never deletes the old row — flips old is_current_version=False and sets supersedes_evidence_id on new row.
     """
-    old_evidence = db.query(EvidenceFile).filter_by(id=evidence_id).first()
+    res = await db.execute(select(EvidenceFile).filter(EvidenceFile.id == evidence_id))
+    old_evidence = res.scalar_one_or_none()
     if not old_evidence:
         raise HTTPException(status_code=404, detail="Original evidence file not found")
 
+    res_rule = await db.execute(select(EvidenceRule).filter(EvidenceRule.id == 1))
+    rule = res_rule.scalar_one_or_none()
+    max_size = rule.max_file_size_bytes if rule else 25 * 1024 * 1024
+    allowed_types = rule.allowed_file_types if rule else []
+
+    if allowed_types and file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail=f"File type '{file.content_type}' is not allowed.")
+
     content = await file.read()
+    if len(content) > max_size:
+        raise HTTPException(status_code=400, detail=f"File exceeds maximum allowed size.")
     storage_uri, checksum, file_size = storage.save_file(file.filename, content)
 
     # Flip old evidence version flag
@@ -214,7 +233,7 @@ async def supersede_evidence(
     )
 
     db.add(new_evidence)
-    db.commit()
-    db.refresh(new_evidence)
+    await db.commit()
+    await db.refresh(new_evidence)
 
     return new_evidence
