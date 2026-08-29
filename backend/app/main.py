@@ -60,9 +60,9 @@ app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
 # app.include_router(users_router,       prefix="/admin/users", tags=["Admin"])
 
 # ── P2: Rebuttal & Decision routers — added by Person 2 (one line each) ──────
-# from app.rebuttal.routes import router as rebuttal_router
+from app.rebuttal.router import router as rebuttal_router
 # from app.decision.routes import router as decision_router
-# app.include_router(rebuttal_router,  prefix="/errors", tags=["Rebuttal"])
+app.include_router(rebuttal_router, tags=["Rebuttal"])
 # app.include_router(decision_router,  prefix="/errors", tags=["Decision"])
 
 # ── P3: Evidence & Notifications routers — added by Person 3 ─────────────────
