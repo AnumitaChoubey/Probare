@@ -1,21 +1,21 @@
-
 import uuid
 from datetime import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.admin._audit import log_config_change, serialize_model
 from app.db.models.ownership_mapping import OwnershipMapping
 from app.db.session import get_db
 
-from app.auth.deps import get_current_user  # noqa: assumed path
-from app.rbac.deps import require_role       # noqa: assumed path
+from app.auth.deps import get_current_user
+from app.rbac.deps import require_role
 
 router = APIRouter(prefix="/admin/ownership-mapping", tags=["admin-ownership-mapping"])
+
 class OwnershipMappingOut(BaseModel):
     id: uuid.UUID
     lob_id: uuid.UUID
@@ -29,7 +29,6 @@ class OwnershipMappingOut(BaseModel):
     class Config:
         from_attributes = True
 
-
 class OwnershipMappingCreate(BaseModel):
     lob_id: uuid.UUID
     category_id: uuid.UUID
@@ -37,18 +36,12 @@ class OwnershipMappingCreate(BaseModel):
     default_owner_team_ref: Optional[uuid.UUID] = None
     default_owner_manager_user_id: Optional[uuid.UUID] = None
 
-
-
-
-
-
-
 @router.get("", response_model=List[OwnershipMappingOut])
-def list_ownership_mapping(
+async def list_ownership_mapping(
     lob_id: Optional[uuid.UUID] = Query(default=None),
     category_id: Optional[uuid.UUID] = Query(default=None),
     active_only: bool = Query(default=True),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
     filters = []
@@ -59,29 +52,33 @@ def list_ownership_mapping(
     if active_only:
         filters.append(OwnershipMapping.effective_to.is_(None))
 
-    query = db.query(OwnershipMapping)
+    query = select(OwnershipMapping)
     if filters:
         query = query.filter(and_(*filters))
-    return query.order_by(OwnershipMapping.effective_from.desc()).all()
+    query = query.order_by(OwnershipMapping.effective_from.desc())
+    
+    result = await db.execute(query)
+    return result.scalars().all()
 
 
 @router.post("", response_model=OwnershipMappingOut, status_code=201)
-def create_ownership_mapping(
+async def create_ownership_mapping(
     payload: OwnershipMappingCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     current_user=Depends(require_role("ADMIN")),
 ):
     now = datetime.utcnow()
 
-    previous = (
-        db.query(OwnershipMapping)
+    result = await db.execute(
+        select(OwnershipMapping)
         .filter(
             OwnershipMapping.lob_id == payload.lob_id,
             OwnershipMapping.category_id == payload.category_id,
             OwnershipMapping.effective_to.is_(None),
         )
-        .first()
     )
+    previous = result.scalars().first()
+    
     old_value = None
     if previous is not None:
         old_value = serialize_model(previous)
@@ -98,7 +95,7 @@ def create_ownership_mapping(
         effective_to=None,
     )
     db.add(new_mapping)
-    db.flush()
+    await db.flush()
 
     log_config_change(
         db,
@@ -109,6 +106,6 @@ def create_ownership_mapping(
         changed_by_user_id=current_user.id,
     )
 
-    db.commit()
-    db.refresh(new_mapping)
+    await db.commit()
+    await db.refresh(new_mapping)
     return new_mapping

@@ -11,13 +11,13 @@ import uuid
 from datetime import datetime
 from typing import Any, Optional
 
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.config_change_history import ConfigChangeHistory
 
 
 def log_config_change(
-    db: Session,
+    db: AsyncSession,
     *,
     config_entity: str,
     entity_id: uuid.UUID,
