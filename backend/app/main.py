@@ -96,6 +96,8 @@ app.include_router(escalation_router,     tags=["Admin"])
 # ── P3: Notification templates — added by Person 3 ───────────────────────────
 from app.admin.notification_templates import router as notif_templates_router
 app.include_router(notif_templates_router, tags=["Admin"])
+from app.admin.evidence_rules import router as evidence_rules_router
+app.include_router(evidence_rules_router, tags=["Admin"])
 
 
 @app.get("/health", tags=["Health"])
