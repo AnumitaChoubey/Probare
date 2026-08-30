@@ -94,7 +94,9 @@ app.include_router(escalation_router,     tags=["Admin"])
 # app.include_router(working_hours_router,  prefix="/admin/working-hours",  tags=["Admin"])
 app.include_router(holidays_router, tags=["Admin"])
 # app.include_router(config_history_router, prefix="/admin/config-history", tags=["Admin"])
+from app.admin import working_hours
 
+app.include_router(working_hours.router)
 # ── P3: Notification templates — added by Person 3 ───────────────────────────
 from app.admin.notification_templates import router as notif_templates_router
 app.include_router(notif_templates_router, tags=["Admin"])
