@@ -70,7 +70,7 @@ app.include_router(rebuttal_router, tags=["Rebuttal"])
 # ── P3: Evidence & Notifications routers — added by Person 3 ─────────────────
 from app.evidence.router import router as evidence_router
 from app.notifications.router import router as notifications_router
-app.include_router(evidence_router,       prefix="/errors",        tags=["Evidence"])
+app.include_router(evidence_router, tags=["Evidence"])
 app.include_router(notifications_router,  tags=["Notifications"])
 
 # ── P4: Search, Dashboards, Reports, Admin routers — added by Person 4 ────────
