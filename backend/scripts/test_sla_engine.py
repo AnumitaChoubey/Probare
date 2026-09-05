@@ -1,6 +1,9 @@
 import asyncio
 import logging
 import uuid
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.jobs.sla_engine import run_sla_engine
 from app.db.session import async_session_maker
 from app.db.models.error import Error
@@ -12,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 
 logging.basicConfig(level=logging.INFO)
 
-async def test_engine():
+async def run_engine():
     print("Forcing SLA breach on an error...")
     
     async with async_session_maker() as db:
@@ -59,4 +62,4 @@ async def test_engine():
         print(f"SLA State Dict: {error.sla_state}")
 
 if __name__ == "__main__":
-    asyncio.run(test_engine())
+    asyncio.run(run_engine())

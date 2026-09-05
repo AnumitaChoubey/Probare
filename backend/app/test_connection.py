@@ -1,8 +1,9 @@
 import asyncio
 from app.db.session import engine
 
-async def test():
+async def run_test_connection():
     async with engine.connect() as conn:
         print("✅ Connected successfully!")
 
-asyncio.run(test())
+if __name__ == "__main__":
+    asyncio.run(run_test_connection())
