@@ -57,3 +57,6 @@ frontend/.env
 *.sw?
 .DS_Store
 Thumbs.db
+
+# Project Documentation
+PROBARE_COMPREHENSIVE_DOCUMENTATION.md
