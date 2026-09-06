@@ -30,6 +30,19 @@ import ReportsExport from './features/person4_dashboards_admin/reports/ReportsEx
 // import { UsersRoles } from './features/person4_dashboards_admin/admin/UsersRoles'
 // import { ConfigHistory } from './features/person4_dashboards_admin/admin/ConfigHistory'
 
+import { useAuth } from './features/person1_foundation/useAuth'
+
+function RoleBasedRedirect() {
+  const { user } = useAuth()
+  const roles = user?.roles || []
+  
+  if (roles.includes('OPS_MGR') || roles.includes('OPS_AGT')) return <Navigate to="/ops-dashboard" replace />
+  if (roles.includes('QAL')) return <Navigate to="/team-dashboard" replace />
+  if (roles.includes('QA_GOV') || roles.includes('ADMIN') || roles.includes('AUDITOR_RO')) return <Navigate to="/leadership-dashboard" replace />
+  
+  return <Navigate to="/dashboard" replace />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -39,7 +52,7 @@ export default function App() {
 
         {/* ── P1: Foundation routes ─────────────────────────────────────────── */}
         <Route element={<AppShell />}>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<RoleBasedRedirect />} />
           <Route path="/dashboard"    element={<AuditorDashboard />} />
           <Route path="/errors/new"   element={<LogNewErrorForm />} />
           <Route path="/errors/:id"   element={<ErrorDetail />} />

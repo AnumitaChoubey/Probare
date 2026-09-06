@@ -32,13 +32,51 @@ function SingleSelect({ label, options, width = 150 }: { label: string; options:
   );
 }
 
+import { useAuth } from "../person1_foundation/useAuth";
+
 export default function ReportsExport() {
   const [format, setFormat] = useState("CSV");
   const [exportState, setExportState] = useState<"idle" | "running" | "done">("idle");
+  const { token } = useAuth();
 
-  const runExport = () => {
+  const runExport = async () => {
     setExportState("running");
-    setTimeout(() => setExportState("done"), 1800);
+    try {
+      const response = await fetch("http://localhost:8000/reports/export", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          dashboard: "reports",
+          filters: {},
+          format: "csv"
+        })
+      });
+
+      if (!response.ok) {
+        console.error("Export failed");
+        setExportState("idle");
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "qems_report_export.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      
+      setExportState("done");
+      setTimeout(() => setExportState("idle"), 3000);
+    } catch (error) {
+      console.error("Export error:", error);
+      setExportState("idle");
+    }
   };
 
   return (

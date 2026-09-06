@@ -115,44 +115,50 @@ async def create_error(
     db: AsyncSession = Depends(get_db),
     current_user = Depends(get_current_user)
 ):
-    now = datetime.utcnow()
-    initial_status = "DRAFT"
-    new_error = Error(
-        id=uuid.uuid4(),
-        qa_error_id="DRAFT", # Temporary until submitted
-        lob_id=payload.lob_id,
-        category_id=payload.category_id,
-        sub_category_id=payload.sub_category_id,
-        severity=payload.severity,
-        status=initial_status,
-        transaction_reference=payload.transaction_reference,
-        logged_by_user_id=current_user.id,
-        owner_user_id=None,
-        date_of_occurrence=payload.date_of_occurrence,
-        date_of_detection=payload.date_of_detection,
-        description=payload.description,
-        initial_root_cause=payload.initial_root_cause,
-        internal_notes=payload.internal_notes if not is_ops_user(current_user) else None,
-        client_impact_flag=payload.client_impact_flag,
-        sla_rebuttal_window_hours_snapshot=0,
-        sla_decision_window_hours_snapshot=0,
-        sla_clock_started_at=None,
-        current_escalation_level=0,
-        is_draft=True,
-        created_at=now,
-        updated_at=now,
-        submitted_at=None,
-    )
-    db.add(new_error)
-    await db.flush()
-    
-    if not payload.is_draft:
-        # If immediate submit, call submit logic
-        return await submit_error(request, new_error.id, db, current_user)
+    try:
+        now = datetime.utcnow()
+        initial_status = "DRAFT"
+        new_error = Error(
+            id=uuid.uuid4(),
+            qa_error_id=f"DRAFT-{uuid.uuid4().hex[:8]}", # Temporary unique ID until submitted
+            lob_id=payload.lob_id,
+            category_id=payload.category_id,
+            sub_category_id=payload.sub_category_id,
+            severity=payload.severity,
+            status=initial_status,
+            transaction_reference=payload.transaction_reference,
+            logged_by_user_id=current_user.id,
+            owner_user_id=None,
+            date_of_occurrence=payload.date_of_occurrence,
+            date_of_detection=payload.date_of_detection,
+            description=payload.description,
+            initial_root_cause=payload.initial_root_cause,
+            internal_notes=payload.internal_notes if not is_ops_user(current_user) else None,
+            client_impact_flag=payload.client_impact_flag,
+            sla_rebuttal_window_hours_snapshot=0,
+            sla_decision_window_hours_snapshot=0,
+            sla_clock_started_at=None,
+            current_escalation_level=0,
+            is_draft=True,
+            created_at=now,
+            updated_at=now,
+            submitted_at=None,
+        )
+        db.add(new_error)
+        await db.flush()
         
-    await db.commit()
-    await db.refresh(new_error)
-    return ErrorResponse.model_validate(new_error) if not is_ops_user(current_user) else ErrorResponseOps.model_validate(new_error)
+        if not payload.is_draft:
+            # If immediate submit, call submit logic
+            return await submit_error(request, new_error.id, db, current_user)
+            
+        await db.commit()
+        await db.refresh(new_error, attribute_names=['decisions'])
+        return ErrorResponse.model_validate(new_error) if not is_ops_user(current_user) else ErrorResponseOps.model_validate(new_error)
+    except Exception as e:
+        import traceback
+        with open("error_traceback.txt", "w") as f:
+            f.write(traceback.format_exc())
+        raise e
 
 @router.patch("/{error_id}/draft")
 async def update_draft(error_id: uuid.UUID, payload: ErrorDraftUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
@@ -175,13 +181,19 @@ async def update_draft(error_id: uuid.UUID, payload: ErrorDraftUpdate, db: Async
         
     error.updated_at = datetime.utcnow()
     await db.commit()
-    await db.refresh(error)
+    await db.refresh(error, attribute_names=['decisions'])
     
     return ErrorResponse.model_validate(error) if not is_ops_user(current_user) else ErrorResponseOps.model_validate(error)
 
 @router.post("/{error_id}/submit")
 async def submit_error(request: Request, error_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
-    res = await db.execute(select(Error).filter(Error.id == error_id))
+    from sqlalchemy.orm import selectinload
+    res = await db.execute(
+        select(Error)
+        .options(selectinload(Error.decisions))
+        .filter(Error.id == error_id)
+        .execution_options(populate_existing=True)
+    )
     error = res.scalar_one_or_none()
     
     if not error:
@@ -288,16 +300,22 @@ async def update_status(error_id: uuid.UUID, payload: ErrorStatusUpdate, db: Asy
 
 @router.get("/{error_id}/history", response_model=List[ErrorHistoryResponse])
 async def get_error_history(error_id: uuid.UUID, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
-    # Verify error exists and user has access
-    res = await db.execute(select(Error).filter(Error.id == error_id))
-    error = res.scalar_one_or_none()
-    if not error:
-        raise HTTPException(status_code=404, detail="Error not found")
-        
-    # Fetch history in descending order
-    history_res = await db.execute(
-        select(ErrorStatusHistory)
-        .filter(ErrorStatusHistory.error_id == error_id)
-        .order_by(ErrorStatusHistory.occurred_at.desc())
-    )
-    return history_res.scalars().all()
+    try:
+        # Verify error exists and user has access
+        res = await db.execute(select(Error).filter(Error.id == error_id))
+        error = res.scalar_one_or_none()
+        if not error:
+            raise HTTPException(status_code=404, detail="Error not found")
+            
+        # Fetch history in descending order
+        history_res = await db.execute(
+            select(ErrorStatusHistory)
+            .filter(ErrorStatusHistory.error_id == error_id)
+            .order_by(ErrorStatusHistory.occurred_at.desc())
+        )
+        return history_res.scalars().all()
+    except Exception as e:
+        import traceback
+        with open("error_traceback.txt", "w") as f:
+            f.write(traceback.format_exc())
+        raise e
