@@ -131,7 +131,7 @@ class ErrorDraftUpdate(BaseModel):
 
 class ErrorStatusUpdate(BaseModel):
     to_status: str
-    reason: str
+    reason: Optional[str] = None
 
 class ErrorHistoryResponse(BaseModel):
     id: uuid.UUID
