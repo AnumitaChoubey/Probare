@@ -4,15 +4,16 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     DEBUG: bool = True
     
-    # Postgres
+    # Postgres — all values must come from environment / .env file
     POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_PASSWORD: str = "change_me_in_production"
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: str = "5433"
     POSTGRES_DB: str = "qems_dev"
     
-    # Auth
-    SECRET_KEY: str = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+    # Auth — REQUIRED in production: generate with `openssl rand -hex 32`
+    # Never commit a real value here; always override via .env
+    SECRET_KEY: str = "CHANGE_ME_GENERATE_WITH_OPENSSL_RAND_HEX_32"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
     # Internal Services

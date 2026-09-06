@@ -1,5 +1,6 @@
 # Python / Backend
 __pycache__/
+**/__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -22,7 +23,12 @@ wheels/
 *.egg
 venv/
 .venv/
+
+# Alembic — never commit the ini (it may embed DB URLs)
 alembic.ini
+
+# Pytest cache
+.pytest_cache/
 
 # Node / Frontend
 node_modules/
@@ -33,10 +39,13 @@ yarn-debug.log*
 yarn-error.log*
 .eslintcache
 
-# Environment variables
+# ===== ENVIRONMENT VARIABLES — NEVER COMMIT =====
+# Only .env.example is safe to commit (with placeholder values)
 .env
 .env.local
 .env.*.local
+backend/.env
+frontend/.env
 
 # IDE / OS
 .vscode/
@@ -48,3 +57,6 @@ yarn-error.log*
 *.sw?
 .DS_Store
 Thumbs.db
+
+# Project Documentation
+PROBARE_COMPREHENSIVE_DOCUMENTATION.md
