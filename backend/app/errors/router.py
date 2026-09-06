@@ -223,7 +223,7 @@ async def submit_error(request: Request, error_id: uuid.UUID, db: AsyncSession =
     db.add(history)
     
     await db.commit()
-    await db.refresh(error)
+    await db.refresh(error, attribute_names=["decisions"])
     
     # We could return a warning header if no owner was found, but JSON is fine too
     if not error.owner_user_id:

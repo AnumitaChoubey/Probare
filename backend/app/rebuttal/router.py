@@ -388,3 +388,51 @@ async def rebuttal_correction(
     )
 
     return {"message": "Rebuttal correction window opened", "reason": payload.reason}
+
+from sqlalchemy import select
+from app.db.models.rebuttal import Rebuttal
+from app.db.models.decision import Decision
+
+@router.get("/{error_id}/rebuttals")
+async def get_rebuttals(error_id: str, db=Depends(get_db), current_user=Depends(get_current_user)):
+    result = await db.execute(
+        select(Rebuttal).where(Rebuttal.error_id == error_id).order_by(Rebuttal.cycle_number)
+    )
+    rebuttals = result.scalars().all()
+    if not rebuttals:
+        return []
+    return [
+        {
+            "id": str(r.id),
+            "error_id": str(r.error_id),
+            "cycle_number": r.cycle_number,
+            "justification": r.justification,
+            "evidence_file_ids": [str(fid) for fid in (r.evidence_file_ids or [])],
+            "submitted_by_user_id": str(r.submitted_by_user_id),
+            "submitted_at": r.submitted_at,
+        }
+        for r in rebuttals
+    ]
+
+
+@router.get("/{error_id}/decisions")
+async def get_decisions(error_id: str, db=Depends(get_db), current_user=Depends(get_current_user)):
+    result = await db.execute(
+        select(Decision).where(Decision.error_id == error_id).order_by(Decision.cycle_number)
+    )
+    decisions = result.scalars().all()
+    if not decisions:
+        return []
+    return [
+        {
+            "id": str(d.id),
+            "error_id": str(d.error_id),
+            "cycle_number": d.cycle_number,
+            "decision": d.decision,
+            "rationale": d.rationale,
+            "partial_breakdown": d.partial_breakdown,
+            "decided_by_user_id": str(d.decided_by_user_id),
+            "decided_at": d.decided_at,
+        }
+        for d in decisions
+    ]
