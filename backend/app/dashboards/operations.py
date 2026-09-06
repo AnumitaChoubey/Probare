@@ -11,11 +11,13 @@ from datetime import datetime, timedelta
 from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from app.core.config import settings  # assumed: exposes ERRORS_SERVICE_BASE_URL
 from app.auth.deps import get_current_user
 
 router = APIRouter(prefix="/dashboards", tags=["dashboards-operations"])
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 CLOSED_STATUSES = {"CLOSED_UPHELD", "CLOSED_OVERTURNED", "CLOSED_PARTIAL"}
 ESCALATED_STATUS = "SLA_BREACHED_ESCALATED"
@@ -80,12 +82,13 @@ async def _fetch_errors(auth_header: str, owner_manager_user_id: Optional[str]) 
 @router.get("/operations", response_model=OpsDashboardResponse)
 async def get_operations_dashboard(
     current_user=Depends(get_current_user),
+    token: str = Depends(oauth2_scheme),
 ):
     
     errors = await _fetch_errors(
-        auth_header=f"Bearer {current_user.token}" if hasattr(current_user, "token") else "",
-        owner_manager_user_id=str(current_user.user_id),
-    )
+    auth_header=f"Bearer {token}",
+    owner_manager_user_id=str(current_user.id),
+)
 
     open_count = 0
     closed_count = 0
