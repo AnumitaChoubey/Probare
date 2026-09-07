@@ -1,16 +1,14 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  LineChart, Line, AreaChart, Area, PieChart, Pie, XAxis, YAxis, CartesianGrid,
-  Tooltip as RTooltip, ResponsiveContainer, Cell, BarChart, Bar, ReferenceDot,
+  LineChart, Line, PieChart, Pie, XAxis, YAxis, CartesianGrid,
+  Tooltip as RTooltip, ResponsiveContainer, Cell, BarChart, Bar,
 } from "recharts";
 import {
   ChevronDown, AlertTriangle, ListChecks,
   Clock, Siren, RotateCcw, ArrowUpRight, ArrowDownRight, Flame,
 } from "lucide-react";
-import { useAuth } from "../../person1_foundation/useAuth";
 
-
-interface SlaRailProps { pct: number; state: "red" | "amber" | "green"; }
+interface SlaRailProps { pct: number; state: string; }
 interface ComplianceRingProps { pct: number; }
 interface KpiCardProps {
   label: string; value: string; delta: string; up: boolean;
@@ -37,32 +35,17 @@ const T = {
   hair: "#E7E1D2",
 };
 
-const FONT = "'Inter', 'Avenir', 'Segoe UI', ui-sans-serif, system-ui";
-interface MonthlyTrendPoint {
-  month: string;
-  logged: number;
-  closed: number;
-  reopened: number;
-}
+/* ---------------------------------------------------------------
+   REAL API TYPES — matches operations.py's OpsDashboardResponse
+   exactly. If the backend field names ever change, this is the
+   only place that needs updating for the 4 wired widgets below.
+--------------------------------------------------------------- */
+interface MonthlyTrendPoint { month: string; logged: number; closed: number; reopened: number; }
+interface SeveritySlice { name: string; value: number; }
+interface DepartmentRow { dept: string; open: number; closed: number; avg_resolution_days: number; }
+interface EscalationTrendPoint { month: string; escalations: number; }
 
-interface SeveritySlice {
-  name: string;
-  value: number;
-}
-
-interface DepartmentRow {
-  dept: string;
-  open: number;
-  closed: number;
-  avg_resolution_days: number;
-}
-
-interface EscalationTrendPoint {
-  month: string;
-  escalations: number;
-}
-
-interface OpsDashboardData {
+interface OpsDashboardApiResponse {
   open_count: number;
   closed_count: number;
   overdue_count: number;
@@ -75,18 +58,26 @@ interface OpsDashboardData {
   escalation_trend: EscalationTrendPoint[];
 }
 
+// TODO: confirm this matches your actual backend URL / Vite proxy setup.
+// If vite.config.ts proxies /dashboards to your FastAPI server, this can
+// just be a relative path ("/dashboards/operations") instead.
+const API_BASE = "http://localhost:8000";
 
-
-
-
-const criticalErrors: Array<{ id: string; desc: string; dept: string; owner: string; pct: number; state: "red" | "amber" | "green"; due: string; }> = [
+/* ---------------------------------------------------------------
+   MOCK DATA — kept ONLY for the 3 widgets the real endpoint doesn't
+   cover yet: Needs Immediate Attention (individual error rows),
+   Owner Workload (per-owner breakdown), Escalation Queue (individual
+   escalated error rows). These need either an extended backend
+   response or a second fetch to raw GET /errors — flag to Charan,
+   don't silently leave these looking wired when they aren't.
+--------------------------------------------------------------- */
+const criticalErrors = [
   { id: "ERR-2291", desc: "Duplicate payout on claim batch #4471", dept: "Claims Ops", owner: "R. Iyer", pct: 96, state: "red", due: "1h 12m" },
-  { id: "ERR-2287", desc: "Missing KYC attestation, retail onboarding", dept: "Compliance", owner: "Fenwick", pct: 91, state: "red", due: "2h 40m" },
+  { id: "ERR-2287", desc: "Missing KYC attestation, retail onboarding", dept: "Compliance", owner: "M. Fenwick", pct: 91, state: "red", due: "2h 40m" },
   { id: "ERR-2280", desc: "Rate mismatch on renewal quote set", dept: "Underwriting", owner: "S. Okafor", pct: 84, state: "amber", due: "6h 05m" },
   { id: "ERR-2274", desc: "Data lag, nightly reconciliation feed", dept: "Finance Ops", owner: "T. Alvarez", pct: 78, state: "amber", due: "9h 20m" },
   { id: "ERR-2266", desc: "Incorrect tax code on invoice run", dept: "Finance Ops", owner: "R. Iyer", pct: 71, state: "amber", due: "13h 50m" },
 ];
-
 
 const owners = [
   { name: "R. Iyer", value: 21 },
@@ -104,10 +95,6 @@ const escalations = [
 
 const stateColor = (s: string): string => (s === "red" ? T.red : s === "amber" ? T.amber : T.green);
 const stateSoft = (s: string): string => (s === "red" ? T.redSoft : s === "amber" ? T.amberSoft : T.greenSoft);
-
-/* ---------------------------------------------------------------
-   SUBCOMPONENTS — all inline-styled
---------------------------------------------------------------- */
 
 function SlaRail({ pct, state }: SlaRailProps) {
   return (
@@ -144,19 +131,11 @@ function KpiCard({ label, value, delta, up, icon: Icon, warn }: KpiCardProps) {
   return (
     <div style={{ borderRadius: 16, padding: 20, display: "flex", flexDirection: "column", gap: 16, background: T.card, border: `1px solid ${T.hair}` }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <div style={{
-          height: 36, width: 36, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
-          background: warn ? T.redSoft : T.beige, color: warn ? T.red : T.gold,
-        }}>
+        <div style={{ height: 36, width: 36, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", background: warn ? T.redSoft : T.beige, color: warn ? T.red : T.gold }}>
           <Icon size={17} strokeWidth={1.8} />
         </div>
-        <div style={{
-          display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 500,
-          padding: "4px 8px", borderRadius: 999,
-          color: up ? T.red : T.green, background: up ? T.redSoft : T.greenSoft,
-        }}>
-          {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-          {delta}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, fontWeight: 500, padding: "4px 8px", borderRadius: 999, color: up ? T.red : T.green, background: up ? T.redSoft : T.greenSoft }}>
+          {up ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {delta}
         </div>
       </div>
       <div>
@@ -169,158 +148,77 @@ function KpiCard({ label, value, delta, up, icon: Icon, warn }: KpiCardProps) {
 
 function FilterChip({ label }: FilterChipProps) {
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "8px 12px",
-      borderRadius: 8, cursor: "pointer", background: T.card, border: `1px solid ${T.hair}`, color: T.ink,
-    }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, padding: "8px 12px", borderRadius: 8, cursor: "pointer", background: T.card, border: `1px solid ${T.hair}`, color: T.ink }}>
       {label} <ChevronDown size={13} color={T.slate} />
     </div>
   );
 }
 
-/* ---------------------------------------------------------------
-   MAIN COMPONENT
---------------------------------------------------------------- */
-
 export default function OpsDashboard() {
-  const { token } = useAuth();
-
-  const [data, setData] = useState<OpsDashboardData | null>(null);
+  const [data, setData] = useState<OpsDashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token) {
-      setError("You must be logged in to view the operations dashboard.");
-      setLoading(false);
-      return;
-    }
+    const token = localStorage.getItem("qems_token");
+    fetch(`${API_BASE}/dashboards/operations`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        return res.json();
+      })
+      .then((json: OpsDashboardApiResponse) => setData(json))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
-    const loadDashboard = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const response = await fetch(
-          "http://localhost:8000/dashboards/operations",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to load operations dashboard (${response.status})`
-          );
-        }
-
-        const result: OpsDashboardData = await response.json();
-
-        setData(result);
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Failed to load operations dashboard"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDashboard();
-  }, [token]);
-
-  const maxDept = useMemo(
-    () =>
-      Math.max(
-        ...(data?.department_breakdown ?? []).map((d) => d.open),
-        1
-      ),
-    [data]
-  );
-
-  const peakMonth = useMemo(() => {
-    if (!data?.monthly_trend?.length) return null;
-
-    return data.monthly_trend.reduce(
-      (max, cur) => (cur.logged > max.logged ? cur : max),
-      data.monthly_trend[0]
-    );
-  }, [data]);
-
-  const severity = useMemo(() => {
-    const colors = [T.red, T.amber, "#7FA8C9", T.navy];
-
-    return (data?.severity_breakdown ?? []).map((item, index) => ({
-      ...item,
-      color: colors[index % colors.length],
-    }));
+  const maxDept = useMemo(() => {
+    if (!data?.department_breakdown?.length) return 1;
+    return Math.max(...data.department_breakdown.map((d) => d.open + d.closed));
   }, [data]);
 
   if (loading) {
-    return (
-      <div
-        style={{
-          padding: 40,
-          background: T.cream,
-          minHeight: "100%",
-          fontFamily: FONT,
-        }}
-      >
-        Loading operations dashboard...
-      </div>
-    );
+    return <div style={{ padding: 40, textAlign: "center", color: T.slate, fontFamily: "'Inter', sans-serif" }}>Loading dashboard…</div>;
   }
 
   if (error || !data) {
     return (
-      <div
-        style={{
-          padding: 40,
-          background: T.cream,
-          minHeight: "100%",
-          fontFamily: FONT,
-        }}
-      >
-        <div style={{ color: T.red, fontWeight: 600 }}>
-          Unable to load Operations Dashboard
-        </div>
-
-        <div style={{ marginTop: 8, color: T.slate }}>
-          {error ?? "No dashboard data available."}
-        </div>
+      <div style={{ padding: 40, textAlign: "center", color: T.red, fontFamily: "'Inter', sans-serif" }}>
+        Couldn't load dashboard data{error ? `: ${error}` : ""}. Check that the backend is running and the auth token is valid.
       </div>
     );
   }
 
-  // NOTE: no <header> here on purpose. AppShell (Person 1's shared shell) already
-  // renders the app's real top nav + sidebar around every routed page — this
-  // component only needs to return its own page CONTENT, not a second nav bar.
-  // If you ever need this dashboard to render standalone (e.g. outside AppShell,
-  // for a design preview), that's what the earlier full-header version was for.
+  // Real KPI tiles, built from the live response instead of hardcoded values.
+  const kpis: KpiCardProps[] = [
+    { label: "Escalated Issues", value: String(data.escalated_count), delta: "—", up: true, icon: Siren, warn: true },
+    { label: "Overdue Errors", value: String(data.overdue_count), delta: "—", up: true, icon: AlertTriangle, warn: true },
+    { label: "Open Errors", value: String(data.open_count), delta: "—", up: false, icon: ListChecks, warn: false },
+    { label: "Avg. Resolution Time", value: `${data.avg_resolution_days} days`, delta: "—", up: false, icon: Clock, warn: false },
+    { label: "Closed Errors", value: String(data.closed_count), delta: "—", up: true, icon: RotateCcw, warn: false },
+  ];
+  // NOTE: "delta" (vs. last period trend %) isn't in the backend response
+  // yet — showing "—" honestly instead of a fabricated number. Flag to
+  // Charan if period-over-period comparison is wanted here.
 
   return (
-    <div style={{ width: "100%", minHeight: "100%", background: T.cream, fontFamily: FONT }}>
-      <main style={{ padding: "4px 4px 32px", display: "flex", flexDirection: "column", gap: 24 }}>
+    <div style={{ width: "100%", minHeight: "100vh", display: "flex", flexDirection: "column", background: T.cream, fontFamily: "'Inter', ui-sans-serif, system-ui" }}>
+      <main style={{ flex: 1, padding: "28px 32px", display: "flex", flexDirection: "column", gap: 24 }}>
 
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between" }}>
           <div>
             <div style={{ fontSize: 12, marginBottom: 4, color: T.slate }}>Operations / Overview</div>
             <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.3px", color: T.ink }}>Operations Dashboard</div>
           </div>
-          <div style={{ fontSize: 12, color: T.slate }}>Last updated 4 minutes ago</div>
+          <div style={{ fontSize: 12, color: T.slate }}>Live data</div>
         </div>
 
-        {/* Filter bar */}
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 8, padding: 12, borderRadius: 12, background: T.card, border: `1px solid ${T.hair}` }}>
           {["Date Range", "LOB", "Category", "Subcategory", "Severity", "Status", "Assigned Team"].map((f) => (
             <FilterChip key={f} label={f} />
           ))}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, marginLeft: "auto", cursor: "pointer", color: T.slate }}>
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: T.slate, cursor: "pointer" }}>
             <RotateCcw size={13} /> Reset
           </div>
           <div style={{ fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: 8, color: "#fff", cursor: "pointer", background: T.navy }}>
@@ -328,161 +226,69 @@ export default function OpsDashboard() {
           </div>
         </div>
 
-        {/* KPI row — minmax-based grid so it reflows cleanly with the sidebar's real width taken into account, instead of assuming full viewport */}
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(260px, 300px) repeat(auto-fit, minmax(150px, 1fr))", gap: 14 }}>
-          <div style={{ borderRadius: 16, padding: 20, display: "flex", alignItems: "center", gap: 16, background: T.navy }}>
-            <ComplianceRing pct={data.sla_compliance_pct} />
-            <div>
-              <div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.55)" }}>SLA Compliance</div>
-              <div style={{ fontSize: 11, marginBottom: 6, color: "rgba(255,255,255,0.4)" }}>Rolling 30 days</div>
-              <div style={{ fontSize: 12, color: "#8FD4A8" }}>
-                      Live backend calculation
+        {/* KPI row — hero SLA card is real, tiles are real */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(1, 1fr)", gap: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "300px repeat(5, 1fr)", gap: 16 }}>
+            <div style={{ borderRadius: 16, padding: 20, display: "flex", alignItems: "center", gap: 16, background: T.navy }}>
+              <ComplianceRing pct={data.sla_compliance_pct} />
+              <div>
+                <div style={{ fontSize: 11.5, color: "rgba(255,255,255,0.55)" }}>SLA Compliance</div>
+                <div style={{ fontSize: 11, marginBottom: 6, color: "rgba(255,255,255,0.4)" }}>Rolling 30 days</div>
               </div>
-
-              <div
-                style={{
-                    fontSize: 11,
-                    marginTop: 4,
-                    color: "rgba(255,255,255,0.4)",
-                       }}
-                        >
-                    {data.overdue_count} overdue errors
-                    </div>
             </div>
+            {kpis.map((k) => <KpiCard key={k.label} {...k} />)}
           </div>
-          <KpiCard
-  label="Escalated Issues"
-  value={String(data.escalated_count)}
-  delta="Live"
-  up={false}
-  icon={Siren}
-  warn={true}
-/>
-
-<KpiCard
-  label="Overdue Errors"
-  value={String(data.overdue_count)}
-  delta="Live"
-  up={false}
-  icon={AlertTriangle}
-  warn={true}
-/>
-
-<KpiCard
-  label="Open Errors"
-  value={String(data.open_count)}
-  delta="Live"
-  up={false}
-  icon={ListChecks}
-  warn={false}
-/>
-
-<KpiCard
-  label="Avg. Resolution Time"
-  value={`${data.avg_resolution_days} days`}
-  delta="Live"
-  up={false}
-  icon={Clock}
-  warn={false}
-/>
-
-<KpiCard
-  label="Closed Errors"
-  value={String(data.closed_count)}
-  delta="Live"
-  up={false}
-  icon={RotateCcw}
-  warn={false}
-/>
         </div>
 
-        {/* Trends & Distribution */}
+        {/* Trends & Distribution — both real now */}
         <div>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: T.ink }}>Trends &amp; Distribution</div>
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(320px, 2fr) minmax(260px, 1fr)", gap: 20 }}>
+          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12, color: T.ink }}>Trends & Distribution</div>
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20 }}>
             <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Monthly Error Trend</div>
-              <div style={{ fontSize: 12, marginBottom: 12, color: T.slate }}>Logged vs. closed vs. reopened, last 8 months</div>
+              <div style={{ fontSize: 12, marginBottom: 12, color: T.slate }}>Logged vs. closed vs. reopened — live data</div>
               <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={data.monthly_trend} margin={{ top: 30, right: 10, left: -20, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="loggedGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={T.gold} stopOpacity={0.35} />
-                      <stop offset="100%" stopColor={T.gold} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <LineChart data={data.monthly_trend} margin={{ top: 6, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke={T.hair} />
                   <XAxis dataKey="month" tick={{ fontSize: 11, fill: T.slate }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 11, fill: T.slate }} axisLine={false} tickLine={false} />
                   <RTooltip contentStyle={{ borderRadius: 10, border: `1px solid ${T.hair}`, fontSize: 12 }} />
-                  <Area type="monotone" dataKey="logged" name="Logged" stroke={T.gold} strokeWidth={2.5} fill="url(#loggedGrad)" dot={false} />
+                  <Line type="monotone" dataKey="logged" name="Logged" stroke={T.navy} strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="closed" name="Closed" stroke={T.green} strokeWidth={2} dot={false} />
                   <Line type="monotone" dataKey="reopened" name="Reopened" stroke={T.red} strokeWidth={2} dot={false} />
-  <ReferenceDot
-  x={peakMonth.month}
-  y={peakMonth.logged}
-  r={4}
-  fill={T.gold}
-  stroke="#fff"
-  strokeWidth={2}
-  label={{
-    value: `${peakMonth.logged} · ${peakMonth.month}`,
-    position: "top",
-    fill: "#fff",
-    fontSize: 11,
-    fontWeight: 600,
-    style: {
-      paintOrder: "stroke",
-      stroke: T.navy,
-      strokeWidth: 6,
-      strokeLinejoin: "round",
-    },
-  }}
-/>
-                </AreaChart>
+                </LineChart>
               </ResponsiveContainer>
-              <div style={{ display: "flex", gap: 20, marginTop: 8, fontSize: 12, color: T.slate }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ height: 6, width: 6, borderRadius: 999, background: T.gold }} />Logged</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ height: 6, width: 6, borderRadius: 999, background: T.green }} />Closed</span>
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ height: 6, width: 6, borderRadius: 999, background: T.red }} />Reopened</span>
-              </div>
             </div>
 
             <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: T.ink }}>Errors by Severity</div>
-              <div style={{ fontSize: 12, marginBottom: 4, color: T.slate }}>Operational risk breakdown</div>
+              <div style={{ fontSize: 12, marginBottom: 4, color: T.slate }}>Live data</div>
               <ResponsiveContainer width="100%" height={190}>
                 <PieChart>
-                  <Pie data={severity} dataKey="value" innerRadius={52} outerRadius={74} paddingAngle={2}>
-                    {severity.map((s, i) => <Cell key={i} fill={s.color} />)}
+                  <Pie data={data.severity_breakdown} dataKey="value" nameKey="name" innerRadius={52} outerRadius={74} paddingAngle={2}>
+                    {data.severity_breakdown.map((s, i) => (
+                      <Cell key={i} fill={[T.red, T.amber, "#7FA8C9", T.navy][i % 4]} />
+                    ))}
                   </Pie>
                   <RTooltip contentStyle={{ borderRadius: 10, border: `1px solid ${T.hair}`, fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div style={{ display: "flex", flexWrap: "wrap", columnGap: 16, rowGap: 6, marginTop: 4, fontSize: 12, color: T.slate }}>
-                {severity.map((s) => (
-                  <span key={s.name} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span style={{ height: 6, width: 6, borderRadius: 999, background: s.color }} />{s.name}
-                  </span>
-                ))}
-              </div>
             </div>
           </div>
         </div>
 
-        {/* Needs attention table */}
+        {/* ⚠️ MOCK — needs individual error rows the backend doesn't return yet */}
         <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <div>
               <div style={{ fontSize: 15, fontWeight: 600, color: T.ink }}>Needs Immediate Attention</div>
-              <div style={{ fontSize: 12.5, marginTop: 2, color: T.slate }}>Ranked by SLA elapsed time</div>
+              <div style={{ fontSize: 12.5, marginTop: 0.5, color: T.slate }}>⚠️ Still mock data — needs a backend field for individual error rows</div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12.5, fontWeight: 500, color: T.red }}>
               <Flame size={14} /> 5 breaching within 24h
             </div>
           </div>
-          <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", minWidth: 720, fontSize: 14, borderCollapse: "collapse" }}>
+          <table style={{ width: "100%", fontSize: 14, borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ textAlign: "left", fontSize: 11.5, textTransform: "uppercase", letterSpacing: "0.4px", color: T.slate }}>
                 <th style={{ paddingBottom: 12, fontWeight: 500 }}>ID</th>
@@ -510,50 +316,54 @@ export default function OpsDashboard() {
               ))}
             </tbody>
           </table>
-          </div>
         </div>
 
-        {/* Departments + Owners + Escalations */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20 }}>
+        {/* Departments by Volume — real now (from department_breakdown) */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
           <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
-            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2, color: T.ink }}>Departments by Volume</div>
-            <div style={{ fontSize: 12.5, marginBottom: 16, color: T.slate }}>Open errors, this quarter</div>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 0.5, color: T.ink }}>Departments by Volume</div>
+            <div style={{ fontSize: 12.5, marginBottom: 16, color: T.slate }}>Live data</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {data.department_breakdown.map((d) => (
-                <div key={d.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
-                    <span style={{ color: T.ink }}>{d.name}</span>
-                    <span style={{ color: T.slate }}>{d.value}</span>
+              {data.department_breakdown.map((d) => {
+                const total = d.open + d.closed;
+                return (
+                  <div key={d.dept}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12.5, marginBottom: 4 }}>
+                      <span style={{ color: T.ink }}>{d.dept}</span>
+                      <span style={{ color: T.slate }}>{total}</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 999, background: T.beige }}>
+                      <div style={{ height: 6, borderRadius: 999, width: `${(total / maxDept) * 100}%`, background: T.gold }} />
+                    </div>
                   </div>
-                  <div style={{ height: 6, borderRadius: 999, background: T.beige }}>
-                    <div style={{ height: 6, borderRadius: 999, width: `${(d.value / maxDept) * 100}%`, background: T.gold }} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
+          {/* ⚠️ MOCK — needs per-owner data the backend doesn't return yet */}
           <div style={{ borderRadius: 16, padding: 24, background: T.card, border: `1px solid ${T.hair}` }}>
-            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 2, color: T.ink }}>Owner Workload</div>
-            <div style={{ fontSize: 12.5, marginBottom: 8, color: T.slate }}>Open items assigned right now</div>
+            <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 0.5, color: T.ink }}>Owner Workload</div>
+            <div style={{ fontSize: 12.5, marginBottom: 8, color: T.slate }}>⚠️ Still mock — needs per-owner breakdown from backend</div>
             <ResponsiveContainer width="100%" height={190}>
               <BarChart data={owners} layout="vertical" margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
                 <XAxis type="number" hide />
                 <YAxis dataKey="name" type="category" width={78} tick={{ fontSize: 11.5, fill: T.ink }} axisLine={false} tickLine={false} />
                 <RTooltip contentStyle={{ borderRadius: 10, border: `1px solid ${T.hair}`, fontSize: 12 }} cursor={{ fill: T.beige }} />
                 <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={14}>
-                  {owners.map((o, i) => <Cell key={i} fill={i === 0 ? T.red : T.navy} fillOpacity={i === 0 ? 1 : 0.82 - i * 0.12} />)}
+                  {owners.map((_, i) => <Cell key={i} fill={i === 0 ? T.red : T.navy} fillOpacity={i === 0 ? 1 : 0.82 - i * 0.12} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
 
+          {/* ⚠️ MOCK — needs individual escalated error rows the backend doesn't return yet */}
           <div style={{ borderRadius: 16, padding: 24, background: T.navy }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 0.5 }}>
               <Siren size={15} color={T.goldSoft} />
               <div style={{ fontSize: 15, fontWeight: 600, color: "#fff" }}>Escalation Queue</div>
             </div>
-            <div style={{ fontSize: 12.5, marginBottom: 16, color: "rgba(255,255,255,0.5)" }}>Waiting on next-level response</div>
+            <div style={{ fontSize: 12.5, marginBottom: 16, color: "rgba(255,255,255,0.5)" }}>⚠️ Still mock — needs individual escalated error rows</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {escalations.map((e) => (
                 <div key={e.id} style={{ borderRadius: 12, padding: 14, background: "rgba(255,255,255,0.06)" }}>
@@ -567,7 +377,6 @@ export default function OpsDashboard() {
             </div>
           </div>
         </div>
-
       </main>
     </div>
   );
