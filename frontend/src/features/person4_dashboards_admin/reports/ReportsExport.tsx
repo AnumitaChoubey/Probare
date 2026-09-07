@@ -32,7 +32,7 @@ function SingleSelect({ label, options, width = 150 }: { label: string; options:
   );
 }
 
-import { useAuth } from "../person1_foundation/useAuth";
+import { useAuth } from "../../person1_foundation/useAuth";
 
 export default function ReportsExport() {
   const [format, setFormat] = useState("CSV");

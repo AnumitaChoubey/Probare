@@ -1,6 +1,7 @@
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, update
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -30,11 +31,11 @@ class InAppNotificationResponse(BaseModel):
         from_attributes = True
 
 @router.post("/trigger", status_code=201)
-def trigger_notification(payload: TriggerNotificationRequest, db: Session = Depends(get_db)):
+async def trigger_notification(payload: TriggerNotificationRequest, db: AsyncSession = Depends(get_db)):
     """
     Internal endpoint called by Person 1 / backend workflows to trigger a notification dispatch.
     """
-    log_entry = notification_worker.process_trigger(
+    log_entry = await notification_worker.process_trigger(
         db=db,
         template_code=payload.template_code,
         recipient_user_id=payload.recipient_user_id,
@@ -49,54 +50,58 @@ def trigger_notification(payload: TriggerNotificationRequest, db: Session = Depe
     }
 
 @router.get("", response_model=List[InAppNotificationResponse])
-def list_notifications(
+async def list_notifications(
     unread_only: bool = Query(False),
     user_id: str = Query("user-default-1"),
     limit: int = Query(20, ge=1, le=100),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     List in-app notifications for the given user.
     """
-    query = db.query(InAppNotification).filter(InAppNotification.user_id == user_id)
+    query = select(InAppNotification).where(InAppNotification.user_id == user_id)
     if unread_only:
-        query = query.filter(InAppNotification.is_read == False)
+        query = query.where(InAppNotification.is_read == False)
     
-    notifications = query.order_by(InAppNotification.created_at.desc()).limit(limit).all()
+    query = query.order_by(InAppNotification.created_at.desc()).limit(limit)
+    result = await db.execute(query)
+    notifications = result.scalars().all()
     return notifications
 
 @router.post("/mark-all-read")
-def mark_all_read(
+async def mark_all_read(
     user_id: str = Query("user-default-1"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Bulk mark all notifications as read for current user.
     """
-    db.query(InAppNotification).filter(
+    stmt = update(InAppNotification).where(
         InAppNotification.user_id == user_id,
         InAppNotification.is_read == False
-    ).update({"is_read": True})
-    db.commit()
+    ).values(is_read=True)
+    await db.execute(stmt)
+    await db.commit()
     return {"message": "All notifications marked as read"}
 
 @router.post("/{notification_id}/read")
-def mark_single_read(
+async def mark_single_read(
     notification_id: int,
     user_id: str = Query("user-default-1"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     Mark a single notification as read on click-through.
     """
-    notif = db.query(InAppNotification).filter(
+    result = await db.execute(select(InAppNotification).where(
         InAppNotification.id == notification_id,
         InAppNotification.user_id == user_id
-    ).first()
+    ))
+    notif = result.scalar_one_or_none()
     
     if not notif:
         raise HTTPException(status_code=404, detail="Notification not found")
         
     notif.is_read = True
-    db.commit()
+    await db.commit()
     return {"message": "Notification marked as read", "id": notification_id}

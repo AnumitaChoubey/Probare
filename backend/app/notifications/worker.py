@@ -1,7 +1,8 @@
 import logging
 from datetime import datetime
 from typing import Dict, Any, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from app.db.models.notification_template import NotificationTemplate
 from app.db.models.notifications_log import NotificationsLog
 from app.db.models.in_app_notification import InAppNotification
@@ -10,9 +11,9 @@ from app.email.client import email_client
 logger = logging.getLogger("notification_worker")
 
 class NotificationWorker:
-    def process_trigger(
+    async def process_trigger(
         self,
-        db: Session,
+        db: AsyncSession,
         template_code: str,
         recipient_user_id: str,
         recipient_email: str,
@@ -30,7 +31,9 @@ class NotificationWorker:
         context = context or {}
 
         # 1. Fetch template
-        template = db.query(NotificationTemplate).filter_by(code=template_code, is_active=True).first()
+        result = await db.execute(select(NotificationTemplate).filter_by(code=template_code, is_active=True))
+        template = result.scalar_one_or_none()
+        
         if not template:
             # Fallback default template if template code not yet seeded
             subject = f"Notification Alert [{template_code}]"
@@ -54,8 +57,8 @@ class NotificationWorker:
             created_at=datetime.utcnow(),
         )
         db.add(log_entry)
-        db.commit()
-        db.refresh(log_entry)
+        await db.commit()
+        await db.refresh(log_entry)
 
         # 3. Attempt email dispatch
         try:
@@ -75,7 +78,7 @@ class NotificationWorker:
             log_entry.failure_reason = str(e)
             logger.error(f"Error during email send: {e}")
 
-        db.commit()
+        await db.commit()
 
         # 4. Independent in-app notification insert (MUST run regardless of email failure)
         try:
@@ -89,9 +92,9 @@ class NotificationWorker:
                 created_at=datetime.utcnow(),
             )
             db.add(in_app_notif)
-            db.commit()
+            await db.commit()
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             logger.error(f"Failed to create in-app notification: {e}")
 
         return log_entry
