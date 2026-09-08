@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     POSTGRES_PORT: str = "5433"
     POSTGRES_DB: str = "qems_dev"
     
+    # Optional single connection string (overrides individual parts)
+    DATABASE_URL: str | None = None
+    
     # Auth — REQUIRED in production: generate with `openssl rand -hex 32`
     # Never commit a real value here; always override via .env
     SECRET_KEY: str = "CHANGE_ME_GENERATE_WITH_OPENSSL_RAND_HEX_32"
@@ -23,6 +26,10 @@ class Settings(BaseSettings):
     
     @property
     def ASYNC_DATABASE_URI(self) -> str:
+        if self.DATABASE_URL:
+            # SQLAlchemy async requires the asyncpg driver scheme
+            return self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+            
         url = f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
         if "neon.tech" in self.POSTGRES_SERVER:
             url += "?ssl=require"
