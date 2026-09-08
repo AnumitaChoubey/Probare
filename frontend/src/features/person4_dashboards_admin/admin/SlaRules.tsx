@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import VersionedConfigTable from "../VersionedConfigTable";
 
 
-const API_URL = "http://localhost:8000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function SlaRules() {
   const [data, setData] = useState<any[]>([]);

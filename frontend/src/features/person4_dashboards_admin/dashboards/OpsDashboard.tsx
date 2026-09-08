@@ -61,7 +61,7 @@ interface OpsDashboardApiResponse {
 // TODO: confirm this matches your actual backend URL / Vite proxy setup.
 // If vite.config.ts proxies /dashboards to your FastAPI server, this can
 // just be a relative path ("/dashboards/operations") instead.
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 /* ---------------------------------------------------------------
    MOCK DATA — kept ONLY for the 3 widgets the real endpoint doesn't

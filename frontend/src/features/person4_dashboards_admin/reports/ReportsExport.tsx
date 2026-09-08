@@ -42,7 +42,7 @@ export default function ReportsExport() {
   const runExport = async () => {
     setExportState("running");
     try {
-      const response = await fetch("http://localhost:8000/reports/export", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/reports/export`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

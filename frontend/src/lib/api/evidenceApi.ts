@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export async function uploadEvidence(errorId: string, file: File, stage: string = 'ORIGINAL_LOGGING') {
   const formData = new FormData();
