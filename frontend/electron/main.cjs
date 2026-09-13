@@ -16,7 +16,7 @@ try {
   keytar = null;
 }
 
-const { IPC } = require('./ipcChannels');
+const { IPC } = require('./ipcChannels.cjs');
 
 const KEYTAR_SERVICE = 'QEMS';
 const MIN_WIDTH = 1024;
@@ -37,7 +37,7 @@ function createWindow() {
     title: 'QEMS — Quality Error Management System',
     // Security: contextIsolation ON, nodeIntegration OFF (master plan Section 9)
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false, // must be false to allow preload to use require()
