@@ -23,10 +23,16 @@ class Settings(BaseSettings):
     # Internal Services
     ERRORS_SERVICE_BASE_URL: str = "http://localhost:8000"
     
+    # Local Database (Desktop Shell)
+    SQLITE_DB_PATH: str | None = None
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
     
     @property
     def ASYNC_DATABASE_URI(self) -> str:
+        if self.SQLITE_DB_PATH:
+            return f"sqlite+aiosqlite:///{self.SQLITE_DB_PATH}"
+            
         if self.DATABASE_URL:
             # SQLAlchemy async requires the asyncpg driver scheme
             return self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
