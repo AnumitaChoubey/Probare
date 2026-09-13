@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_URL;
+import { API_BASE_URL } from '..\config';
+
+const API_BASE = API_BASE_URL;
 
 export async function fetchUserNotifications(userId: string = 'user-default-1', unreadOnly: boolean = false) {
   const res = await fetch(`${API_BASE}/notifications?user_id=${userId}&unread_only=${unreadOnly}`);

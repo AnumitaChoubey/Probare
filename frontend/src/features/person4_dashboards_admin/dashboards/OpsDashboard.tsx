@@ -4,6 +4,8 @@ import {
   Tooltip as RTooltip, ResponsiveContainer, Cell, BarChart, Bar,
 } from "recharts";
 import {
+import { API_BASE_URL } from '..\..\..\lib\config';
+
   ChevronDown, AlertTriangle, ListChecks,
   Clock, Siren, RotateCcw, ArrowUpRight, ArrowDownRight, Flame,
 } from "lucide-react";
@@ -61,7 +63,7 @@ interface OpsDashboardApiResponse {
 // TODO: confirm this matches your actual backend URL / Vite proxy setup.
 // If vite.config.ts proxies /dashboards to your FastAPI server, this can
 // just be a relative path ("/dashboards/operations") instead.
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = API_BASE_URL;
 
 /* ---------------------------------------------------------------
    MOCK DATA — kept ONLY for the 3 widgets the real endpoint doesn't

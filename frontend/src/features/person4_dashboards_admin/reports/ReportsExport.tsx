@@ -33,6 +33,8 @@ function SingleSelect({ label, options, width = 150 }: { label: string; options:
 }
 
 import { useAuth } from "../../person1_foundation/useAuth";
+import { API_BASE_URL } from '..\..\..\lib\config';
+
 
 export default function ReportsExport() {
   const [format, setFormat] = useState("CSV");
@@ -42,7 +44,7 @@ export default function ReportsExport() {
   const runExport = async () => {
     setExportState("running");
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/reports/export`, {
+      const response = await fetch(`${API_BASE_URL}/reports/export`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

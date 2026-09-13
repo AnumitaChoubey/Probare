@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import './evidence.css';
+import { API_BASE_URL } from '..\..\lib\config';
+
 
 export interface EvidenceFile {
   id: string;
@@ -24,7 +26,7 @@ export const EvidenceUploadWidget: React.FC<EvidenceUploadWidgetProps> = ({
   errorId,
   uploadedByUserId = 'user-default-1',
   onUploadSuccess,
-  apiBaseUrl = import.meta.env.VITE_API_URL,
+  apiBaseUrl = API_BASE_URL,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<EvidenceFile[]>([]);

@@ -7,6 +7,7 @@
 
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');
+const backendManager = require('./backendManager.cjs');
 
 // ── Single Instance Lock — must happen BEFORE app.whenReady() ─────────────────
 // Prevents a second Electron window from opening if the user double-clicks.
@@ -80,7 +81,9 @@ function createWindow() {
 
 // ── App Lifecycle ─────────────────────────────────────────────────────────────
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  // Start local backend first
+  await backendManager.startBackend();
   createWindow();
 
   // Focus existing window if a second instance tries to open (Windows deep link)
@@ -104,6 +107,10 @@ app.whenReady().then(() => {
 // Quit on all windows closed (except macOS — standard convention)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+  backendManager.stopBackend();
 });
 
 // ── Deep Link Protocol (Phase 2: qems:// — Teams/Outlook notification links) ──

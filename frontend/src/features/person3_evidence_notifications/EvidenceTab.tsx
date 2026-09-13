@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './evidence.css';
+import { API_BASE_URL } from '..\..\lib\config';
+
 
 export interface EvidenceFileItem {
   id: string;
@@ -22,7 +24,7 @@ export interface EvidenceTabProps {
 
 export const EvidenceTab: React.FC<EvidenceTabProps> = ({
   errorId,
-  apiBaseUrl = import.meta.env.VITE_API_URL,
+  apiBaseUrl = API_BASE_URL,
 }) => {
   const [auditorEvidence, setAuditorEvidence] = useState<EvidenceFileItem[]>([]);
   const [rebuttalEvidence, setRebuttalEvidence] = useState<EvidenceFileItem[]>([]);

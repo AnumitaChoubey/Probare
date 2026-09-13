@@ -12,9 +12,9 @@ files:
   - "frontend/dist/**/*"
 
 # Phase 1 will add this section to bundle the Python backend binary:
-# extraResources:
-#   - from: "backend/dist/qems-backend.exe"
-#     to: "backend/qems-backend.exe"
+extraResources:
+  - from: "backend/dist/qems-backend.exe"
+    to: "backend/qems-backend.exe"
 
 win:
   target:

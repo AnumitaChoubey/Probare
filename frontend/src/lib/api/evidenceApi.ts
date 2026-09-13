@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_URL;
+import { API_BASE_URL } from '..\config';
+
+const API_BASE = API_BASE_URL;
 
 export async function uploadEvidence(errorId: string, file: File, stage: string = 'ORIGINAL_LOGGING') {
   const formData = new FormData();

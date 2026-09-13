@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './evidence.css';
+import { API_BASE_URL } from '..\..\lib\config';
+
 
 export interface InAppNotification {
   id: number;
@@ -19,7 +21,7 @@ export interface NotificationBellProps {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({
   userId = 'user-default-1',
-  apiBaseUrl = import.meta.env.VITE_API_URL,
+  apiBaseUrl = API_BASE_URL,
   onNavigateToError,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
