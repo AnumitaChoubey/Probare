@@ -1,0 +1,48 @@
+appId: com.probare.qems
+productName: QEMS
+copyright: Copyright © 2026 Probare
+
+directories:
+  buildResources: frontend/electron/build
+  output: dist-electron
+
+# Files to include in the package
+files:
+  - "frontend/electron/**/*.cjs"
+  - "frontend/dist/**/*"
+
+# Phase 1 will add this section to bundle the Python backend binary:
+# extraResources:
+#   - from: "backend/dist/qems-backend.exe"
+#     to: "backend/qems-backend.exe"
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: frontend/electron/build/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  installerIcon: frontend/electron/build/icon.ico
+  uninstallerIcon: frontend/electron/build/icon.ico
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+mac:
+  target:
+    - target: dmg
+  icon: frontend/electron/build/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  # entitlements will be needed for code signing in Phase 4
+
+linux:
+  target:
+    - target: AppImage
+  icon: frontend/electron/build/icon.png
+  category: Office
+
+# Auto-update server — left null until Phase 4
+publish: null
