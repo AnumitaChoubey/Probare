@@ -14,9 +14,10 @@ class Settings(BaseSettings):
     # Optional single connection string (overrides individual parts)
     DATABASE_URL: str | None = None
     
-    # Auth — REQUIRED in production: generate with `openssl rand -hex 32`
-    # Never commit a real value here; always override via .env
-    SECRET_KEY: str = "CHANGE_ME_GENERATE_WITH_OPENSSL_RAND_HEX_32"
+    # Auth — RS256 Keypair
+    # Central API needs JWT_PRIVATE_KEY to sign tokens. Local desktop apps only need JWT_PUBLIC_KEY to verify.
+    JWT_PRIVATE_KEY: str = ""
+    JWT_PUBLIC_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
     # Internal Services

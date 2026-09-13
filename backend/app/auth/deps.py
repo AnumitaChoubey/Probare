@@ -19,7 +19,9 @@ async def get_current_user(
     token: Annotated[str, Depends(reusable_oauth2)]
 ) -> User:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
+        if not settings.JWT_PUBLIC_KEY:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="JWT_PUBLIC_KEY is not configured")
+        payload = jwt.decode(token, settings.JWT_PUBLIC_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("user_id")
         if user_id is None:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Could not validate credentials")
