@@ -11,6 +11,9 @@ from app.jobs.sla_engine import run_sla_engine
 from app.dashboards import team
 from app.dashboards import leadership
 from app.admin import config_history
+from app.sync.worker import run_sync_worker
+from app.core.config import settings
+
 # Initialize the scheduler
 scheduler = AsyncIOScheduler()
 
@@ -18,6 +21,9 @@ scheduler = AsyncIOScheduler()
 async def lifespan(app: FastAPI):
     # Startup
     scheduler.add_job(run_sla_engine, "interval", minutes=1, id="sla_engine_job")
+    if settings.SQLITE_DB_PATH:
+        # Run sync worker every 15 seconds locally
+        scheduler.add_job(run_sync_worker, "interval", seconds=15, id="sync_worker_job")
     scheduler.start()
     yield
     # Shutdown
@@ -52,10 +58,12 @@ app.include_router(operations.router)
 # from app.errors.routes import router as errors_router
 # from app.admin.lobs import router as lobs_router
 from app.admin.categories import router as categories_router
+from app.api.v1.endpoints.sync import router as sync_router
 # from app.admin.sub_categories import router as sub_categories_router
 # from app.admin.users import router as users_router
 app.include_router(auth_router, prefix="/auth", tags=["Auth"])
 app.include_router(errors_router, prefix="/errors", tags=["Errors"])
+app.include_router(sync_router, prefix="/sync", tags=["Sync"])
 app.include_router(config_history.router)
 # app.include_router(lobs_router,        prefix="/admin/lobs", tags=["Admin"])
 app.include_router(categories_router,  prefix="/categories", tags=["Admin"])
