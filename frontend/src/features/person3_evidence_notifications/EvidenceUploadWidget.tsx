@@ -24,7 +24,7 @@ export const EvidenceUploadWidget: React.FC<EvidenceUploadWidgetProps> = ({
   errorId,
   uploadedByUserId = 'user-default-1',
   onUploadSuccess,
-  apiBaseUrl = 'http://localhost:8000',
+  apiBaseUrl = import.meta.env.VITE_API_URL,
 }) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<EvidenceFile[]>([]);

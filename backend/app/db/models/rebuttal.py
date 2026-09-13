@@ -18,3 +18,5 @@ class Rebuttal(Base):
     __table_args__ = (
         CheckConstraint("length(justification) >= 20", name="justification_min_length"),
     )
+
+    

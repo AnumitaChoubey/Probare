@@ -8,7 +8,7 @@ directories:
 
 # Files to include in the package
 files:
-  - "frontend/electron/**/*.cjs"
+  - "frontend/electron/**/*"
   - "frontend/dist/**/*"
 
 # Phase 1 will add this section to bundle the Python backend binary:

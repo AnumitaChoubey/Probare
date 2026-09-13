@@ -47,6 +47,33 @@ async def seed_db():
             session.add(UserRole(user_id=admin_user.id, role_id=admin_role.id))
             await session.commit()
             
+        # Seed test users for end-to-end testing
+        test_users_data = [
+            {"username": "qa_user", "password": "password123", "name": "QA Agent", "email": "qa@qems.com", "role": "AUD"},
+            {"username": "qa_lead", "password": "password123", "name": "QA Lead", "email": "lead@qems.com", "role": "QAL"},
+            {"username": "ops_user", "password": "password123", "name": "Ops Agent", "email": "ops@qems.com", "role": "OPS_AGT"}
+        ]
+        
+        for u_data in test_users_data:
+            result = await session.execute(select(User).where(User.username == u_data["username"]))
+            test_user = result.scalar_one_or_none()
+            
+            if not test_user:
+                test_user = User(
+                    username=u_data["username"],
+                    password_hash=get_password_hash(u_data["password"]),
+                    full_name=u_data["name"],
+                    email=u_data["email"]
+                )
+                session.add(test_user)
+                await session.commit()
+                
+                # Assign role
+                result = await session.execute(select(Role).where(Role.code == u_data["role"]))
+                role = result.scalar_one()
+                session.add(UserRole(user_id=test_user.id, role_id=role.id))
+                await session.commit()
+            
         # Seed LOBs and Categories for testing
         from app.db.models.lob import Lob
         from app.db.models.category import Category

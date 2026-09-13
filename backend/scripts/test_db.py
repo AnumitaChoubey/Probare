@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.core.config import settings
 from sqlalchemy import text
 
-async def test_connection():
+async def run_connection():
     try:
         db_url = str(settings.ASYNC_DATABASE_URI)
         print(f"Connecting to: {db_url.replace(settings.POSTGRES_PASSWORD, '***')}")
@@ -17,4 +17,4 @@ async def test_connection():
         print(f"Connection failed: {e}")
 
 if __name__ == "__main__":
-    asyncio.run(test_connection())
+    asyncio.run(run_connection())

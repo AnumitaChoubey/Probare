@@ -3,7 +3,7 @@ import React from 'react'
 export default function Footer() {
   return (
     <footer style={{
-      height: 40, background: '#1e293b', color: '#475569',
+      height: 40, background: '#1e293b', color: '#fafafaff',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 12,
     }}>

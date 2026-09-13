@@ -19,7 +19,7 @@ export interface NotificationBellProps {
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({
   userId = 'user-default-1',
-  apiBaseUrl = 'http://localhost:8000',
+  apiBaseUrl = import.meta.env.VITE_API_URL,
   onNavigateToError,
 }) => {
   const [isOpen, setIsOpen] = useState(false);

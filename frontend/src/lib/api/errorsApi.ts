@@ -1,5 +1,5 @@
 export async function fetchErrorDetail(token: string, errorId: string) {
-  const res = await fetch(`http://localhost:8000/errors/${errorId}`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/errors/${errorId}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -13,7 +13,7 @@ export async function fetchErrorDetail(token: string, errorId: string) {
 }
 
 export async function fetchErrorHistory(token: string, errorId: string) {
-  const res = await fetch(`http://localhost:8000/errors/${errorId}/history`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/errors/${errorId}/history`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -32,7 +32,7 @@ export async function fetchErrors(token: string, params: Record<string, any> = {
     if (value) query.append(key, value)
   }
   const queryString = query.toString()
-  const url = `http://localhost:8000/errors${queryString ? '?' + queryString : ''}`
+  const url = `${import.meta.env.VITE_API_URL}/errors${queryString ? '?' + queryString : ''}`
 
   const res = await fetch(url, {
     method: 'GET',
@@ -48,7 +48,7 @@ export async function fetchErrors(token: string, params: Record<string, any> = {
 }
 
 export async function createError(token: string, payload: any) {
-  const res = await fetch(`http://localhost:8000/errors`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/errors`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

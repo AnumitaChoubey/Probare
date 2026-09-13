@@ -22,7 +22,7 @@ export interface EvidenceTabProps {
 
 export const EvidenceTab: React.FC<EvidenceTabProps> = ({
   errorId,
-  apiBaseUrl = 'http://localhost:8000',
+  apiBaseUrl = import.meta.env.VITE_API_URL,
 }) => {
   const [auditorEvidence, setAuditorEvidence] = useState<EvidenceFileItem[]>([]);
   const [rebuttalEvidence, setRebuttalEvidence] = useState<EvidenceFileItem[]>([]);

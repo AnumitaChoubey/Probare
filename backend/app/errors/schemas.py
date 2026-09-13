@@ -73,6 +73,7 @@ class ErrorResponse(BaseModel):
     submitted_at: Optional[datetime]
     closed_at: Optional[datetime]
     sla_state: dict
+    latest_decision: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -104,6 +105,7 @@ class ErrorResponseOps(BaseModel):
     submitted_at: Optional[datetime]
     closed_at: Optional[datetime]
     sla_state: dict
+    latest_decision: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -129,10 +131,10 @@ class ErrorDraftUpdate(BaseModel):
 
 class ErrorStatusUpdate(BaseModel):
     to_status: str
-    reason: str
+    reason: Optional[str] = None
 
 class ErrorHistoryResponse(BaseModel):
-    id: uuid.UUID
+    id: int
     error_id: uuid.UUID
     from_status: str
     to_status: str

@@ -3,7 +3,7 @@ import os
 import httpx
 from datetime import date
 
-async def test_endpoints():
+async def run_endpoints():
     async with httpx.AsyncClient(base_url="http://localhost:8000", timeout=30.0) as client:
         # First login to get a token
         login_data = {"username": "admin", "password": "password123"}
@@ -37,4 +37,4 @@ async def test_endpoints():
         print("GET /errors Status:", errs_resp.status_code)
         
 if __name__ == "__main__":
-    asyncio.run(test_endpoints())
+    asyncio.run(run_endpoints())

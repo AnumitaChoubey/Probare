@@ -1,5 +1,5 @@
 export async function fetchLobs(token: string) {
-  const res = await fetch(`http://localhost:8000/categories/lobs`, {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/categories/lobs`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`
@@ -14,8 +14,8 @@ export async function fetchLobs(token: string) {
 
 export async function fetchCategories(token: string, lobId?: string) {
   const url = lobId 
-    ? `http://localhost:8000/categories?lob_id=${lobId}`
-    : `http://localhost:8000/categories`
+    ? `${import.meta.env.VITE_API_URL}/categories?lob_id=${lobId}`
+    : `${import.meta.env.VITE_API_URL}/categories`
     
   const res = await fetch(url, {
     method: 'GET',

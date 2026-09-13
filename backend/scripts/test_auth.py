@@ -2,7 +2,7 @@ import asyncio
 from fastapi.testclient import TestClient
 from app.main import app
 
-def test_login_and_me():
+def run_login_and_me():
     client = TestClient(app)
     
     # Test Login
@@ -28,4 +28,4 @@ def test_login_and_me():
     print("ALL TESTS PASSED!")
 
 if __name__ == "__main__":
-    test_login_and_me()
+    run_login_and_me()

@@ -2,7 +2,7 @@ import asyncio
 from fastapi.testclient import TestClient
 from app.main import app
 
-def test_create_error():
+def run_create_error():
     client = TestClient(app)
     
     # login
@@ -34,4 +34,4 @@ def test_create_error():
     print("RESPONSE:", draft_resp.text)
 
 if __name__ == "__main__":
-    test_create_error()
+    run_create_error()
