@@ -1,15 +1,16 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 import uuid
 from typing import Optional
 from datetime import datetime
-from sqlalchemy import String, Boolean, DateTime
+from sqlalchemy import Uuid, JSON, String, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
 from app.db.base_class import Base, generate_uuid, utc_now
 
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     username: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     full_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)

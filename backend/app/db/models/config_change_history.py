@@ -1,7 +1,8 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 from datetime import datetime
 
-from sqlalchemy import BigInteger, Column, DateTime, String
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import Uuid, JSON, BigInteger, Column, DateTime, String
 
 from app.db.base_class import Base
 
@@ -24,10 +25,10 @@ class ConfigChangeHistory(Base):
     # e.g. "SLA_RULE", "OWNERSHIP_MAPPING", "ESCALATION_MATRIX",
     # "WORKING_HOURS", "HOLIDAY"
 
-    entity_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    entity_id = Column(Uuid, nullable=False, index=True)
 
-    old_value = Column(JSONB, nullable=True)   # null on first create
-    new_value = Column(JSONB, nullable=False)
+    old_value = Column(JSON, nullable=True)   # null on first create
+    new_value = Column(JSON, nullable=False)
 
-    changed_by_user_id = Column(UUID(as_uuid=True), nullable=False)
+    changed_by_user_id = Column(Uuid, nullable=False)
     changed_at = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow, index=True)

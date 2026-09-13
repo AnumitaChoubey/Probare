@@ -1,7 +1,8 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, DateTime, Integer, String
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid, JSON, Column, DateTime, Integer, String
 from app.db.base_class import Base
 
 
@@ -24,9 +25,9 @@ class SLARule(Base):
     ORM layer — Person 1's migrations and yours stay independent.
     """
     __tablename__ = "sla_rules"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lob_id = Column(UUID(as_uuid=True), nullable=False, index=True)
-    category_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    lob_id = Column(Uuid, nullable=False, index=True)
+    category_id = Column(Uuid, nullable=True, index=True)
     severity = Column(String, nullable=False, index=True)
     rebuttal_window_hours = Column(Integer, nullable=False)
     decision_window_hours = Column(Integer, nullable=False)

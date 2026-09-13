@@ -1,6 +1,7 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 import uuid
-from sqlalchemy import Boolean, Column, Integer
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid, JSON, Boolean, Column, Integer
 from app.db.base_class import Base
 
 class EscalationMatrix(Base):
@@ -20,10 +21,10 @@ class EscalationMatrix(Base):
     """
     __tablename__ = "escalation_matrix"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lob_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    lob_id = Column(Uuid, nullable=False, index=True)
     escalation_level = Column(Integer, nullable=False)
     threshold_hours_after_breach = Column(Integer, nullable=False)
-    recipient_role_id = Column(UUID(as_uuid=True), nullable=True)
-    recipient_user_id = Column(UUID(as_uuid=True), nullable=True)
+    recipient_role_id = Column(Uuid, nullable=True)
+    recipient_user_id = Column(Uuid, nullable=True)
     is_active = Column(Boolean, nullable=False, default=True, index=True)

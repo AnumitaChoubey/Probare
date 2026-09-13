@@ -1,3 +1,6 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
+from sqlalchemy import Uuid, JSON
 from app.db.models.user import User
 from app.db.models.role import Role
 from app.db.models.user_role import UserRole
@@ -21,6 +24,7 @@ from app.db.models.sla_rule import SLARule
 from app.db.models.escalation_matrix import EscalationMatrix
 from app.db.models.ownership_mapping import OwnershipMapping
 from app.db.models.working_hours_calendar import WorkingHoursCalendar
+from app.db.models.sync import Project, Device, SyncCursor, SyncQueue
 
 # Expose models for SQLAlchemy registry
-__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule", "Holiday", "ConfigChangeHistory", "SLARule", "EscalationMatrix", "OwnershipMapping", "WorkingHoursCalendar"]
+__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule", "Holiday", "ConfigChangeHistory", "SLARule", "EscalationMatrix", "OwnershipMapping", "WorkingHoursCalendar", "Project", "Device", "SyncCursor", "SyncQueue"]

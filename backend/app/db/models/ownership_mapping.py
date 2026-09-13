@@ -1,7 +1,8 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, DateTime
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid, JSON, Column, DateTime
 from app.db.base_class import Base
 
 class OwnershipMapping(Base):
@@ -21,11 +22,11 @@ class OwnershipMapping(Base):
     on their behalf").
     """
     __tablename__ = "ownership_mapping"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    lob_id = Column(UUID(as_uuid=True), nullable=False, index=True)
-    category_id = Column(UUID(as_uuid=True), nullable=False, index=True)
-    default_owner_user_id = Column(UUID(as_uuid=True), nullable=True)
-    default_owner_team_ref = Column(UUID(as_uuid=True), nullable=True)
-    default_owner_manager_user_id = Column(UUID(as_uuid=True), nullable=True)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    lob_id = Column(Uuid, nullable=False, index=True)
+    category_id = Column(Uuid, nullable=False, index=True)
+    default_owner_user_id = Column(Uuid, nullable=True)
+    default_owner_team_ref = Column(Uuid, nullable=True)
+    default_owner_manager_user_id = Column(Uuid, nullable=True)
     effective_from = Column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
     effective_to = Column(DateTime(timezone=True), nullable=True, index=True)
