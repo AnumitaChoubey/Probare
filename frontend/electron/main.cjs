@@ -1,69 +1,81 @@
-// electron/main.js
+// electron/main.cjs
 // Electron Main Process — entry point for the QEMS desktop app.
-// Phase 0: Electron shell only. Points to the existing central API on Render.
+// Electron Shell only — connects to the existing central API on Render.
 // Phase 1 will add: spawning the local PyInstaller backend binary.
 
-const { app, BrowserWindow, ipcMain, shell, dialog } = require('electron');
-const path = require('path');
-const isDev = require('electron-is-dev');
+'use strict';
 
-let keytar;
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const path = require('path');
+
+// ── Single Instance Lock — must happen BEFORE app.whenReady() ─────────────────
+// Prevents a second Electron window from opening if the user double-clicks.
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  // Another instance is already running — quit immediately
+  app.quit();
+  process.exit(0);
+}
+
+// ── Keytar (optional — degrades gracefully if native module unavailable) ─────
+let keytar = null;
 try {
   keytar = require('keytar');
 } catch (e) {
-  // keytar may not be available in dev without native rebuild — fail gracefully
-  console.warn('[main] keytar not available, secure token storage will be disabled:', e.message);
-  keytar = null;
+  console.warn('[QEMS] keytar not available — OS keychain disabled, using fallback:', e.message);
 }
 
 const { IPC } = require('./ipcChannels.cjs');
 
 const KEYTAR_SERVICE = 'QEMS';
-const MIN_WIDTH = 1024;
+const MIN_WIDTH  = 1024;
 const MIN_HEIGHT = 768;
-const DEFAULT_WIDTH = 1440;
-const DEFAULT_HEIGHT = 900;
+const DEF_WIDTH  = 1440;
+const DEF_HEIGHT = 900;
 
 let mainWindow = null;
 
-// ── Window Creation ──────────────────────────────────────────────────────────
+// ── Window Creation ───────────────────────────────────────────────────────────
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: DEFAULT_WIDTH,
-    height: DEFAULT_HEIGHT,
-    minWidth: MIN_WIDTH,
+    width:  DEF_WIDTH,
+    height: DEF_HEIGHT,
+    minWidth:  MIN_WIDTH,
     minHeight: MIN_HEIGHT,
     title: 'QEMS — Quality Error Management System',
-    // Security: contextIsolation ON, nodeIntegration OFF (master plan Section 9)
+    // Security: contextIsolation ON, nodeIntegration OFF (master plan §9)
     webPreferences: {
-      preload: path.join(__dirname, 'preload.cjs'),
+      preload:          path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: false, // must be false to allow preload to use require()
+      nodeIntegration:  false,
+      sandbox:          false, // required for preload require()
     },
-    show: false, // don't show until ready-to-show to avoid white flash
+    show: false, // show only when fully rendered (avoids white flash)
   });
 
-  // Load the app
-  if (isDev) {
-    // Development: load the Vite dev server
-    mainWindow.loadURL('http://localhost:5173');
+  if (!app.isPackaged) {
+    // Development — load the running Vite dev server
+    mainWindow.loadURL('http://localhost:5173').catch(err => {
+      console.error('[QEMS] Failed to load Vite dev server:', err.message);
+    });
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    // Production: load the built Vite output
+    // Production — load the built Vite output packaged alongside Electron
     mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   }
 
-  // Show window only when fully rendered (avoids white flash on launch)
+  // Surface renderer-level load errors in the console
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
+    console.error(`[QEMS] Page load failed: ${desc} (${code}) — URL: ${url}`);
+  });
+
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     mainWindow.focus();
   });
 
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-  });
+  mainWindow.on('closed', () => { mainWindow = null; });
 }
 
 // ── App Lifecycle ─────────────────────────────────────────────────────────────
@@ -71,25 +83,30 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
-  // macOS: re-create window when dock icon is clicked and no windows are open
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+  // Focus existing window if a second instance tries to open (Windows deep link)
+  app.on('second-instance', (_event, commandLine) => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
     }
+    const deepLink = commandLine.find(a => a.startsWith('qems://'));
+    if (deepLink && mainWindow) {
+      mainWindow.webContents.send(IPC.DEEP_LINK_NAVIGATE, deepLink.replace('qems://errors/', ''));
+    }
+  });
+
+  // macOS: re-create window when dock icon clicked and no windows open
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// Quit when all windows are closed (except on macOS — standard convention)
+// Quit on all windows closed (except macOS — standard convention)
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
-// ── Deep Link Handler (Phase 2: qems:// protocol) ────────────────────────────
-// Registered for the custom protocol so Teams/Outlook notification links
-// can open the app and navigate to a specific error.
-
+// ── Deep Link Protocol (Phase 2: qems:// — Teams/Outlook notification links) ──
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
     app.setAsDefaultProtocolClient('qems', process.execPath, [path.resolve(process.argv[1])]);
@@ -98,69 +115,32 @@ if (process.defaultApp) {
   app.setAsDefaultProtocolClient('qems');
 }
 
-// Windows: deep link arrives as a second instance
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-  app.quit();
-} else {
-  app.on('second-instance', (_event, commandLine) => {
-    // Someone tried to run a second instance — focus our window instead
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore();
-      mainWindow.focus();
-    }
-    // Parse the deep link from the command line args
-    const deepLink = commandLine.find(arg => arg.startsWith('qems://'));
-    if (deepLink && mainWindow) {
-      const errorId = deepLink.replace('qems://errors/', '');
-      mainWindow.webContents.send(IPC.DEEP_LINK_NAVIGATE, errorId);
-    }
-  });
-}
-
-// macOS: deep link arrives via open-url event
+// macOS deep link arrives via open-url
 app.on('open-url', (event, url) => {
   event.preventDefault();
   if (mainWindow && url.startsWith('qems://errors/')) {
-    const errorId = url.replace('qems://errors/', '');
-    mainWindow.webContents.send(IPC.DEEP_LINK_NAVIGATE, errorId);
+    mainWindow.webContents.send(IPC.DEEP_LINK_NAVIGATE, url.replace('qems://errors/', ''));
   }
 });
 
 // ── IPC Handlers ─────────────────────────────────────────────────────────────
 
-// Return the app version to the renderer
-ipcMain.handle(IPC.GET_APP_VERSION, () => {
-  return app.getVersion();
-});
+ipcMain.handle(IPC.GET_APP_VERSION, () => app.getVersion());
 
-// Keytar: read a credential from the OS keychain
-ipcMain.handle(IPC.GET_SECURE_TOKEN, async (_event, key) => {
+ipcMain.handle(IPC.GET_SECURE_TOKEN, async (_e, key) => {
   if (!keytar) return null;
-  try {
-    return await keytar.getPassword(KEYTAR_SERVICE, key);
-  } catch (e) {
-    console.error('[main] keytar.getPassword failed:', e.message);
-    return null;
-  }
+  try { return await keytar.getPassword(KEYTAR_SERVICE, key); }
+  catch (e) { console.error('[QEMS] keytar.getPassword:', e.message); return null; }
 });
 
-// Keytar: save a credential to the OS keychain
-ipcMain.handle(IPC.SET_SECURE_TOKEN, async (_event, key, value) => {
+ipcMain.handle(IPC.SET_SECURE_TOKEN, async (_e, key, val) => {
   if (!keytar) return;
-  try {
-    await keytar.setPassword(KEYTAR_SERVICE, key, value);
-  } catch (e) {
-    console.error('[main] keytar.setPassword failed:', e.message);
-  }
+  try { await keytar.setPassword(KEYTAR_SERVICE, key, val); }
+  catch (e) { console.error('[QEMS] keytar.setPassword:', e.message); }
 });
 
-// Keytar: delete a credential from the OS keychain
-ipcMain.handle(IPC.CLEAR_SECURE_TOKEN, async (_event, key) => {
+ipcMain.handle(IPC.CLEAR_SECURE_TOKEN, async (_e, key) => {
   if (!keytar) return;
-  try {
-    await keytar.deletePassword(KEYTAR_SERVICE, key);
-  } catch (e) {
-    console.error('[main] keytar.deletePassword failed:', e.message);
-  }
+  try { await keytar.deletePassword(KEYTAR_SERVICE, key); }
+  catch (e) { console.error('[QEMS] keytar.deletePassword:', e.message); }
 });
