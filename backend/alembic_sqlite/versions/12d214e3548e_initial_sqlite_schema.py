@@ -326,7 +326,7 @@ def upgrade() -> None:
     sa.Column('updated_by_device_id', sa.Uuid(), nullable=True),
     sa.Column('version', sa.Integer(), nullable=False),
     sa.CheckConstraint("severity IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')", name='chk_severity'),
-    sa.CheckConstraint('char_length(description) >= 20', name='chk_description_length'),
+    sa.CheckConstraint('length(description) >= 20', name='chk_description_length'),
     sa.CheckConstraint('date_of_occurrence <= CURRENT_DATE', name='chk_date_occurrence'),
     sa.ForeignKeyConstraint(['category_id'], ['categories.id'], ),
     sa.ForeignKeyConstraint(['lob_id'], ['lobs.id'], ),

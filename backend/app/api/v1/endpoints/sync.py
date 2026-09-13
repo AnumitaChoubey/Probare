@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, insert
 from datetime import datetime, timezone
 import uuid
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from app.db.session import get_db
 from app.db.models.sync import Device, SyncCursor
@@ -11,7 +11,7 @@ from app.schemas.sync import (
     SyncPushRequest, SyncPushResponse, SyncResult,
     DeviceRegisterRequest, DeviceRegisterResponse, SyncPullResponse
 )
-from app.core.security import get_current_user
+from app.auth.deps import get_current_user
 from app.db.models.user import User
 from app.db.models.error import Error
 from app.db.models.rebuttal import Rebuttal

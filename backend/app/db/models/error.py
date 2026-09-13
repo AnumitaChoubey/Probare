@@ -64,7 +64,7 @@ class Error(Base):
     __table_args__ = (
         CheckConstraint("severity IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')", name="chk_severity"),
         CheckConstraint("date_of_occurrence <= CURRENT_DATE", name="chk_date_occurrence"),
-        CheckConstraint("char_length(description) >= 20", name="chk_description_length"),
+        CheckConstraint("length(description) >= 20", name="chk_description_length"),
         Index("idx_errors_status", "status"),
         Index("idx_errors_lob_category", "lob_id", "category_id"),
         Index("idx_errors_owner_user_id", "owner_user_id"),

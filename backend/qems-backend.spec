@@ -1,9 +1,10 @@
 # -*- mode: python -*-
+import os
 from PyInstaller.utils.hooks import collect_submodules
 
 a = Analysis(
     ['run_desktop_server.py'],
-    pathex=['.'],
+    pathex=[os.path.abspath('.')],
     hiddenimports=[
         'app.db.models',
         'app.db.models.user',
@@ -36,7 +37,12 @@ a = Analysis(
         'uvicorn.protocols.websockets.auto',
         'uvicorn.lifespan.on',
         'aiosqlite',
-        'apscheduler'
+        'apscheduler',
+        'passlib.handlers.bcrypt',
+        'app.auth.deps',
+        'app.core.config',
+        'app.api.v1.endpoints.sync',
+        'app.sync.worker',
     ],
     datas=[
         ('alembic', 'alembic'),
@@ -44,9 +50,13 @@ a = Analysis(
         ('alembic_sqlite.ini', '.'),
     ],
 )
+pyz = PYZ(a.pure, a.zipped_data)
 exe = EXE(
-    a.pyz, a.scripts, a.binaries, a.zipfiles, a.datas,
+    pyz,
+    a.scripts,
+    a.binaries,
+    a.datas,
+    [],
     name='qems-backend',
-    console=True,   # Setting to True for debugging right now
-    onefile=True,
+    console=True,
 )

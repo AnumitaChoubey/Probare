@@ -1,23 +1,33 @@
 import argparse
 import os
 import sys
+
+def parse_early_args():
+    parser = argparse.ArgumentParser(description="QEMS Desktop Backend")
+    parser.add_argument("--port", type=int, default=8765, help="Port to run the server on")
+    parser.add_argument("--db-path", type=str, required=True, help="Path to the SQLite database")
+    args, _ = parser.parse_known_args()
+    return args
+
+early_args = parse_early_args()
+os.environ["SQLITE_DB_PATH"] = early_args.db_path
+
 import uvicorn
+from sqlalchemy import create_engine
 from alembic.config import Config
 from alembic import command
-import importlib
+
+# Force Pyinstaller to bundle dynamic modules by importing them statically here
+import app.auth.deps
+import app.core.config
+import app.api.v1.endpoints.sync
+import app.sync.worker
 
 # Force import all models for PyInstaller
 import app.db.models
 import app.db.models.sync
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="QEMS Desktop Backend")
-    parser.add_argument("--port", type=int, default=8765, help="Port to run the server on")
-    parser.add_argument("--db-path", type=str, required=True, help="Path to the SQLite database")
-    return parser.parse_args()
-
 def run_migrations(db_path: str):
-    print(f"Running SQLite migrations on {db_path}...")
     
     # Alembic assumes it's running from the root where alembic_sqlite.ini is
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -34,10 +44,12 @@ def run_migrations(db_path: str):
         sys.exit(1)
 
 def main():
-    args = parse_args()
+    args = early_args
     
     # Ensure SQLite path is set for the backend config
     os.environ["SQLITE_DB_PATH"] = args.db_path
+    from app.core.config import settings
+    settings.SQLITE_DB_PATH = args.db_path
     
     # We must run migrations before importing app.main because importing it 
     # triggers db models and we want to make sure the db is ready

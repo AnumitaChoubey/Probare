@@ -41,7 +41,7 @@ async function startBackend() {
   
   let executablePath;
   if (isDev) {
-    executablePath = path.join(__dirname, '..', '..', 'backend', 'dist', 'qems-backend', 'qems-backend.exe');
+    executablePath = path.join(__dirname, '..', '..', 'backend', 'dist', 'qems-backend.exe');
   } else {
     executablePath = path.join(process.resourcesPath, 'backend', 'qems-backend.exe');
   }
