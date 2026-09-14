@@ -1,6 +1,8 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, BigInteger, Boolean, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Uuid, JSON, Column, String, BigInteger, Boolean, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
@@ -20,6 +22,12 @@ class EvidenceFile(Base):
     is_current_version = Column(Boolean, nullable=False, default=True)
     supersedes_evidence_id = Column(String(36), ForeignKey("evidence_files.id"), nullable=True)
     uploaded_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    # Sync Columns
+    local_id = Column(Uuid, nullable=True, unique=True, index=True)
+    sync_status = Column(String(20), default="SYNCED", nullable=False)
+    updated_by_device_id = Column(Uuid, nullable=True)
+    version = Column(Integer, default=1, nullable=False)
 
     __table_args__ = (
         CheckConstraint("stage IN ('ORIGINAL_LOGGING', 'REBUTTAL', 'DECISION')", name="chk_evidence_stage"),

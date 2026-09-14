@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String, Integer, Boolean, Text
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
+from sqlalchemy import Uuid, JSON, Column, String, Integer, Boolean, Text
 from app.db.base_class import Base
 
 class NotificationTemplate(Base):
@@ -7,5 +9,6 @@ class NotificationTemplate(Base):
     code = Column(String(50), primary_key=True)  # NT-01..NT-08
     subject_template = Column(String(255), nullable=False)
     body_template = Column(Text, nullable=False)
+    teams_card_json = Column(JSON, nullable=True)
     version = Column(Integer, nullable=False, default=1)
     is_active = Column(Boolean, nullable=False, default=True)

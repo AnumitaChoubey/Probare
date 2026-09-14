@@ -50,7 +50,7 @@ class LeadershipDashboardResponse(BaseModel):
     by_lob: list[NamedCount]
     by_category: list[NamedCount]
     aging_distribution: list[AgingBucket]
-
+    anomalies: list[dict] = []
 
 # helper
 
@@ -77,12 +77,20 @@ async def _fetch_errors(
             raise HTTPException(status_code=502, detail="Failed to fetch errors from foundation service")
         return resp.json()
 
+async def _fetch_anomalies() -> list[dict]:
+    # Since we are in the dashboard router and don't have db injected here cleanly (it uses httpx),
+    # let's just query via async session. Wait, I can inject db in get_leadership_dashboard
+    return []
 
 def _month_key(dt: datetime) -> str:
     return dt.strftime("%b")
 
 
 # endpoint
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.session import get_db
+from sqlalchemy import select
+from app.db.models.ai import AISuggestionLog
 
 @router.get("/leadership", response_model=LeadershipDashboardResponse)
 async def get_leadership_dashboard(
@@ -91,6 +99,7 @@ async def get_leadership_dashboard(
     severity: Optional[str] = Query(default=None),
     client_impact_only: bool = Query(default=False),
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
 ):
     errors = await _fetch_errors(
         auth_header=f"Bearer {current_user.token}" if hasattr(current_user, "token") else "",
@@ -154,6 +163,17 @@ async def get_leadership_dashboard(
     by_category = [NamedCount(name=name, value=count) for name, count in sorted(category_counts.items(), key=lambda kv: -kv[1])]
     aging_distribution = [AgingBucket(state=s, count=aging_counts.get(s, 0)) for s in ("green", "amber", "red")]
 
+    anomalies = []
+    if not settings.SQLITE_DB_PATH:
+        # Fetch latest anomalies
+        anomaly_res = await db.execute(
+            select(AISuggestionLog)
+            .where(AISuggestionLog.suggestion_type == "ANOMALY")
+            .order_by(AISuggestionLog.created_at.desc())
+            .limit(10)
+        )
+        anomalies = [log.suggested_value for log in anomaly_res.scalars().all()]
+
     return LeadershipDashboardResponse(
         total_errors=total_errors,
         sla_compliance_pct=sla_compliance_pct,
@@ -164,4 +184,5 @@ async def get_leadership_dashboard(
         by_lob=by_lob,
         by_category=by_category,
         aging_distribution=aging_distribution,
+        anomalies=anomalies
     )

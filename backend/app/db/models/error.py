@@ -1,28 +1,31 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 import uuid
 from datetime import datetime, date
+from sqlalchemy import Uuid, JSON
 from sqlalchemy import (
+    String, Integer,
     Column, String, ForeignKey, Integer, Boolean, Text, Date, DateTime, BigInteger, CheckConstraint, Index
 )
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
 class Error(Base):
     __tablename__ = "errors"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid, primary_key=True, default=uuid.uuid4)
     qa_error_id = Column(String, unique=True, nullable=False, index=True)
     
-    lob_id = Column(UUID(as_uuid=True), ForeignKey("lobs.id"), nullable=False)
-    category_id = Column(UUID(as_uuid=True), ForeignKey("categories.id"), nullable=False)
-    sub_category_id = Column(UUID(as_uuid=True), ForeignKey("sub_categories.id"), nullable=True)
+    lob_id = Column(Uuid, ForeignKey("lobs.id"), nullable=False)
+    category_id = Column(Uuid, ForeignKey("categories.id"), nullable=False)
+    sub_category_id = Column(Uuid, ForeignKey("sub_categories.id"), nullable=True)
     
     severity = Column(String, nullable=False)
     status = Column(String, nullable=False)
     transaction_reference = Column(String, nullable=False)
     
-    logged_by_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    owner_user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    logged_by_user_id = Column(Uuid, ForeignKey("users.id"), nullable=False)
+    owner_user_id = Column(Uuid, ForeignKey("users.id"), nullable=True)
     
     date_of_occurrence = Column(Date, nullable=False)
     date_of_detection = Column(Date, nullable=False)
@@ -45,6 +48,12 @@ class Error(Base):
     submitted_at = Column(DateTime(timezone=True), nullable=True)
     closed_at = Column(DateTime(timezone=True), nullable=True)
 
+    # Sync Columns
+    local_id = Column(Uuid, nullable=True, unique=True, index=True)
+    sync_status = Column(String(20), default="SYNCED", nullable=False)
+    updated_by_device_id = Column(Uuid, nullable=True)
+    version = Column(Integer, default=1, nullable=False)
+
     decisions = relationship(
         "Decision",
         primaryjoin="Error.id == Decision.error_id",
@@ -55,7 +64,7 @@ class Error(Base):
     __table_args__ = (
         CheckConstraint("severity IN ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW')", name="chk_severity"),
         CheckConstraint("date_of_occurrence <= CURRENT_DATE", name="chk_date_occurrence"),
-        CheckConstraint("char_length(description) >= 20", name="chk_description_length"),
+        CheckConstraint("length(description) >= 20", name="chk_description_length"),
         Index("idx_errors_status", "status"),
         Index("idx_errors_lob_category", "lob_id", "category_id"),
         Index("idx_errors_owner_user_id", "owner_user_id"),

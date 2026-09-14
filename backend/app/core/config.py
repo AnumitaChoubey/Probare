@@ -14,18 +14,29 @@ class Settings(BaseSettings):
     # Optional single connection string (overrides individual parts)
     DATABASE_URL: str | None = None
     
-    # Auth — REQUIRED in production: generate with `openssl rand -hex 32`
-    # Never commit a real value here; always override via .env
-    SECRET_KEY: str = "CHANGE_ME_GENERATE_WITH_OPENSSL_RAND_HEX_32"
+    # Auth — RS256 Keypair
+    # Central API needs JWT_PRIVATE_KEY to sign tokens. Local desktop apps only need JWT_PUBLIC_KEY to verify.
+    JWT_PRIVATE_KEY: str = ""
+    JWT_PUBLIC_KEY: str = ""
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
     # Internal Services
     ERRORS_SERVICE_BASE_URL: str = "http://localhost:8000"
     
+    # Local Database (Desktop Shell)
+    SQLITE_DB_PATH: str | None = None
+    
+    # Azure Blob Storage (Phase 2)
+    AZURE_STORAGE_CONNECTION_STRING: str | None = None
+    AZURE_STORAGE_CONTAINER_NAME: str = "qems-evidence"
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
     
     @property
     def ASYNC_DATABASE_URI(self) -> str:
+        if self.SQLITE_DB_PATH:
+            return f"sqlite+aiosqlite:///{self.SQLITE_DB_PATH}"
+            
         if self.DATABASE_URL:
             # SQLAlchemy async requires the asyncpg driver scheme
             return self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)

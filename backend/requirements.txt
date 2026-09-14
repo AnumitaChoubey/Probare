@@ -12,3 +12,10 @@ asyncpg>=0.28.0
 python-multipart>=0.0.6
 apscheduler>=3.10.1
 httpx>=0.27.0
+aiosqlite 
+azure-storage-blob>=12.19.0
+ 
+pgvector>=0.2.5
+openai>=1.14.0
+scipy>=1.12.0
+numpy>=1.26.0

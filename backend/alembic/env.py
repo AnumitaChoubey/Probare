@@ -12,10 +12,7 @@ from app.core.config import settings
 from app.db.base_class import Base
 
 # Import all models here so Alembic can discover them
-import app.db.models.user
-import app.db.models.role
-import app.db.models.user_role
-# -----------------------------------------------
+import app.db.models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

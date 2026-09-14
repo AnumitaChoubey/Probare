@@ -4,7 +4,7 @@
 // contextIsolation is ON — the renderer never gets raw Node.js access.
 
 const { contextBridge, ipcRenderer, shell } = require('electron');
-const { IPC } = require('./ipcChannels');
+const { IPC } = require('./ipcChannels.cjs');
 
 contextBridge.exposeInMainWorld('qemsDesktop', {
   /**

@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer, JSON
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
+from sqlalchemy import Uuid, JSON, Column, Integer, JSON
 from app.db.base_class import Base
 
 class EvidenceRule(Base):

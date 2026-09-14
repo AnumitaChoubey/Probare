@@ -1,5 +1,7 @@
+
+from sqlalchemy import Column, String, Integer, Uuid, Boolean, Float, Text, Date, DateTime, BigInteger, ForeignKey, CheckConstraint, Index
 from datetime import datetime
-from sqlalchemy import Column, BigInteger, String, DateTime, ForeignKey, CheckConstraint
+from sqlalchemy import Uuid, JSON, Column, BigInteger, String, DateTime, ForeignKey, CheckConstraint
 from sqlalchemy.orm import relationship
 from app.db.base_class import Base
 
