@@ -9,5 +9,6 @@ class NotificationTemplate(Base):
     code = Column(String(50), primary_key=True)  # NT-01..NT-08
     subject_template = Column(String(255), nullable=False)
     body_template = Column(Text, nullable=False)
+    teams_card_json = Column(JSON, nullable=True)
     version = Column(Integer, nullable=False, default=1)
     is_active = Column(Boolean, nullable=False, default=True)
