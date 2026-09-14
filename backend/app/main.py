@@ -118,6 +118,10 @@ from app.integrations.outlook.router import router as outlook_router
 app.include_router(teams_router)
 app.include_router(outlook_router)
 
+# ── P3: AI Insights — added by Person 4 ──────────────────────────────────────
+from app.ai.router import router as ai_router
+app.include_router(ai_router)
+
 
 @app.get("/health", tags=["Health"])
 def health_check():
