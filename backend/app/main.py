@@ -112,6 +112,10 @@ app.include_router(notif_templates_router, tags=["Admin"])
 from app.admin.evidence_rules import router as evidence_rules_router
 app.include_router(evidence_rules_router, tags=["Admin"])
 
+# ── P2: Microsoft Integrations — added by Person 3 ───────────────────────────
+from app.integrations.teams.router import router as teams_router
+app.include_router(teams_router)
+
 
 @app.get("/health", tags=["Health"])
 def health_check():
