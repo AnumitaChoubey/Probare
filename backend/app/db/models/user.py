@@ -20,6 +20,7 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    aad_object_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, unique=True, nullable=True)
 
     # Relationships
     user_roles: Mapped[list["UserRole"]] = relationship(
