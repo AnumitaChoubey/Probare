@@ -114,7 +114,9 @@ app.include_router(evidence_rules_router, tags=["Admin"])
 
 # ── P2: Microsoft Integrations — added by Person 3 ───────────────────────────
 from app.integrations.teams.router import router as teams_router
+from app.integrations.outlook.router import router as outlook_router
 app.include_router(teams_router)
+app.include_router(outlook_router)
 
 
 @app.get("/health", tags=["Health"])

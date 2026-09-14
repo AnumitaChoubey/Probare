@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     # Local Database (Desktop Shell)
     SQLITE_DB_PATH: str | None = None
     
+    # Azure Blob Storage (Phase 2)
+    AZURE_STORAGE_CONNECTION_STRING: str | None = None
+    AZURE_STORAGE_CONTAINER_NAME: str = "qems-evidence"
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
     
     @property

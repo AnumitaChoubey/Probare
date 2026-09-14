@@ -173,12 +173,17 @@ async def download_evidence(
     db.add(log_entry)
     await db.commit()
 
-    filepath = storage.get_file_path(evidence.storage_uri)
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="File asset not found on storage disk")
+    filepath_or_url = storage.get_download_url(evidence.storage_uri)
+    if filepath_or_url.startswith("http"):
+        # It's an Azure Blob SAS URL, redirect to it
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse(url=filepath_or_url)
+
+    if not os.path.exists(filepath_or_url):
+        raise HTTPException(status_code=404, detail="File physically missing from disk")
 
     return FileResponse(
-        path=filepath,
+        path=filepath_or_url,
         filename=evidence.file_name,
         media_type=evidence.file_type,
     )
