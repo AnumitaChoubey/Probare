@@ -153,7 +153,22 @@ async def create_error(
             
         await db.commit()
         await db.refresh(new_error, attribute_names=['decisions'])
-        return ErrorResponse.model_validate(new_error) if not is_ops_user(current_user) else ErrorResponseOps.model_validate(new_error)
+        
+        # Check for duplicates using AI Embeddings (Central Only)
+        from app.ai.embeddings import check_and_store_duplicate
+        duplicate_warnings = await check_and_store_duplicate(
+            db=db,
+            error_id=new_error.id,
+            lob_id=new_error.lob_id,
+            description=new_error.description
+        )
+        await db.commit() # commit the new embedding
+        
+        resp = ErrorResponse.model_validate(new_error).model_dump() if not is_ops_user(current_user) else ErrorResponseOps.model_validate(new_error).model_dump()
+        if duplicate_warnings:
+            resp["warnings"] = duplicate_warnings
+            
+        return resp
     except Exception as e:
         import traceback
         with open("error_traceback.txt", "w") as f:
@@ -237,17 +252,29 @@ async def submit_error(request: Request, error_id: uuid.UUID, db: AsyncSession =
     await db.commit()
     await db.refresh(error, attribute_names=["decisions"])
     
+    # Duplicate check on submit (if not already done, or to catch new duplicates)
+    from app.ai.embeddings import check_and_store_duplicate
+    duplicate_warnings = await check_and_store_duplicate(
+        db=db,
+        error_id=error.id,
+        lob_id=error.lob_id,
+        description=error.description
+    )
+    await db.commit() # commit the new embedding
+
     # We could return a warning header if no owner was found, but JSON is fine too
+    warnings = duplicate_warnings.copy()
     if not error.owner_user_id:
-        # According to specs, "warnings" array in 201 body.
-        # But we must fit the response model. We'll return custom dict for this specific endpoint.
-        resp = ErrorResponse.model_validate(error).model_dump()
-        if is_ops_user(current_user):
-            resp = ErrorResponseOps.model_validate(error).model_dump()
-        resp["warnings"] = ["No ownership mapping found - this error is unassigned."]
-        return resp
+        warnings.append("No ownership mapping found - this error is unassigned.")
         
-    return ErrorResponse.model_validate(error) if not is_ops_user(current_user) else ErrorResponseOps.model_validate(error)
+    resp = ErrorResponse.model_validate(error).model_dump()
+    if is_ops_user(current_user):
+        resp = ErrorResponseOps.model_validate(error).model_dump()
+        
+    if warnings:
+        resp["warnings"] = warnings
+        
+    return resp
 
 @router.patch("/{error_id}/status")
 async def update_status(error_id: uuid.UUID, payload: ErrorStatusUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
