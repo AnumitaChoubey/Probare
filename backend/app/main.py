@@ -21,6 +21,11 @@ scheduler = AsyncIOScheduler()
 async def lifespan(app: FastAPI):
     # Startup
     scheduler.add_job(run_sla_engine, "interval", minutes=1, id="sla_engine_job")
+    if not settings.SQLITE_DB_PATH:
+        from app.jobs.anomaly_job import run_anomaly_detection_job
+        # Run anomaly job daily at 1 AM
+        scheduler.add_job(run_anomaly_detection_job, "cron", hour=1, minute=0, id="anomaly_job")
+        
     if settings.SQLITE_DB_PATH:
         # Run sync worker every 15 seconds locally
         scheduler.add_job(run_sync_worker, "interval", seconds=15, id="sync_worker_job")
