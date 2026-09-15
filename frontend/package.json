@@ -14,6 +14,9 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@tanstack/react-table": "^9.2.4",
+    "@tanstack/react-virtual": "^3.14.13",
+    "clsx": "^2.1.1",
     "electron-log": "^5.4.4",
     "electron-updater": "^6.8.9",
     "lucide-react": "^0.300.0",
@@ -21,7 +24,9 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.21.0",
     "recharts": "^3.10.1",
-    "tailwindcss": "^4.3.3"
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^4.3.3",
+    "wavesurfer.js": "^7.12.12"
   },
   "devDependencies": {
     "@types/react": "^18.3.31",
