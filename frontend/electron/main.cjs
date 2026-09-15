@@ -81,6 +81,46 @@ function createWindow() {
 
 // ── App Lifecycle ─────────────────────────────────────────────────────────────
 
+const log = require('electron-log');
+const { autoUpdater } = require('electron-updater');
+
+// Configure electron-log
+log.transports.file.level = 'info';
+autoUpdater.logger = log;
+
+app.on('before-quit', () => {
+  backendManager.stopBackend();
+});
+
+// ── Auto-Updater (Phase 4) ───────────────────────────────────────────────────
+autoUpdater.on('checking-for-update', () => {
+  log.info('[QEMS] Checking for updates...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  log.info('[QEMS] Update available.', info);
+  // Optional: notify renderer process to show a badge
+  if (mainWindow) mainWindow.webContents.send('update-available', info);
+});
+
+autoUpdater.on('update-not-available', (info) => {
+  log.info('[QEMS] Update not available.', info);
+});
+
+autoUpdater.on('error', (err) => {
+  log.error('[QEMS] Error in auto-updater.', err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  log.info(`[QEMS] Download speed: ${progressObj.bytesPerSecond} - Downloaded ${progressObj.percent}%`);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  log.info('[QEMS] Update downloaded.', info);
+  // Optional: notify renderer process to prompt user to restart
+  if (mainWindow) mainWindow.webContents.send('update-downloaded', info);
+});
+
 app.whenReady().then(async () => {
   // Start local backend first
   await backendManager.startBackend();
@@ -102,15 +142,16 @@ app.whenReady().then(async () => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+  
+  if (app.isPackaged) {
+    // Only check for updates in packaged apps
+    autoUpdater.checkForUpdatesAndNotify();
+  }
 });
 
 // Quit on all windows closed (except macOS — standard convention)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
-});
-
-app.on('before-quit', () => {
-  backendManager.stopBackend();
 });
 
 // ── Deep Link Protocol (Phase 2: qems:// — Teams/Outlook notification links) ──
