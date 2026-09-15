@@ -22,6 +22,8 @@ class User(Base):
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     aad_object_id: Mapped[Optional[uuid.UUID]] = mapped_column(Uuid, unique=True, nullable=True)
 
+    saved_filters = relationship("SavedFilter", back_populates="user", cascade="all, delete-orphan")
+
     # Relationships
     user_roles: Mapped[list["UserRole"]] = relationship(
         "UserRole", back_populates="user", cascade="all, delete-orphan", lazy="selectin"

@@ -26,6 +26,7 @@ from app.db.models.ownership_mapping import OwnershipMapping
 from app.db.models.working_hours_calendar import WorkingHoursCalendar
 from app.db.models.sync import Project, Device, SyncCursor, SyncQueue
 from app.db.models.ai import ErrorEmbedding, AISuggestionLog
+from app.db.models.saved_filter import SavedFilter
 
 # Expose models for SQLAlchemy registry
-__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule", "Holiday", "ConfigChangeHistory", "SLARule", "EscalationMatrix", "OwnershipMapping", "WorkingHoursCalendar", "Project", "Device", "SyncCursor", "SyncQueue"]
+__all__ = ["User", "Role", "UserRole", "Lob", "Category", "SubCategory", "Error", "ErrorStatusHistory", "QaErrorIdSequence", "Rebuttal", "Decision", "EvidenceFile", "EvidenceAccessLog", "NotificationTemplate", "NotificationsLog", "InAppNotification", "EvidenceRule", "Holiday", "ConfigChangeHistory", "SLARule", "EscalationMatrix", "OwnershipMapping", "WorkingHoursCalendar", "Project", "Device", "SyncCursor", "SyncQueue", "ErrorEmbedding", "AISuggestionLog", "SavedFilter"]
