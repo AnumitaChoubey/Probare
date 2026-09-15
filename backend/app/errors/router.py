@@ -50,9 +50,14 @@ def is_ops_user(current_user) -> bool:
 async def list_errors(
     status: Optional[str] = None,
     severity: Optional[str] = None,
-    lob_id: Optional[uuid.UUID] = None,
+    lob_id: Optional[Union[uuid.UUID, List[uuid.UUID]]] = Query(None),
     category_id: Optional[uuid.UUID] = None,
     owner_user_id: Optional[uuid.UUID] = None,
+    project_id: Optional[List[uuid.UUID]] = Query(None),
+    sla_state: Optional[str] = None,
+    date_field: Optional[str] = None,
+    date_from: Optional[datetime] = None,
+    date_to: Optional[datetime] = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -65,30 +70,62 @@ async def list_errors(
     if severity:
         query = query.filter(Error.severity == severity)
     if lob_id:
-        query = query.filter(Error.lob_id == lob_id)
+        if isinstance(lob_id, list):
+            query = query.filter(Error.lob_id.in_(lob_id))
+        else:
+            query = query.filter(Error.lob_id == lob_id)
     if category_id:
         query = query.filter(Error.category_id == category_id)
     if owner_user_id:
         query = query.filter(Error.owner_user_id == owner_user_id)
+    if project_id: # For future expandability when project mapping is active
+        pass
         
-    # Count total
-    count_query = select(func.count()).select_from(query.subquery())
-    total_res = await db.execute(count_query)
-    total_count = total_res.scalar_one()
-    
-    # Paginate
-    query = query.order_by(Error.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
-    res = await db.execute(query)
-    errors = res.scalars().all()
-    
-    # For lists, we must omit internal_notes for OPS
-    ops_view = is_ops_user(current_user)
-    items = []
-    for e in errors:
-        if ops_view:
-            items.append(ErrorResponseOps.model_validate(e))
-        else:
-            items.append(ErrorResponse.model_validate(e))
+    if date_field and (date_from or date_to):
+        field_map = {
+            "occurrence": Error.date_of_occurrence,
+            "detection": Error.date_of_detection,
+            "created": Error.created_at
+        }
+        col = field_map.get(date_field.lower())
+        if col is not None:
+            if date_from:
+                query = query.filter(col >= date_from)
+            if date_to:
+                query = query.filter(col <= date_to)
+                
+    if sla_state:
+        # Complex computed field: fetch all matching base filters, then post-filter
+        query = query.order_by(Error.created_at.desc())
+        res = await db.execute(query)
+        errors = res.scalars().all()
+        
+        ops_view = is_ops_user(current_user)
+        items = []
+        for e in errors:
+            model = ErrorResponseOps.model_validate(e) if ops_view else ErrorResponse.model_validate(e)
+            if model.sla_state and model.sla_state.state == sla_state:
+                items.append(model)
+                
+        total_count = len(items)
+        # Apply pagination in-memory
+        start = (page - 1) * page_size
+        items = items[start:start + page_size]
+        
+    else:
+        # Standard DB-level pagination
+        count_query = select(func.count()).select_from(query.subquery())
+        total_res = await db.execute(count_query)
+        total_count = total_res.scalar_one()
+        
+        query = query.order_by(Error.created_at.desc()).offset((page - 1) * page_size).limit(page_size)
+        res = await db.execute(query)
+        errors = res.scalars().all()
+        
+        ops_view = is_ops_user(current_user)
+        items = []
+        for e in errors:
+            items.append(ErrorResponseOps.model_validate(e) if ops_view else ErrorResponse.model_validate(e))
             
     return ErrorListResponse(
         items=items,

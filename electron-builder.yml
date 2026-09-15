@@ -44,5 +44,8 @@ linux:
   icon: frontend/electron/build/icon.png
   category: Office
 
-# Auto-update server — left null until Phase 4
-publish: null
+# Auto-update server
+publish: 
+  provider: github
+  owner: AnumitaChoubey
+  repo: Probare

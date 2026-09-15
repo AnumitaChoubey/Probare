@@ -93,3 +93,60 @@ async def export_report(
     response = StreamingResponse(iter([output.getvalue()]), media_type="text/csv")
     response.headers["Content-Disposition"] = "attachment; filename=export.csv"
     return response
+
+@router.get("/export/powerbi")
+async def export_powerbi(
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Dedicated unauthenticated endpoint for Power BI to fetch all raw error data.
+    This acts as a live CSV feed. In production, consider adding API key auth.
+    """
+    query = select(Error).options(
+        joinedload(Error.lob),
+        joinedload(Error.category),
+        joinedload(Error.sub_category),
+        joinedload(Error.logged_by_user),
+        joinedload(Error.owner_user)
+    ).order_by(Error.created_at.desc())
+    
+    result = await db.execute(query)
+    errors = result.scalars().unique().all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Denormalized flat schema optimal for Power BI
+    headers = [
+        "error_id", "qa_error_id", "created_at", "updated_at", "closed_at",
+        "status", "severity", "lob_name", "category_name", "subcategory_name",
+        "logged_by", "owner", "client_impact", "escalation_level",
+        "sla_clock_started_at", "transaction_reference"
+    ]
+    writer.writerow(headers)
+    
+    for error in errors:
+        writer.writerow([
+            str(error.id),
+            error.qa_error_id,
+            error.created_at.isoformat() if error.created_at else "",
+            error.updated_at.isoformat() if error.updated_at else "",
+            error.closed_at.isoformat() if hasattr(error, 'closed_at') and error.closed_at else "",
+            error.status,
+            error.severity,
+            error.lob.name if error.lob else "",
+            error.category.name if error.category else "",
+            error.sub_category.name if error.sub_category else "",
+            f"{error.logged_by_user.first_name} {error.logged_by_user.last_name}" if error.logged_by_user else "",
+            f"{error.owner_user.first_name} {error.owner_user.last_name}" if error.owner_user else "",
+            "1" if error.client_impact_flag else "0",
+            error.current_escalation_level,
+            error.sla_clock_started_at.isoformat() if error.sla_clock_started_at else "",
+            error.transaction_reference or ""
+        ])
+        
+    output.seek(0)
+    
+    response = StreamingResponse(iter([output.getvalue()]), media_type="text/csv")
+    response.headers["Content-Disposition"] = "attachment; filename=qems_powerbi_export.csv"
+    return response

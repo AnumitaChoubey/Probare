@@ -58,16 +58,24 @@ app.add_middleware(
 
 
 app.include_router(operations.router)
-# ── P1: Foundation routers ─ added by Person 1 ──────────────────────────────
-# from app.auth.routes import router as auth_router
-# from app.errors.routes import router as errors_router
-# from app.admin.lobs import router as lobs_router
-from app.admin.categories import router as categories_router
+# ── P1: Foundation — added by Person 1 ───────────────────────────────────────
+from app.errors.router import router as errors_router
+from app.rebuttal.router import router as rebuttal_router
+from app.search.router import router as search_router
+from app.search.saved_filters_router import router as saved_filters_router
+from app.dashboards.operations import router as ops_dash_router
+from app.dashboards.team import router as team_dash_router
+from app.dashboards.leadership import router as lead_dash_router
 from app.api.v1.endpoints.sync import router as sync_router
-# from app.admin.sub_categories import router as sub_categories_router
-# from app.admin.users import router as users_router
-app.include_router(auth_router, prefix="/auth", tags=["Auth"])
-app.include_router(errors_router, prefix="/errors", tags=["Errors"])
+from app.admin.categories import router as categories_router
+
+app.include_router(errors_router, prefix="/errors")
+app.include_router(rebuttal_router, prefix="/errors")
+app.include_router(search_router)
+app.include_router(saved_filters_router)
+app.include_router(ops_dash_router)
+app.include_router(team_dash_router)
+app.include_router(lead_dash_router)
 app.include_router(sync_router, prefix="/sync", tags=["Sync"])
 app.include_router(config_history.router)
 # app.include_router(lobs_router,        prefix="/admin/lobs", tags=["Admin"])
