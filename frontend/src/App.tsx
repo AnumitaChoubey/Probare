@@ -3,6 +3,7 @@ import TitleBar from './app/shell/TitleBar';
 import Sidebar from './app/shell/Sidebar';
 import StatusBar from './app/shell/StatusBar';
 import CommandPalette from './app/shell/CommandPalette';
+import QueueTable from './features/queue/QueueTable';
 
 export default function App() {
   return (
@@ -12,10 +13,14 @@ export default function App() {
       <Sidebar />
       <main className="flex-1 ml-64 mt-12 mb-8 bg-slate-50 relative overflow-hidden flex flex-col h-[calc(100vh-5rem)]">
         <div className="flex-1 overflow-y-auto p-6">
-          <div className="text-center space-y-4 mt-20">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-800">QEMS Enterprise Shell</h1>
-            <p className="text-slate-500">Master Split View Architecture Loading...</p>
-          </div>
+          <Routes>
+            <Route path="/" element={<Navigate to="/queue" replace />} />
+            <Route path="/queue" element={<QueueTable />} />
+            <Route path="/inbox" element={<div className="p-8">Action Inbox Placeholder</div>} />
+            <Route path="/log-error" element={<div className="p-8">Log Error Placeholder</div>} />
+            <Route path="/disputes" element={<div className="p-8">Disputes Placeholder</div>} />
+            <Route path="/metrics" element={<div className="p-8">Metrics Placeholder</div>} />
+          </Routes>
         </div>
       </main>
       <StatusBar />
