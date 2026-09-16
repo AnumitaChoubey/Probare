@@ -5,7 +5,7 @@
 
 'use strict';
 
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, Notification } = require('electron');
 const path = require('path');
 const backendManager = require('./backendManager.cjs');
 
@@ -191,4 +191,17 @@ ipcMain.handle(IPC.CLEAR_SECURE_TOKEN, async (_e, key) => {
   if (!keytar) return;
   try { await keytar.deletePassword(KEYTAR_SERVICE, key); }
   catch (e) { console.error('[QEMS] keytar.deletePassword:', e.message); }
+});
+
+ipcMain.handle(IPC.SHOW_NOTIFICATION, (_e, { title, body }) => {
+  if (Notification.isSupported()) {
+    new Notification({ title, body }).show();
+  }
+});
+
+ipcMain.handle(IPC.UPLOAD_EVIDENCE, async (_e, { fileBuffer, fileName }) => {
+  // In a real implementation, this buffer would be sent to S3/Blob storage
+  // or written locally to a temp SQLite blob cache.
+  console.log(`[QEMS] Received evidence upload request for: ${fileName}, buffer size: ${fileBuffer.length} bytes`);
+  return { success: true, fileName };
 });

@@ -53,4 +53,14 @@ contextBridge.exposeInMainWorld('qemsDesktop', {
     // Return a cleanup function so React can call it on unmount
     return () => ipcRenderer.removeAllListeners(IPC.DEEP_LINK_NAVIGATE);
   },
+
+  /**
+   * Triggers a native OS desktop notification.
+   */
+  showNotification: (title, body) => ipcRenderer.invoke(IPC.SHOW_NOTIFICATION, { title, body }),
+
+  /**
+   * Securely uploads raw file buffers (e.g. pasted clipboard images) directly from the OS to the backend.
+   */
+  uploadEvidence: (fileBuffer, fileName) => ipcRenderer.invoke(IPC.UPLOAD_EVIDENCE, { fileBuffer, fileName }),
 });
