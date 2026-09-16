@@ -134,7 +134,7 @@ export default function QueueTable() {
           
           {/* Sticky Header */}
           <div className="sticky top-0 z-10 bg-slate-100 border-b border-slate-200 shadow-sm flex text-xs font-bold text-slate-500 uppercase tracking-wider">
-            {table.getFlatHeaders().map(header => (
+            {table.getFlatHeaders().map((header: any) => (
               <div 
                 key={header.id} 
                 className="px-4 py-3 flex items-center cursor-pointer hover:bg-slate-200 transition-colors select-none"
@@ -148,7 +148,7 @@ export default function QueueTable() {
           </div>
 
           {/* Virtual Rows */}
-          {rowVirtualizer.getVirtualItems().map(virtualRow => {
+          {rowVirtualizer.getVirtualItems().map((virtualRow: any) => {
             const row = rows[virtualRow.index];
             return (
               <div
@@ -159,7 +159,7 @@ export default function QueueTable() {
                   transform: `translateY(${virtualRow.start + 41}px)`, // Offset by header height
                 }}
               >
-                {row.getVisibleCells().map(cell => (
+                {row.getVisibleCells().map((cell: any) => (
                   <div key={cell.id} className="px-4 py-3 text-sm text-slate-700 flex items-center truncate" style={{ width: cell.column.getSize() }}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </div>
