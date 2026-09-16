@@ -5,6 +5,7 @@ import StatusBar from './app/shell/StatusBar';
 import CommandPalette from './app/shell/CommandPalette';
 import QueueTable from './features/queue/QueueTable';
 import NewErrorForm from './features/queue/NewErrorForm';
+import DisputeModal from './features/queue/DisputeModal';
 
 export default function App() {
   return (
@@ -19,7 +20,7 @@ export default function App() {
             <Route path="/queue" element={<QueueTable />} />
             <Route path="/inbox" element={<div className="p-8">Action Inbox Placeholder</div>} />
             <Route path="/log-error" element={<div className="py-4"><NewErrorForm /></div>} />
-            <Route path="/disputes" element={<div className="p-8">Disputes Placeholder</div>} />
+            <Route path="/disputes" element={<div className="py-4"><DisputeModal /></div>} />
             <Route path="/metrics" element={<div className="p-8">Metrics Placeholder</div>} />
           </Routes>
         </div>
