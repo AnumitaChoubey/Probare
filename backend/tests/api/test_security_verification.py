@@ -262,13 +262,14 @@ async def test_error_information_leak(security_data):
     version = response.json()["version"]
 
     with patch.object(AuditService, 'record_action', side_effect=ValueError("Secret internal database password: Password123")):
-        async with AsyncClient(transport=transport, base_url="http://test") as ac:
-            transition_response = await ac.post(
-                f"/api/v1/projects/{project_id}/quality-events/{event_id}/transitions",
-                json={"target_state": "Logged", "expected_version": version, "reason": "leak"},
-                headers={"Authorization": f"Bearer dev_{user_a.id}"}
-            )
-            
+        with patch('app.api.errors.settings.APPLICATION_ENV', 'production'):
+            async with AsyncClient(transport=transport, base_url="http://test") as ac:
+                transition_response = await ac.post(
+                    f"/api/v1/projects/{project_id}/quality-events/{event_id}/transitions",
+                    json={"target_state": "Logged", "expected_version": version, "reason": "leak"},
+                    headers={"Authorization": f"Bearer dev_{user_a.id}"}
+                )
+
     assert transition_response.status_code == 500
     data = transition_response.json()
     assert "error" in data

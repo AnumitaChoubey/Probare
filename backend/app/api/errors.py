@@ -1,6 +1,9 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 import uuid
+import logging
+import traceback
+from app.core.config import settings
 from app.domain.exceptions import (
     QEMSBusinessError, 
     ProjectAccessDeniedError, 
@@ -77,14 +80,25 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 async def global_exception_handler(request: Request, exc: Exception):
     request_id = request.state.request_id if hasattr(request.state, "request_id") else str(uuid.uuid4())
-    # In production, do not expose internal error details.
+    
+    # Log the full exception server-side always
+    logger = logging.getLogger(__name__)
+    logger.error(f"Unhandled Exception [req: {request_id}]: {exc}", exc_info=True)
+    
+    details = {}
+    if settings.APPLICATION_ENV == "development":
+        details = {
+            "exception": str(exc),
+            "traceback": traceback.format_exc().splitlines()
+        }
+
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
             "error": {
                 "code": "INTERNAL_SERVER_ERROR",
                 "message": "An unexpected error occurred.",
-                "details": {},
+                "details": details,
                 "request_id": request_id
             }
         },

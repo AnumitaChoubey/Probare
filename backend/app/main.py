@@ -20,10 +20,10 @@ from app.core.scheduler import setup_scheduler, shutdown_scheduler
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize rate limiter
-    import redis.asyncio as redis_async
-    from fastapi_limiter import FastAPILimiter
-    redis = redis_async.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
-    await FastAPILimiter.init(redis)
+    # import redis.asyncio as redis_async
+    # from fastapi_limiter import FastAPILimiter
+    # redis = redis_async.from_url(settings.REDIS_URL, encoding="utf-8", decode_responses=True)
+    # await FastAPILimiter.init(redis)
     
     # Start APScheduler jobs only if not in testing mode
     if os.getenv("APPLICATION_ENV") != "testing":
