@@ -8,7 +8,7 @@ export const rebuttalsApi = {
     return response.data;
   },
   
-  resolveRebuttal: async (eventId: string, data: { decision: string, rationale: string }): Promise<any> => {
+  resolveRebuttal: async (eventId: string, data: { decision: string, rationale: string, expected_version: number }): Promise<any> => {
     const response = await apiClient.post(`/projects/${getActiveProjectId()}/quality-events/${eventId}/rebuttal/decision`, data);
     return response.data;
   },

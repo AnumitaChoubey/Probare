@@ -213,7 +213,8 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resolveRebuttal = async (errorId: string, decision: any, rationale: string) => {
-    await resolveRebuttalMutation.mutateAsync({ id: errorId, data: { decision, rationale } });
+    const event = events.find(e => e.id === errorId);
+    await resolveRebuttalMutation.mutateAsync({ id: errorId, data: { decision, rationale, expected_version: event?.version || 1 } });
     addToast({ type: 'success', title: 'Rebuttal Resolved' });
   };
 
@@ -256,7 +257,10 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const bulkUpdateStatus = async (errorIds: string[], newStatus: QualityStatus) => {
-    for (const id of errorIds) await statusMutation.mutateAsync({ id, status: newStatus });
+    for (const id of errorIds) {
+      const event = events.find(e => e.id === id);
+      await statusMutation.mutateAsync({ id, status: newStatus, version: event?.version || 1 });
+    }
     addToast({ type: 'success', title: 'Bulk Status Update Complete' });
   };
 
