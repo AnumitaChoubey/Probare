@@ -253,5 +253,6 @@ class ExternalResourceMapping(Base, UUIDMixin, TimestampMixin):
 class IdempotencyRecord(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "idempotency_records"
     idempotency_key = Column(String(255), nullable=False, unique=True, index=True)
+    request_hash = Column(String(255), nullable=False)
     response_status = Column(Integer, nullable=False)
     response_body = Column(JSONB, nullable=False)
