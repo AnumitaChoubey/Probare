@@ -6,12 +6,14 @@ from enum import Enum
 class TeamsDestinationType(Enum):
     CHANNEL = "CHANNEL"
     CHAT = "CHAT"
+    WORKFLOW_WEBHOOK = "WORKFLOW_WEBHOOK"
 
 class TeamsDestination(BaseModel):
     destination_type: TeamsDestinationType
     team_id: Optional[str] = None
     channel_id: Optional[str] = None
     chat_id: Optional[str] = None
+    webhook_url: Optional[str] = None
 
 class MSGraphAdapter(ABC):
     """

@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     
     MS_GRAPH_PROVIDER: str = "mock"
     MS_GRAPH_WEBHOOK_SECRET: str | None = None
+    TEAMS_WEBHOOK_URL: str | None = None
     
     SLA_CHECK_INTERVAL_SECONDS: int = 60
 
@@ -48,6 +49,8 @@ class Settings(BaseSettings):
             raise ValueError("Mock AI Provider is not allowed in production")
         if self.APPLICATION_ENV == "production" and self.MS_GRAPH_PROVIDER.lower() == "mock":
             raise ValueError("Mock MS Graph Provider is not allowed in production")
+        if self.APPLICATION_ENV == "production" and self.AUTH_PROVIDER.lower() != "entra":
+            raise ValueError("Production environment requires Entra authentication (OIDC).")
         return self
 
 settings = Settings()

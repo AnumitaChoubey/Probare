@@ -55,13 +55,57 @@ class GraphAPIProvider(MSGraphAdapter):
                 raise
 
     async def send_teams_message(self, destination: TeamsDestination, title: str, body: str, metadata: Optional[Dict[str, Any]] = None) -> bool:
-        token = await self.get_app_token()
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
-        }
-        
+        token = None
+        headers = {}
         url = ""
+        payload = {}
+        
+        if destination.destination_type == TeamsDestinationType.WORKFLOW_WEBHOOK:
+            if not destination.webhook_url:
+                logger.error("Teams Workflow webhook requires webhook_url")
+                return False
+            url = destination.webhook_url
+            headers = {"Content-Type": "application/json"}
+            payload = {
+                "type": "message",
+                "attachments": [
+                    {
+                        "contentType": "application/vnd.microsoft.card.adaptive",
+                        "contentUrl": None,
+                        "content": {
+                            "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                            "type": "AdaptiveCard",
+                            "version": "1.4",
+                            "body": [
+                                {
+                                    "type": "TextBlock",
+                                    "text": title,
+                                    "weight": "Bolder",
+                                    "size": "Medium"
+                                },
+                                {
+                                    "type": "TextBlock",
+                                    "text": body,
+                                    "wrap": True
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        else:
+            token = await self.get_app_token()
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "body": {
+                    "contentType": "html",
+                    "content": f"<h3>{title}</h3><p>{body}</p>"
+                }
+            }
+        
         if destination.destination_type == TeamsDestinationType.CHANNEL:
             if not destination.team_id or not destination.channel_id:
                 logger.error("Channel messaging requires team_id and channel_id")
@@ -72,15 +116,8 @@ class GraphAPIProvider(MSGraphAdapter):
                 logger.error("Chat messaging requires chat_id")
                 return False
             url = f"https://graph.microsoft.com/v1.0/chats/{destination.chat_id}/messages"
-        else:
+        elif destination.destination_type != TeamsDestinationType.WORKFLOW_WEBHOOK:
             return False
-
-        payload = {
-            "body": {
-                "contentType": "html",
-                "content": f"<h3>{title}</h3><p>{body}</p>"
-            }
-        }
 
         async with httpx.AsyncClient() as client:
             try:

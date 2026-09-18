@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from app.models.integration import OutboxEvent
 from app.integrations.microsoft import get_ms_graph_adapter
 from app.integrations.microsoft.ms_graph_adapter import TeamsDestination, TeamsDestinationType
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -56,11 +57,10 @@ class OutboxWorker:
             
             try:
                 if event.event_type == "SEND_TEAMS_MESSAGE":
-                    # Determine destination. Hardcoding for now, in a real app this comes from Notification mapping
-                    # Assuming payload has tenant_id or user mapping
+                    # Use webhook configuration for production teams notifications
                     dest = TeamsDestination(
-                        destination_type=TeamsDestinationType.CHAT,
-                        chat_id=payload.get("user_id") # Simplify for example
+                        destination_type=TeamsDestinationType.WORKFLOW_WEBHOOK,
+                        webhook_url=settings.TEAMS_WEBHOOK_URL
                     )
                     success = await self.ms_graph_adapter.send_teams_message(
                         destination=dest,
