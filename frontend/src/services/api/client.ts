@@ -1,0 +1,73 @@
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
+
+let activeProjectId = '';
+
+export const setActiveProjectId = (id: string) => {
+  activeProjectId = id;
+};
+
+export const getActiveProjectId = () => {
+  if (!activeProjectId) {
+    console.warn('API called before activeProjectId was set from /auth/me context.');
+  }
+  return activeProjectId;
+};
+
+export const apiClient = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor for auth
+apiClient.interceptors.request.use(
+  (config) => {
+    // In a real app, this token would come from Entra ID MSAL library.
+    const isDev = import.meta.env.MODE === 'development';
+    
+    let devToken: string | undefined;
+    if (isDev) {
+      devToken = import.meta.env.VITE_DEV_TOKEN;
+      if (devToken) {
+        config.headers['Authorization'] = `Bearer ${devToken}`;
+      }
+    } else {
+      // In production, the Entra auth flow will inject the proper token here.
+      // We explicitly avoid referencing VITE_DEV_TOKEN in the else block
+      // to ensure dead-code elimination removes it from the prod bundle.
+    }
+    // In production, the Entra auth flow will inject the proper token here.
+    
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for generic error handling
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      const status = error.response.status;
+      if (status === 401) {
+        console.error('Unauthorized access - please login.');
+      } else if (status === 403) {
+        console.error('Permission denied.');
+      } else if (status === 409) {
+        console.error('CONCURRENT_MODIFICATION: Another user has modified this record. State will not be overwritten silently.');
+        if (window.qems?.notifications) {
+          window.qems.notifications.show('Concurrent Modification', 'The record was modified by another user. Please refresh.');
+        } else {
+          // A naive alert for non-electron fallback
+          alert('CONCURRENT_MODIFICATION: Record modified by another user. Please refresh.');
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
