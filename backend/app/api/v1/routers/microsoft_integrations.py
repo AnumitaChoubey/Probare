@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Response, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, Request, Response, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Any, Dict, Optional
 import logging
@@ -6,6 +6,7 @@ from app.core.database import get_db
 from app.core.config import settings
 from app.models.integration import IntegrationEvent
 import uuid
+from app.core.database import AsyncSessionLocal
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ async def validate_webhook(validationToken: str = Query(..., description="Micros
     return Response(content=validationToken, media_type="text/plain", status_code=200)
 
 @router.post("/webhooks")
-async def handle_webhook(request: Request, background_tasks: BackgroundTasks, db: AsyncSession = Depends(get_db)):
+async def handle_webhook(request: Request, db: AsyncSession = Depends(get_db)):
     """
     Handles incoming Microsoft Graph lifecycle and change notifications.
     Stores the notification safely as an IntegrationEvent and returns 202 Accepted.
@@ -72,7 +73,7 @@ async def handle_webhook(request: Request, background_tasks: BackgroundTasks, db
         # but 500 is technically more correct for retry. Let's use 500.
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-    # In a real production setup, we might queue a celery task here:
-    # background_tasks.add_task(process_integration_events, [e.id for e in events_to_process])
+    # Events are safely stored in DB with status PENDING.
+    # InboxWorker will pick them up transactionally via SKIP LOCKED.
 
     return Response(status_code=202)
