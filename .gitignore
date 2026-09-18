@@ -6,8 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
-local_tests/  
- 
+local_tests/
+
 # Python
 __pycache__/
 *.pyc
