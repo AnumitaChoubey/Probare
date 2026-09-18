@@ -1,8 +1,8 @@
-# QEMS (Quality Event Management System)
+# Probare (Quality Event Management System)
 
-QEMS is an enterprise-grade Quality Event Management System designed to orchestrate the complete lifecycle of quality incidents, rebuttals, root cause analyses (RCA), corrective actions (CAPA), and effectiveness reviews. 
+Probare is an enterprise-grade Quality Event Management System designed to orchestrate the complete lifecycle of quality incidents, rebuttals, root cause analyses (RCA), corrective actions (CAPA), and effectiveness reviews. 
 
-Built with an offline-capable, desktop-class React/Electron frontend and powered by a highly concurrent Python FastAPI backend, QEMS prioritizes data integrity, strict optimistic concurrency, and idempotency guarantees.
+Built with an offline-capable, desktop-class React/Electron frontend and powered by a highly concurrent Python FastAPI backend, Probare prioritizes data integrity, strict optimistic concurrency, and idempotency guarantees.
 
 ## 🏗️ Architecture
 
