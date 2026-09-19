@@ -39,6 +39,7 @@ import {
   CorrectiveAction,
 } from '../../types';
 import { aiApi } from '../../services/api';
+import { EventCommunication } from './EventCommunication';
 
 export const ErrorDetailWorkspace: React.FC = () => {
   const {
@@ -62,7 +63,7 @@ export const ErrorDetailWorkspace: React.FC = () => {
   const event = events.find((e) => e.id === selectedEventId) || events[0];
 
   // Active right pane tab
-  const [activeTab, setActiveTab] = useState<'rebuttal' | 'rca' | 'capa' | 'audit'>('rebuttal');
+  const [activeTab, setActiveTab] = useState<'rebuttal' | 'rca' | 'capa' | 'audit' | 'communication'>('rebuttal');
 
   // Rebuttal form state (Frontline)
   const [disputeCategory, setDisputeCategory] = useState<DisputeCategory>('System Issue');
@@ -586,22 +587,34 @@ export const ErrorDetailWorkspace: React.FC = () => {
             <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 text-xs font-semibold">
               <button
                 onClick={() => setActiveTab('rebuttal')}
-                className={`flex-1 py-2.5 px-3 flex items-center justify-center space-x-1.5 border-b-2 transition ${
+                className={`flex-1 py-2.5 px-2 flex items-center justify-center space-x-1.5 border-b-2 transition ${
                   activeTab === 'rebuttal'
                     ? 'border-indigo-600 text-indigo-700 dark:text-indigo-400 bg-white dark:bg-slate-900'
                     : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                <MessageSquareWarning className="w-4 h-4" />
-                <span>Dispute & Rebuttal</span>
+                <MessageSquareWarning className="w-4 h-4 hidden sm:block" />
+                <span>Dispute</span>
                 {event.rebuttal && (
                   <span className="w-2 h-2 rounded-full bg-amber-500 ml-1" />
                 )}
               </button>
 
               <button
+                onClick={() => setActiveTab('communication')}
+                className={`flex-1 py-2.5 px-2 flex items-center justify-center space-x-1.5 border-b-2 transition ${
+                  activeTab === 'communication'
+                    ? 'border-indigo-600 text-indigo-700 dark:text-indigo-400 bg-white dark:bg-slate-900'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                <MessageSquareWarning className="w-4 h-4 hidden sm:block" />
+                <span>Discussion</span>
+              </button>
+
+              <button
                 onClick={() => setActiveTab('rca')}
-                className={`flex-1 py-2.5 px-3 flex items-center justify-center space-x-1.5 border-b-2 transition ${
+                className={`flex-1 py-2.5 px-2 flex items-center justify-center space-x-1.5 border-b-2 transition ${
                   activeTab === 'rca'
                     ? 'border-indigo-600 text-indigo-700 dark:text-indigo-400 bg-white dark:bg-slate-900'
                     : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
@@ -637,7 +650,14 @@ export const ErrorDetailWorkspace: React.FC = () => {
               </button>
             </div>
 
-            <div className="p-4">
+            <div className="p-4 flex-1 flex flex-col overflow-hidden h-[600px]">
+              {/* TAB 0: COMMUNICATION */}
+              {activeTab === 'communication' && (
+                <div className="h-full border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+                  <EventCommunication eventId={event.id} />
+                </div>
+              )}
+
               {/* TAB 1: REBUTTAL & DISPUTE */}
               {activeTab === 'rebuttal' && (
                 <div className="space-y-4">

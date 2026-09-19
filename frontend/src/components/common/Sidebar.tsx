@@ -16,11 +16,14 @@ import {
   ChevronRight,
   ShieldCheck,
 } from 'lucide-react';
-import { useQEMS, NavSection } from '../../context/QEMSContext';
+import { useQEMS } from '../../context/QEMSContext';
+import { useRoleNavigation, NavItemDef } from '../../hooks/useRoleNavigation';
 
 export const Sidebar: React.FC = () => {
   const { activeSection, setActiveSection, currentRole, events, calibrations } = useQEMS();
   const [collapsed, setCollapsed] = useState(false);
+  
+  const roleNavItems = useRoleNavigation(currentRole);
 
   // Compute live badges
   const pendingRebuttals = events.filter(
@@ -35,88 +38,17 @@ export const Sidebar: React.FC = () => {
   );
   const activeCalibrations = calibrations.filter((c) => c.status !== 'Completed').length;
 
-  // Nav items configuration
-  const navItems: {
-    id: NavSection;
-    label: string;
-    icon: React.ComponentType<{ className?: string }>;
-    badge?: number | string;
-    badgeColor?: string;
-    allowedRoles?: string[];
-  }[] = [
-    {
-      id: 'COMMAND CENTER',
-      label: 'Command Center',
-      icon: LayoutDashboard,
-      badge: activeSlaAlerts > 0 ? `${activeSlaAlerts} Risk` : undefined,
-      badgeColor: 'bg-rose-100 text-rose-700',
-    },
-    {
-      id: 'MY WORK',
-      label: 'My Work',
-      icon: CheckSquare,
-      badge: currentRole === 'Frontline Employee' ? '3 Tasks' : '7 Actions',
-      badgeColor: 'bg-indigo-100 text-indigo-700',
-    },
-    {
-      id: 'QUALITY EVENTS',
-      label: 'Quality Events',
-      icon: FileSpreadsheet,
-      badge: events.length,
-      badgeColor: 'bg-slate-100 text-slate-700 font-mono',
-    },
-    {
-      id: 'NEW ERROR',
-      label: 'New Error Entry',
-      icon: PlusCircle,
-    },
-    {
-      id: 'DISPUTE CENTER',
-      label: 'Dispute Center',
-      icon: MessageSquareWarning,
-      badge: pendingRebuttals,
-      badgeColor: 'bg-amber-100 text-amber-800 font-semibold',
-    },
-    {
-      id: 'EVIDENCE',
-      label: 'Evidence Gallery',
-      icon: Paperclip,
-    },
-    {
-      id: 'ROOT CAUSE',
-      label: 'Root Cause (RCA)',
-      icon: GitFork,
-    },
-    {
-      id: 'CORRECTIVE ACTIONS',
-      label: 'Corrective Actions',
-      icon: CheckCircle2,
-      badge: activeCapas,
-      badgeColor: 'bg-cyan-100 text-cyan-800',
-    },
-    {
-      id: 'CALIBRATION',
-      label: 'Calibration Center',
-      icon: Scale,
-      badge: activeCalibrations,
-      badgeColor: 'bg-violet-100 text-violet-800',
-    },
-    {
-      id: 'QUALITY INTELLIGENCE',
-      label: 'Quality Intelligence',
-      icon: LineChart,
-    },
-    {
-      id: 'REPORTS',
-      label: 'Reports & Audits',
-      icon: FileText,
-    },
-    {
-      id: 'ADMINISTRATION',
-      label: 'Administration',
-      icon: Settings,
-    },
-  ];
+  const getBadgeValue = (type?: NavItemDef['badgeType']): number | string | undefined => {
+    switch (type) {
+      case 'alerts': return activeSlaAlerts > 0 ? `${activeSlaAlerts} Risk` : undefined;
+      case 'tasks': return currentRole === 'Frontline Employee' ? '3 Tasks' : '7 Actions';
+      case 'total': return events.length;
+      case 'rebuttals': return pendingRebuttals > 0 ? pendingRebuttals : undefined;
+      case 'capas': return activeCapas > 0 ? activeCapas : undefined;
+      case 'calibrations': return activeCalibrations > 0 ? activeCalibrations : undefined;
+      default: return undefined;
+    }
+  };
 
   return (
     <aside
@@ -141,9 +73,10 @@ export const Sidebar: React.FC = () => {
         </div>
 
         <nav className="space-y-0.5 px-2">
-          {navItems.map((item) => {
+          {roleNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
+            const badgeValue = getBadgeValue(item.badgeType);
 
             return (
               <button
@@ -165,15 +98,15 @@ export const Sidebar: React.FC = () => {
                   {!collapsed && <span className="truncate">{item.label}</span>}
                 </div>
 
-                {!collapsed && item.badge !== undefined && (
+                {!collapsed && badgeValue !== undefined && (
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
                       isActive
                         ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                        : item.badgeColor || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    {item.badge}
+                    {badgeValue}
                   </span>
                 )}
               </button>

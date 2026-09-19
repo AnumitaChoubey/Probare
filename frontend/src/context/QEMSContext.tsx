@@ -15,17 +15,8 @@ export interface ToastMessage {
   id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description?: string; message?: string;
 }
 
-export const ROLE_PERMISSIONS: Record<UserRole, RolePermissions> = {
-  'Frontline Employee': { canCreateEvent: false, canEditEvent: false, canSubmitRebuttal: true, canReviewRebuttal: false, canEscalate: false, canPerformRCA: false, canCreateCAPA: false, canReviewEffectiveness: false, canCalibrate: false, canViewAllTeams: false, canViewExecutiveAnalytics: false, canExportAuditPackage: false, canManageSettings: false },
-  'QA Auditor': { canCreateEvent: true, canEditEvent: true, canSubmitRebuttal: false, canReviewRebuttal: true, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: false, canCalibrate: true, canViewAllTeams: false, canViewExecutiveAnalytics: false, canExportAuditPackage: true, canManageSettings: false },
-  'QA Reviewer': { canCreateEvent: true, canEditEvent: true, canSubmitRebuttal: false, canReviewRebuttal: true, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: true, canCalibrate: true, canViewAllTeams: true, canViewExecutiveAnalytics: true, canExportAuditPackage: true, canManageSettings: false },
-  'Team Lead': { canCreateEvent: true, canEditEvent: false, canSubmitRebuttal: true, canReviewRebuttal: false, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: false, canCalibrate: false, canViewAllTeams: false, canViewExecutiveAnalytics: true, canExportAuditPackage: false, canManageSettings: false },
-  'QA Manager': { canCreateEvent: true, canEditEvent: true, canSubmitRebuttal: false, canReviewRebuttal: true, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: true, canCalibrate: true, canViewAllTeams: true, canViewExecutiveAnalytics: true, canExportAuditPackage: true, canManageSettings: true },
-  'Quality Governance': { canCreateEvent: true, canEditEvent: true, canSubmitRebuttal: false, canReviewRebuttal: true, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: true, canCalibrate: true, canViewAllTeams: true, canViewExecutiveAnalytics: true, canExportAuditPackage: true, canManageSettings: true },
-  'Executive / Leadership': { canCreateEvent: false, canEditEvent: false, canSubmitRebuttal: false, canReviewRebuttal: false, canEscalate: false, canPerformRCA: false, canCreateCAPA: false, canReviewEffectiveness: false, canCalibrate: false, canViewAllTeams: true, canViewExecutiveAnalytics: true, canExportAuditPackage: true, canManageSettings: false },
-  'System Administrator': { canCreateEvent: true, canEditEvent: true, canSubmitRebuttal: true, canReviewRebuttal: true, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: true, canCalibrate: true, canViewAllTeams: true, canViewExecutiveAnalytics: true, canExportAuditPackage: true, canManageSettings: true },
-  'Administrator': { canCreateEvent: true, canEditEvent: true, canSubmitRebuttal: true, canReviewRebuttal: true, canEscalate: true, canPerformRCA: true, canCreateCAPA: true, canReviewEffectiveness: true, canCalibrate: true, canViewAllTeams: true, canViewExecutiveAnalytics: true, canExportAuditPackage: true, canManageSettings: true },
-};
+// The backend is the source of truth for all role permissions.
+// Role-based visibility is driven by sessionData.permissions.
 
 interface QEMSContextType {
   currentRole: UserRole;
@@ -75,7 +66,8 @@ interface QEMSContextType {
 
 const QEMSContext = createContext<QEMSContextType | undefined>(undefined);
 
-// Legacy workflow helper preserved for frontend UI logic
+// Legacy workflow helper preserved ONLY for frontend UI rendering logic.
+// Actual transitions MUST be validated and authorized by the backend API.
 const getNextStatuses = (event: QualityEvent): QualityStatus[] => {
   return ['Logged', 'Under Review', 'Rebuttal Pending', 'QA Review', 'Escalated', 'Manager Review', 'Overturned', 'Upheld', 'Corrective Action', 'Effectiveness Review', 'Closed'];
 };
@@ -99,12 +91,32 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [sessionData]);
 
+  const [currentRole, setCurrentRole] = useState<UserRole>('QA Manager');
+
+  const getRoleFilters = (role: UserRole) => {
+    switch (role) {
+      case 'Frontline Employee': return { involving_me: true };
+      case 'QA Auditor': return { assigned_to_me: true };
+      case 'Team Lead': return { my_team_only: true };
+      case 'QA Manager':
+      case 'QA Reviewer': return { awaiting_my_review: true };
+      case 'Quality Governance':
+      case 'Executive / Leadership':
+      case 'Administrator':
+      case 'System Administrator': return {};
+      default: return {};
+    }
+  };
+
   // Data fetching
-  const { data: events = [] } = useQuery({ queryKey: ['events'], queryFn: eventsApi.getEvents, refetchInterval: 60000 });
+  const { data: events = [] } = useQuery({ 
+    queryKey: ['events', currentRole], 
+    queryFn: () => eventsApi.getEvents(getRoleFilters(currentRole)), 
+    refetchInterval: 60000 
+  });
   const { data: calibrations = [] } = useQuery({ queryKey: ['calibrations'], queryFn: calibrationsApi.getCalibrations });
   const { data: notifications = [] } = useQuery({ queryKey: ['notifications'], queryFn: notificationsApi.getNotifications, refetchInterval: 30000 });
 
-  const [currentRole, setCurrentRole] = useState<UserRole>('QA Manager');
   const [activeSection, setActiveSection] = useState<NavSection>('COMMAND CENTER');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   
@@ -132,8 +144,11 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleTheme = () => setTheme(p => p === 'light' ? 'dark' : 'light');
   const toggleDensity = () => setDensity(p => p === 'comfortable' ? 'compact' : 'comfortable');
 
-  const hasPermission = (permission: keyof RolePermissions): boolean => {
-    return sessionData?.permissions?.includes(permission) ?? !!ROLE_PERMISSIONS[currentRole]?.[permission];
+  const hasPermission = (permission: keyof RolePermissions | string): boolean => {
+    if (!sessionData?.permissions) return false;
+    // Map frontend camelCase permission checks to backend SNAKE_CASE permissions if necessary,
+    // or rely on explicit backend strings.
+    return sessionData.permissions.includes(permission as string);
   };
 
   const addToast = (toast: Omit<ToastMessage, 'id'>) => {

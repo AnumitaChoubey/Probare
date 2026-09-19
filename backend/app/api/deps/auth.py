@@ -13,6 +13,7 @@ from app.models.core import User
 from app.schemas.auth import AuthContext
 from app.services.auth_service import AuthService
 from app.domain.exceptions import ProjectAccessDeniedError, TenantAccessDeniedError, UnauthorizedWorkflowActionError
+from app.models.quality import QualityEvent
 
 logger = logging.getLogger(__name__)
 
@@ -139,3 +140,29 @@ async def require_project_access(
             project_id=project_id
         )
     return auth_context
+
+def check_event_access(event: QualityEvent, auth_context: AuthContext) -> bool:
+    """
+    Core authorization rule: A user can access an event if they have broad project review permissions,
+    or if they are directly related to the event as an owner, creator, or assigned employee.
+    """
+    if "REVIEW_QUALITY_EVENT" in auth_context.permissions or "MANAGE_PROJECT" in auth_context.permissions:
+        return True
+
+    if auth_context.qems_user_id in (event.employee_id, event.created_by_id, event.owner_id):
+        return True
+
+    # NOTE: Team Lead logic currently relies on explicit owner/creator mapping 
+    # until a formal user-team membership model is implemented in the schema.
+    return False
+
+def authorize_quality_event_access(event: QualityEvent, auth_context: AuthContext) -> QualityEvent:
+    if not event:
+        raise HTTPException(status_code=404, detail="Quality Event not found")
+        
+    if not check_event_access(event, auth_context):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access to this Quality Event is denied."
+        )
+    return event

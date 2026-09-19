@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey, DateTime, Boolean, Integer, Float, UniqueConstraint, ForeignKeyConstraint
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from .base import Base, UUIDMixin, TimestampMixin, TenantMixin, ProjectMixin
 
@@ -116,6 +117,8 @@ class Conversation(Base, UUIDMixin, TimestampMixin, ProjectMixin):
     __tablename__ = "conversations"
     quality_event_id = Column(String(36), nullable=True, index=True)
     
+    participants = relationship("ConversationParticipant", back_populates="conversation")
+
     __table_args__ = (
         UniqueConstraint('project_id', 'id', name='uq_conversations_project_id'),
     )
@@ -124,6 +127,8 @@ class ConversationParticipant(Base, UUIDMixin, TimestampMixin, ProjectMixin):
     __tablename__ = "conversation_participants"
     conversation_id = Column(String(36), nullable=False, index=True)
     user_id = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+    
+    conversation = relationship("Conversation", back_populates="participants")
 
     __table_args__ = (
         ForeignKeyConstraint(

@@ -104,29 +104,60 @@ class AuthService:
         )
         accessible_projects = projects_res.scalars().all()
         
-        # In a fully fleshed out RBAC system, we would join roles to permissions.
-        # For Phase 3, we mock some generic permissions based on roles.
+        # Provide an exact mapping from recognized Frontend roles to Backend permissions
+        # This acts as the Server-Authoritative source of truth, removing UI hardcodes.
         permissions = ["VIEW_QUALITY_EVENT"]
-        if "Admin" in roles or "QA Manager" in roles:
+        
+        # Determine broad read capabilities
+        if any(r in roles for r in ["QA Reviewer", "QA Manager", "Quality Governance", "Executive / Leadership", "System Administrator", "Administrator"]):
+            permissions.append("VIEW_ALL_QUALITY_EVENTS")
+            permissions.append("canViewAllTeams")
+            
+        if any(r in roles for r in ["Admin", "Administrator", "System Administrator", "QA Manager"]):
             permissions.extend([
-                "CREATE_QUALITY_EVENT", 
-                "EDIT_QUALITY_EVENT", 
-                "REVIEW_QUALITY_EVENT",
-                "MAKE_DECISION",
-                "PERFORM_EFFECTIVENESS_REVIEW",
-                "MANAGE_USERS",
-                "MANAGE_PROJECT",
-                "MANAGE_CONFIGURATION"
+                "CREATE_QUALITY_EVENT", "EDIT_QUALITY_EVENT", "REVIEW_QUALITY_EVENT",
+                "MAKE_DECISION", "PERFORM_EFFECTIVENESS_REVIEW", "MANAGE_USERS",
+                "MANAGE_PROJECT", "MANAGE_CONFIGURATION",
+                # Frontend mapped
+                "canCreateEvent", "canEditEvent", "canReviewRebuttal", "canEscalate", 
+                "canPerformRCA", "canCreateCAPA", "canReviewEffectiveness", "canCalibrate",
+                "canViewExecutiveAnalytics", "canExportAuditPackage", "canManageSettings"
             ])
-        if "Employee" in roles:
+            if "System Administrator" in roles or "Administrator" in roles:
+                permissions.append("canSubmitRebuttal")
+                
+        if "QA Auditor" in roles or "QA Reviewer" in roles:
+            permissions.extend([
+                "CREATE_QUALITY_EVENT", "EDIT_QUALITY_EVENT", "REVIEW_QUALITY_EVENT",
+                "canCreateEvent", "canEditEvent", "canReviewRebuttal", "canEscalate",
+                "canPerformRCA", "canCreateCAPA", "canCalibrate", "canExportAuditPackage"
+            ])
+            if "QA Reviewer" in roles:
+                permissions.append("canReviewEffectiveness")
+                
+        if "Quality Governance" in roles:
+            permissions.extend([
+                "CREATE_QUALITY_EVENT", "EDIT_QUALITY_EVENT", "REVIEW_QUALITY_EVENT",
+                "canCreateEvent", "canEditEvent", "canReviewRebuttal", "canEscalate",
+                "canPerformRCA", "canCreateCAPA", "canReviewEffectiveness", "canCalibrate",
+                "canViewExecutiveAnalytics", "canExportAuditPackage", "canManageSettings"
+            ])
+
+        if "Team Lead" in roles:
             permissions.extend([
                 "CREATE_QUALITY_EVENT",
-                "SUBMIT_REBUTTAL",
-                "PERFORM_RCA",
-                "MANAGE_CORRECTIVE_ACTION"
+                "canCreateEvent", "canSubmitRebuttal", "canEscalate", "canPerformRCA",
+                "canCreateCAPA", "canViewExecutiveAnalytics"
             ])
             
-        # Give Viewer role baseline permissions
+        if "Frontline Employee" in roles or "Employee" in roles:
+            permissions.extend([
+                "CREATE_QUALITY_EVENT", "SUBMIT_REBUTTAL", "PERFORM_RCA", "MANAGE_CORRECTIVE_ACTION",
+                "canSubmitRebuttal"
+            ])
+            
+        if "Executive / Leadership" in roles:
+            permissions.extend(["canViewExecutiveAnalytics", "canExportAuditPackage"])
         
         return AuthContext(
             qems_user_id=user.id,

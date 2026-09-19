@@ -85,6 +85,10 @@ async def list_quality_events(
     limit: int = Query(50, ge=1, le=100),
     status_filter: Optional[str] = Query(None, alias="status"),
     severity: Optional[str] = None,
+    assigned_to_me: Optional[bool] = Query(False),
+    created_by_me: Optional[bool] = Query(False),
+    involving_me: Optional[bool] = Query(False),
+    awaiting_my_review: Optional[bool] = Query(False),
     auth_context: AuthContext = Depends(require_project_access),
     session: AsyncSession = Depends(get_db),
     workflow_service: WorkflowService = Depends(get_workflow_service)
@@ -97,6 +101,17 @@ async def list_quality_events(
         filters["status"] = status_filter
     if severity:
         filters["severity"] = severity
+    
+    # Workspace role filters
+    filters["user_id"] = auth_context.qems_user_id
+    if assigned_to_me:
+        filters["assigned_to_me"] = True
+    if created_by_me:
+        filters["created_by_me"] = True
+    if involving_me:
+        filters["involving_me"] = True
+    if awaiting_my_review:
+        filters["awaiting_my_review"] = True
         
     events = await workflow_service.event_service.list_events(
         session=session,
@@ -104,7 +119,8 @@ async def list_quality_events(
         project_id=project_id,
         filters=filters,
         skip=skip,
-        limit=limit
+        limit=limit,
+        auth_context=auth_context
     )
     
     # We don't have a count implemented in event_service, so we return what we have.
@@ -137,7 +153,8 @@ async def get_quality_event(
         session=session,
         tenant_id=auth_context.qems_tenant_id,
         project_id=project_id,
-        event_id=event_id
+        event_id=event_id,
+        auth_context=auth_context
     )
     if not event:
         raise HTTPException(status_code=404, detail="Quality Event not found")

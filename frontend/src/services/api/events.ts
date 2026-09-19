@@ -3,9 +3,11 @@ import { QualityEvent, QualityStatus } from '../../types';
 
 
 export const eventsApi = {
-  getEvents: async (): Promise<QualityEvent[]> => {
-    const response = await apiClient.get(`/projects/${getActiveProjectId()}/quality-events?limit=500`);
-    return response.data;
+  getEvents: async (params?: Record<string, any>): Promise<QualityEvent[]> => {
+    const response = await apiClient.get(`/projects/${getActiveProjectId()}/quality-events`, {
+      params: { limit: 500, ...params }
+    });
+    return response.data.items || response.data;
   },
   
   getEvent: async (id: string): Promise<QualityEvent> => {

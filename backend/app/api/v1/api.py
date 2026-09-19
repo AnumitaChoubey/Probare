@@ -10,6 +10,7 @@ from app.api.v1.routers import rebuttals
 from app.api.v1.routers import rca
 from app.api.v1.routers import capa
 from app.api.v1.routers import effectiveness
+from app.api.v1.routers import communications
 
 api_router = APIRouter()
 
@@ -22,3 +23,4 @@ api_router.include_router(rebuttals.router)
 api_router.include_router(rca.router)
 api_router.include_router(capa.router)
 api_router.include_router(effectiveness.router)
+api_router.include_router(communications.router, prefix="/projects", tags=["communications"])

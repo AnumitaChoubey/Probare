@@ -5,5 +5,6 @@ export * from './ai';
 export * from './evidence';
 export * from './rebuttals';
 export * from './workflows';
+export * from './communications';
 export * from './notifications';
 export * from './calibrations';

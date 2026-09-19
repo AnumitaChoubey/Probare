@@ -8,12 +8,25 @@ from app.repositories.quality_event_repository import QualityEventRepository
 from app.domain.exceptions import ConcurrentModificationError
 from app.services.sla_service import SLAService
 
+from app.schemas.auth import AuthContext
+from app.api.deps.auth import authorize_quality_event_access
+
 class QualityEventService:
     def __init__(self):
         self.repository = QualityEventRepository()
 
-    async def get_event(self, session: AsyncSession, event_id: str, tenant_id: str = None, project_id: str = None) -> Optional[QualityEvent]:
-        return await self.repository.get_with_relations(session, id=event_id, tenant_id=tenant_id, project_id=project_id)
+    async def get_event(
+        self, 
+        session: AsyncSession, 
+        event_id: str, 
+        tenant_id: str = None, 
+        project_id: str = None,
+        auth_context: AuthContext = None
+    ) -> Optional[QualityEvent]:
+        event = await self.repository.get_with_relations(session, id=event_id, tenant_id=tenant_id, project_id=project_id)
+        if event and auth_context:
+            authorize_quality_event_access(event, auth_context)
+        return event
 
     async def list_events(
         self,
@@ -22,14 +35,50 @@ class QualityEventService:
         project_id: str,
         filters: Dict[str, Any] = None,
         skip: int = 0,
-        limit: int = 50
+        limit: int = 50,
+        auth_context: AuthContext = None
     ) -> list[QualityEvent]:
-        # We assume the repository has a generic list/filter method, or we implement a simple select here
         from sqlalchemy.future import select
+        from sqlalchemy import or_
         stmt = select(QualityEvent).filter_by(tenant_id=tenant_id, project_id=project_id)
+        
+        user_id = filters.pop("user_id", None) if filters else None
+        
+        # Explicit Server-Side Authorization Scope
+        # If the user lacks broad project review permissions, restrict query to events they are directly involved in.
+        if auth_context and "REVIEW_QUALITY_EVENT" not in auth_context.permissions and "MANAGE_PROJECT" not in auth_context.permissions:
+            stmt = stmt.filter(
+                or_(
+                    QualityEvent.owner_id == auth_context.qems_user_id,
+                    QualityEvent.employee_id == auth_context.qems_user_id,
+                    QualityEvent.created_by_id == auth_context.qems_user_id
+                )
+            )
+        
         if filters:
+            if filters.pop("assigned_to_me", None) and user_id:
+                stmt = stmt.filter(QualityEvent.owner_id == user_id)
+            if filters.pop("created_by_me", None) and user_id:
+                stmt = stmt.filter(QualityEvent.created_by_id == user_id)
+            if filters.pop("involving_me", None) and user_id:
+                stmt = stmt.filter(
+                    or_(
+                        QualityEvent.owner_id == user_id,
+                        QualityEvent.employee_id == user_id,
+                        QualityEvent.created_by_id == user_id
+                    )
+                )
+            if filters.pop("awaiting_my_review", None) and user_id:
+                stmt = stmt.filter(
+                    QualityEvent.status.in_(["QA Review", "Manager Review"])
+                )
+                
+            # Generic remaining filters
             for k, v in filters.items():
-                stmt = stmt.filter(getattr(QualityEvent, k) == v)
+                if hasattr(QualityEvent, k):
+                    stmt = stmt.filter(getattr(QualityEvent, k) == v)
+                    
+        stmt = stmt.order_by(QualityEvent.created_at.desc())
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
