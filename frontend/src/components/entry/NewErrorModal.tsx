@@ -49,7 +49,7 @@ export const NewErrorModal: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  if (!isNewErrorModalOpen) return null;
+
 
   // Calculate severity dynamically
   const calculateSeverity = (): Severity => {
@@ -265,6 +265,8 @@ export const NewErrorModal: React.FC = () => {
       });
     }
   };
+
+  if (!isNewErrorModalOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
