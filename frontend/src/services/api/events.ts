@@ -15,8 +15,23 @@ export const eventsApi = {
     return response.data;
   },
   
-  createEvent: async (data: Partial<QualityEvent>): Promise<QualityEvent> => {
-    const response = await apiClient.post(`/projects/${getActiveProjectId()}/quality-events`, data);
+  createEvent: async (data: any): Promise<QualityEvent> => {
+    // Map frontend UI model to backend schema
+    const payload = {
+      title: data.title,
+      description: data.description,
+      severity: data.severity || 'Medium',
+      employee_id: data.employeeId || data.employee_id || 'system',
+      team_id: data.teamId || data.team_id,
+      process_id: data.processArea || data.processId || data.process_id,
+      sub_process_id: data.subCategory || data.sub_process_id,
+      error_type_id: data.errorType || data.error_type_id,
+      sop_id: data.sopId || data.sop_id,
+      customer_impact: data.customerImpact || data.customer_impact,
+      owner_id: data.ownerId || data.owner_id
+    };
+
+    const response = await apiClient.post(`/projects/${getActiveProjectId()}/quality-events`, payload);
     return response.data;
   },
   
