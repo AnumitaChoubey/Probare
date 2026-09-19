@@ -10,8 +10,6 @@ export const Login: React.FC = () => {
     >
       <div className="w-full">
         <SignIn 
-          routing="path" 
-          path="/login" 
           signUpUrl="/register"
           appearance={{
             elements: {
