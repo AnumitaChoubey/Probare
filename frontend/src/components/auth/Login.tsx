@@ -17,7 +17,9 @@ export const Login: React.FC = () => {
                 'bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold normal-case',
               card: 'shadow-none bg-transparent p-0 w-full max-w-full',
               header: 'hidden', // We use AuthLayout for header
-              footer: 'hidden', // Custom styling often hides default footers or we can style it
+              footer: 'bg-transparent border-none',
+              footerActionText: 'text-slate-600 dark:text-slate-400 font-medium',
+              footerActionLink: 'text-indigo-600 hover:text-indigo-700 font-semibold',
               formFieldInput: 'rounded-md border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-slate-900',
               formFieldLabel: 'text-sm font-medium text-slate-700 dark:text-slate-300',
               socialButtonsBlockButton: 'border border-slate-300 hover:bg-slate-50 text-slate-600 font-medium',
