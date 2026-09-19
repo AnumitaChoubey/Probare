@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     MICROSOFT_CLIENT_SECRET: str | None = None
     MICROSOFT_REDIRECT_URI: str | None = None
 
+    CLERK_PUBLISHABLE_KEY: str | None = None
+    CLERK_SECRET_KEY: str | None = None
+    CLERK_ISSUER_URL: str | None = None
+
     AI_PROVIDER: str = "gemini"
     AI_API_KEY: str | None = None
     
