@@ -16,7 +16,14 @@ class User(Base, UUIDMixin, TimestampMixin, TenantMixin):
     __tablename__ = "users"
     email = Column(String(255), nullable=False, unique=True, index=True)
     name = Column(String(255), nullable=False)
-    entra_id_sub = Column(String(255), unique=True, index=True, nullable=True)
+    entra_id_sub = Column(String(255), unique=True, index=True, nullable=True) # Deprecated in favor of UserIdentity
+
+class UserIdentity(Base, UUIDMixin, TimestampMixin):
+    __tablename__ = "user_identities"
+    user_id = Column(String(36), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    provider = Column(String(50), nullable=False) # e.g. "clerk", "entra"
+    provider_subject = Column(String(255), nullable=False, index=True)
+    # user = relationship("User", backref="identities")
 
 class Role(Base, UUIDMixin, TimestampMixin, TenantMixin):
     __tablename__ = "roles"
