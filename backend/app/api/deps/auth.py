@@ -132,10 +132,26 @@ class EntraOIDCProvider(AuthenticationProvider):
                 detail="Authentication failed."
             )
 
+class DevelopmentProvider(AuthenticationProvider):
+    async def authenticate(self, request: Request, token: str, session: AsyncSession) -> AuthContext:
+        if settings.APPLICATION_ENV not in ["testing", "development"]:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only for testing")
+        
+        user_id = token.replace("dev_", "")
+        user = await session.execute(select(User).filter(User.id == user_id))
+        user = user.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+            
+        return await AuthService.get_auth_context(session, user, user.tenant_id)
+
 # Factory pattern to choose provider
 def get_auth_provider() -> AuthenticationProvider:
     if settings.AUTH_PROVIDER == "clerk":
         return ClerkAuthProvider()
+    elif settings.AUTH_PROVIDER == "development":
+        return DevelopmentProvider()
     return EntraOIDCProvider()
 
 async def get_current_user(
