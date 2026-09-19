@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useQEMS } from '../../context/QEMSContext';
 import { UserRole } from '../../types';
+import { UserButton } from '@clerk/clerk-react';
 
 export const Header: React.FC = () => {
   const {

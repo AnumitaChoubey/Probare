@@ -24,22 +24,27 @@ export const apiClient = axios.create({
 
 // Request interceptor for auth
 apiClient.interceptors.request.use(
-  (config) => {
-    // In a real app, this token would come from Entra ID MSAL library.
-    const isDev = import.meta.env.MODE === 'development';
-    
-    let devToken: string | undefined;
-    if (isDev) {
-      devToken = import.meta.env.VITE_DEV_TOKEN;
-      if (devToken) {
-        config.headers['Authorization'] = `Bearer ${devToken}`;
+  async (config) => {
+    // Attempt to get token from Clerk first
+    if (window.Clerk?.session) {
+      try {
+        const token = await window.Clerk.session.getToken();
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      } catch (err) {
+        console.error("Failed to fetch Clerk token", err);
       }
     } else {
-      // In production, the Entra auth flow will inject the proper token here.
-      // We explicitly avoid referencing VITE_DEV_TOKEN in the else block
-      // to ensure dead-code elimination removes it from the prod bundle.
+      // Fallback for development if Clerk is not yet mounted or not configured
+      const isDev = import.meta.env.MODE === 'development';
+      if (isDev) {
+        const devToken = import.meta.env.VITE_DEV_TOKEN;
+        if (devToken) {
+          config.headers['Authorization'] = `Bearer ${devToken}`;
+        }
+      }
     }
-    // In production, the Entra auth flow will inject the proper token here.
     
     if ((config.method === 'post' || config.method === 'patch' || config.method === 'put') && !config.headers['Idempotency-Key']) {
       // Use crypto.randomUUID() if available, fallback to a simple generator

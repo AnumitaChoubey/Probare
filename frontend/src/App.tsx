@@ -160,6 +160,9 @@ const AppContent: React.FC = () => {
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { ClerkProvider, SignedIn, SignedOut } from '@clerk/clerk-react';
+import { Login } from './components/auth/Login';
+import { Register } from './components/auth/Register';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -171,15 +174,56 @@ const queryClient = new QueryClient({
   },
 });
 
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+
+const AuthRouter = () => {
+  const [currentPath, setCurrentPath] = React.useState(window.location.pathname);
+
+  useEffect(() => {
+    const handleLocationChange = () => setCurrentPath(window.location.pathname);
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+
+  if (currentPath === '/login') {
+    return <Login />;
+  }
+  
+  if (currentPath === '/register') {
+    return <Register />;
+  }
+  
+  // Default unauthenticated fallback
+  return <Login />;
+};
+
 export default function App() {
+  if (!clerkPubKey) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-50 text-slate-900 p-6">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="text-xl font-bold text-red-600">Configuration Error</h1>
+          <p>Missing VITE_CLERK_PUBLISHABLE_KEY in environment.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary fallbackTitle="Quality Error Management System Error">
-        <QEMSProvider>
-          <AppContent />
-        </QEMSProvider>
-      </ErrorBoundary>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ClerkProvider publishableKey={clerkPubKey}>
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary fallbackTitle="Quality Error Management System Error">
+          <SignedIn>
+            <QEMSProvider>
+              <AppContent />
+            </QEMSProvider>
+          </SignedIn>
+          <SignedOut>
+            <AuthRouter />
+          </SignedOut>
+        </ErrorBoundary>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </ClerkProvider>
   );
 }
