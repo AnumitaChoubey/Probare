@@ -55,6 +55,46 @@ class AuthService:
         session.add(user)
         await session.flush()
         
+        # Ensure a default project exists
+        from app.models.core import Project, ProjectMember, Role, UserRole
+        project_res = await session.execute(select(Project).filter(Project.tenant_id == tenant.id, Project.name == "Default Project"))
+        project = project_res.scalars().first()
+        if not project:
+            project = Project(
+                id=str(uuid.uuid4()),
+                tenant_id=tenant.id,
+                name="Default Project"
+            )
+            session.add(project)
+            await session.flush()
+            
+        # Add user to project
+        pm = ProjectMember(
+            project_id=project.id,
+            user_id=user.id,
+            role="Employee"
+        )
+        session.add(pm)
+        
+        # Ensure 'Employee' role exists and assign it
+        role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == "Employee"))
+        role = role_res.scalars().first()
+        if not role:
+            role = Role(
+                id=str(uuid.uuid4()),
+                tenant_id=tenant.id,
+                name="Employee"
+            )
+            session.add(role)
+            await session.flush()
+            
+        ur = UserRole(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
+            role_id=role.id
+        )
+        session.add(ur)
+        
         identity = UserIdentity(
             id=str(uuid.uuid4()),
             user_id=user.id,
