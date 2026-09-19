@@ -23,32 +23,63 @@ class AuthenticationProvider:
     async def authenticate(self, request: Request, token: str, session: AsyncSession) -> AuthContext:
         raise NotImplementedError()
 
-class DevelopmentProvider(AuthenticationProvider):
+class ClerkAuthProvider(AuthenticationProvider):
+    def __init__(self):
+        # The JWKS URL is derived from the issuer URL
+        # For Clerk, it's typically https://<your_issuer_url>/.well-known/jwks.json
+        if not settings.CLERK_ISSUER_URL:
+            raise ValueError("CLERK_ISSUER_URL is required for Clerk authentication")
+        
+        jwks_url = f"{settings.CLERK_ISSUER_URL}/.well-known/jwks.json"
+        self.jwks_client = PyJWKClient(jwks_url)
+        
     async def authenticate(self, request: Request, token: str, session: AsyncSession) -> AuthContext:
-        if settings.APPLICATION_ENV == "production" or settings.AUTH_PROVIDER != "development":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Development authentication is disabled in this environment."
+        try:
+            signing_key = self.jwks_client.get_signing_key_from_jwt(token)
+            
+            payload = jwt.decode(
+                token,
+                signing_key.key,
+                algorithms=["RS256"],
+                # We can validate azp (authorized party) or aud if configured, but keeping generic for now
+                options={"verify_aud": False}
             )
             
-        if not token.startswith("dev_"):
+            external_subject = payload.get("sub")
+            if not external_subject:
+                raise ValueError("Missing required claim 'sub' in token.")
+                
+            # Delegate to AuthService to map this identity
+            user = await AuthService.get_user_by_identity(
+                session=session,
+                provider="clerk",
+                provider_subject=external_subject
+            )
+            
+            if not user:
+                # If user hasn't completed QEMS onboarding mapping
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="User is authenticated via Clerk but lacks a QEMS user mapping."
+                )
+                
+            return await AuthService.get_auth_context(session, user, external_tenant_id=user.tenant_id)
+            
+        except jwt.PyJWTError as e:
+            logger.error(f"JWT Validation Error (Clerk): {e}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid development token format."
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
             )
-            
-        user_id = token[4:] # strip "dev_"
-        
-        result = await session.execute(select(User).filter(User.id == user_id))
-        user = result.scalars().first()
-        
-        if not user:
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Authentication Error (Clerk): {e}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Unknown development user."
+                detail="Authentication failed."
             )
-            
-        return await AuthService.get_auth_context(session, user, external_tenant_id="dev_tenant")
 
 
 class EntraOIDCProvider(AuthenticationProvider):
@@ -103,8 +134,8 @@ class EntraOIDCProvider(AuthenticationProvider):
 
 # Factory pattern to choose provider
 def get_auth_provider() -> AuthenticationProvider:
-    if settings.AUTH_PROVIDER == "development" and settings.APPLICATION_ENV in ["development", "testing"]:
-        return DevelopmentProvider()
+    if settings.AUTH_PROVIDER == "clerk":
+        return ClerkAuthProvider()
     return EntraOIDCProvider()
 
 async def get_current_user(

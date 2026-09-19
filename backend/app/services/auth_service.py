@@ -9,6 +9,64 @@ class AuthService:
     """Service to handle user provisioning and identity mapping."""
     
     @classmethod
+    async def get_user_by_identity(
+        cls,
+        session: AsyncSession,
+        provider: str,
+        provider_subject: str
+    ) -> Optional[User]:
+        from app.models.core import UserIdentity
+        result = await session.execute(
+            select(User)
+            .join(UserIdentity, UserIdentity.user_id == User.id)
+            .filter(UserIdentity.provider == provider, UserIdentity.provider_subject == provider_subject)
+        )
+        return result.scalars().first()
+
+    @classmethod
+    async def register_clerk_identity(
+        cls,
+        session: AsyncSession,
+        provider_subject: str,
+        email: str,
+        name: str
+    ) -> User:
+        """Provisions a baseline QEMS user mapped to a Clerk identity."""
+        from app.models.core import UserIdentity
+        
+        # We auto-provision a new QEMS Tenant if unknown, mapped securely.
+        # Or attach to a default tenant.
+        tenant_res = await session.execute(select(Tenant).filter(Tenant.name == "Default Clerk Tenant"))
+        tenant = tenant_res.scalars().first()
+        if not tenant:
+            tenant = Tenant(
+                id=str(uuid.uuid4()),
+                name="Default Clerk Tenant"
+            )
+            session.add(tenant)
+            await session.flush()
+            
+        user = User(
+            id=str(uuid.uuid4()),
+            tenant_id=tenant.id,
+            email=email,
+            name=name
+        )
+        session.add(user)
+        await session.flush()
+        
+        identity = UserIdentity(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
+            provider="clerk",
+            provider_subject=provider_subject
+        )
+        session.add(identity)
+        await session.flush()
+        
+        return user
+
+    @classmethod
     async def get_or_provision_user(
         cls, 
         session: AsyncSession, 
@@ -18,7 +76,7 @@ class AuthService:
         name: str
     ) -> User:
         """
-        Locates an existing user by external_subject. 
+        Locates an existing user by external_subject (Entra ID flow). 
         If not found, creates the user and maps them to a QEMS tenant.
         """
         result = await session.execute(
