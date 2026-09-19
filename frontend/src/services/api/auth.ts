@@ -11,7 +11,22 @@ export interface AuthContextResponse {
 
 export const authApi = {
   getMe: async (): Promise<AuthContextResponse> => {
-    const response = await apiClient.get('/auth/me');
-    return response.data;
+    try {
+      const response = await apiClient.get('/auth/me');
+      return response.data;
+    } catch (error: any) {
+      if (error.response && error.response.status === 403) {
+        try {
+          console.log('User lacks QEMS mapping, auto-provisioning...');
+          await apiClient.post('/auth/register');
+          const retryResponse = await apiClient.get('/auth/me');
+          return retryResponse.data;
+        } catch (regError) {
+          console.error('Failed to auto-provision Clerk user in QEMS', regError);
+          throw regError;
+        }
+      }
+      throw error;
+    }
   },
 };
