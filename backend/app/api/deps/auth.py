@@ -42,7 +42,8 @@ class ClerkAuthProvider(AuthenticationProvider):
                 signing_key.key,
                 algorithms=["RS256"],
                 # We can validate azp (authorized party) or aud if configured, but keeping generic for now
-                options={"verify_aud": False}
+                options={"verify_aud": False},
+                leeway=300  # Add 5 minutes of leeway for clock drift in Docker/WSL
             )
             
             external_subject = payload.get("sub")
