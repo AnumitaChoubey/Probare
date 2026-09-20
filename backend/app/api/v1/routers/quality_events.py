@@ -49,6 +49,29 @@ async def create_quality_event(
     """
     Create a new Quality Event in Draft state.
     """
+    import uuid
+    from sqlalchemy.future import select
+    from app.models.core import Team
+
+    def is_valid_uuid(val):
+        try:
+            uuid.UUID(str(val))
+            return True
+        except (ValueError, TypeError):
+            return False
+
+    employee_id = event_in.employee_id if is_valid_uuid(event_in.employee_id) else auth_context.qems_user_id
+    owner_id = event_in.owner_id if is_valid_uuid(event_in.owner_id) else auth_context.qems_user_id
+    team_id = event_in.team_id
+    if not is_valid_uuid(team_id):
+        team_res = await session.execute(select(Team).filter_by(tenant_id=auth_context.qems_tenant_id))
+        team = team_res.scalars().first()
+        if not team:
+            team = Team(id=str(uuid.uuid4()), tenant_id=auth_context.qems_tenant_id, name="Default Team")
+            session.add(team)
+            await session.flush()
+        team_id = team.id
+
     # Enforce created_by and tenant explicitly from context
     event = workflow_service.event_service.create_event(
         session=session,
@@ -56,14 +79,14 @@ async def create_quality_event(
         project_id=project_id,
         title=event_in.title,
         description=event_in.description,
-        employee_id=event_in.employee_id,
-        team_id=event_in.team_id,
+        employee_id=employee_id,
+        team_id=team_id,
         process_id=event_in.process_id,
         sub_process_id=event_in.sub_process_id,
         error_type_id=event_in.error_type_id,
         sop_id=event_in.sop_id,
         severity=event_in.severity,
-        owner_id=event_in.owner_id,
+        owner_id=owner_id,
         created_by_id=auth_context.qems_user_id,
         customer_impact=event_in.customer_impact
     )

@@ -18,7 +18,7 @@ export const Login: React.FC = () => {
               card: 'shadow-none bg-transparent p-0 w-full max-w-full',
               header: 'hidden', // We use AuthLayout for header
               footer: 'bg-transparent border-none',
-              footerActionText: 'text-slate-600 dark:text-slate-400 font-medium',
+              footerActionText: '!text-slate-600 dark:!text-slate-400 font-medium',
               footerActionLink: 'text-indigo-600 hover:text-indigo-700 font-semibold',
               formFieldInput: 'rounded-md border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-slate-900',
               formFieldLabel: 'text-sm font-medium text-slate-700 dark:text-slate-300',

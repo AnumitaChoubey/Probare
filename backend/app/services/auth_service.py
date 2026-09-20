@@ -153,16 +153,16 @@ class AuthService:
         session.add(user)
         await session.flush()
         
-        # Assign default VIEWER role
+        # Assign default Administrator role
         role_res = await session.execute(
-            select(Role).filter(Role.name == "Viewer", Role.tenant_id == tenant.id)
+            select(Role).filter(Role.name == "Administrator", Role.tenant_id == tenant.id)
         )
         role = role_res.scalars().first()
         if not role:
             role = Role(
                 id=str(uuid.uuid4()),
                 tenant_id=tenant.id,
-                name="Viewer"
+                name="Administrator"
             )
             session.add(role)
             await session.flush()
