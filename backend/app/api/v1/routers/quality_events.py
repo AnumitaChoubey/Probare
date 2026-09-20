@@ -187,14 +187,15 @@ async def update_quality_event(
         raise HTTPException(status_code=404, detail="Quality Event not found")
         
     update_data = event_in.model_dump(exclude_unset=True)
+    expected_version = update_data.pop("expected_version", event.version)
     if not update_data:
         return event
 
-    updated_event = await workflow_service.event_service.update_event(
+    updated_event = workflow_service.event_service.update_event(
         session=session,
         event=event,
-        update_data=update_data,
-        actor_id=auth_context.qems_user_id
+        expected_version=expected_version,
+        updates=update_data
     )
     
     await session.commit()
