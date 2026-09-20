@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     if os.getenv("APPLICATION_ENV") != "testing":
         shutdown_scheduler()
     
-    await redis.close()
+    # await redis.close()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
