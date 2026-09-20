@@ -21,3 +21,5 @@ venv/
 .coverage
 htmlcov/
 .mypy_cache/
+
+docs/
