@@ -37,9 +37,9 @@ class QualityEventService:
         skip: int = 0,
         limit: int = 50,
         auth_context: AuthContext = None
-    ) -> list[QualityEvent]:
+    ) -> tuple[list[QualityEvent], int]:
         from sqlalchemy.future import select
-        from sqlalchemy import or_
+        from sqlalchemy import or_, func
         stmt = select(QualityEvent).filter_by(tenant_id=tenant_id, project_id=project_id)
         
         user_id = filters.pop("user_id", None) if filters else None
@@ -78,10 +78,15 @@ class QualityEventService:
                 if hasattr(QualityEvent, k):
                     stmt = stmt.filter(getattr(QualityEvent, k) == v)
                     
+        # Get total count before pagination
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total_result = await session.execute(count_stmt)
+        total_count = total_result.scalar() or 0
+                    
         stmt = stmt.order_by(QualityEvent.created_at.desc())
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return list(result.scalars().all())
+        return list(result.scalars().all()), total_count
 
     def create_event(
         self,

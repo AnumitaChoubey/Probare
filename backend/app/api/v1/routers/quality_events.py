@@ -113,7 +113,7 @@ async def list_quality_events(
     if awaiting_my_review:
         filters["awaiting_my_review"] = True
         
-    events = await workflow_service.event_service.list_events(
+    events, total = await workflow_service.event_service.list_events(
         session=session,
         tenant_id=auth_context.qems_tenant_id,
         project_id=project_id,
@@ -122,10 +122,7 @@ async def list_quality_events(
         limit=limit,
         auth_context=auth_context
     )
-    
-    # We don't have a count implemented in event_service, so we return what we have.
-    # In a real implementation we would count(*) with the filters.
-    total = len(events) 
+
     
     return QualityEventList(
         items=events,
