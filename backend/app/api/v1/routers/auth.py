@@ -46,7 +46,8 @@ async def register_user(
                 token,
                 signing_key.key,
                 algorithms=["RS256"],
-                options={"verify_aud": False}
+                options={"verify_aud": False},
+                leeway=300
             )
             
             sub = payload.get("sub")
