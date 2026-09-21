@@ -17,22 +17,22 @@ export const ToastContainer: React.FC = () => {
         return (
           <div
             key={toast.id}
-            className="pointer-events-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 shadow-lg flex items-start space-x-3 transition-all"
+            className="pointer-events-auto bg-qems-bg-white border border-qems-border rounded-lg p-3 shadow-lg flex items-start space-x-3 transition-all"
           >
             {isSuccess ? (
-              <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <CheckCircle className="w-4 h-4 text-qems-success shrink-0 mt-0.5" />
             ) : isWarning ? (
-              <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-qems-warning shrink-0 mt-0.5" />
             ) : isError ? (
-              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 text-qems-danger shrink-0 mt-0.5" />
             ) : (
-              <Info className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
+              <Info className="w-4 h-4 text-qems-brand-dark shrink-0 mt-0.5" />
             )}
 
             <div className="flex-1">
-              <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100">{toast.title}</h4>
+              <h4 className="text-xs font-semibold text-qems-text-primary ">{toast.title}</h4>
               {toast.description && (
-                <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-0.5 leading-snug">
+                <p className="text-[11px] text-qems-text-muted mt-0.5 leading-snug">
                   {toast.description}
                 </p>
               )}
@@ -40,7 +40,7 @@ export const ToastContainer: React.FC = () => {
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-0.5"
+              className="text-qems-text-disabled hover:text-qems-text-muted :text-slate-200 p-0.5"
             >
               <X className="w-3.5 h-3.5" />
             </button>

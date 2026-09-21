@@ -14,18 +14,18 @@ export const Register: React.FC = () => {
           appearance={{
             elements: {
               formButtonPrimary: 
-                'bg-indigo-600 hover:bg-indigo-700 text-sm font-semibold normal-case',
+                'bg-qems-brand hover:bg-qems-brand-dark text-sm font-semibold normal-case',
               card: 'shadow-none bg-transparent p-0 w-full max-w-full',
               header: 'hidden', 
               footer: 'bg-transparent border-none',
-              footerActionText: '!text-slate-600 dark:!text-slate-400 font-medium',
-              footerActionLink: 'text-indigo-600 hover:text-indigo-700 font-semibold',
-              formFieldInput: 'rounded-md border-slate-300 focus:border-indigo-500 focus:ring-indigo-500 text-slate-900',
-              formFieldLabel: 'text-sm font-medium text-slate-700 dark:text-slate-300',
-              socialButtonsBlockButton: 'border border-slate-300 hover:bg-slate-50 text-slate-600 font-medium',
+              footerActionText: '!text-qems-text-muted dark:!text-qems-text-disabled font-medium',
+              footerActionLink: 'text-qems-brand-dark hover:text-qems-brand-dark font-semibold',
+              formFieldInput: 'rounded-md border-slate-300 focus:border-qems-brand focus:ring-qems-brand text-qems-text-primary',
+              formFieldLabel: 'text-sm font-medium text-qems-text-secondary ',
+              socialButtonsBlockButton: 'border border-slate-300 hover:bg-qems-bg-surface text-qems-text-muted font-medium',
               dividerRow: 'my-6',
               dividerLine: 'bg-slate-200',
-              dividerText: 'text-slate-500 text-xs'
+              dividerText: 'text-qems-text-muted text-xs'
             },
             variables: {
               colorPrimary: '#4f46e5', // indigo-600

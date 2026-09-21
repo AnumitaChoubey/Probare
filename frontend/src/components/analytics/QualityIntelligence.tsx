@@ -72,31 +72,31 @@ export const QualityIntelligence: React.FC = () => {
   return (
     <div className="p-4 sm:p-5 lg:p-6 space-y-4 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-qems-brand-dark bg-qems-brand-light px-2 py-0.5 rounded border border-qems-brand ">
               Executive Analytics
             </span>
-            <span className="text-xs text-slate-400 dark:text-slate-600">•</span>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-qems-text-disabled ">•</span>
+            <span className="text-xs font-medium text-qems-text-muted ">
               Continuous Improvement Operations
             </span>
           </div>
-          <h1 className="text-base font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
+          <h1 className="text-base font-bold text-qems-text-primary mt-1 tracking-tight">
             Quality Intelligence & Defect Analytics
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-qems-text-muted mt-0.5">
             Systemic quality health, Pareto failure analysis, and organizational error heatmaps.
           </p>
         </div>
 
         <div className="flex items-center space-x-2">
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-0.5 rounded text-xs font-medium border border-slate-200 dark:border-slate-700">
+          <div className="flex bg-qems-bg-secondary p-0.5 rounded text-xs font-medium border border-qems-border ">
             <button
               onClick={() => setSelectedTimeframe('30d')}
               className={`px-2.5 py-1 rounded transition ${
-                selectedTimeframe === '30d' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold' : 'text-slate-600 dark:text-slate-400'
+                selectedTimeframe === '30d' ? 'bg-qems-bg-white text-qems-text-primary font-bold' : 'text-qems-text-muted '
               }`}
             >
               30 Days
@@ -104,7 +104,7 @@ export const QualityIntelligence: React.FC = () => {
             <button
               onClick={() => setSelectedTimeframe('90d')}
               className={`px-2.5 py-1 rounded transition ${
-                selectedTimeframe === '90d' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold' : 'text-slate-600 dark:text-slate-400'
+                selectedTimeframe === '90d' ? 'bg-qems-bg-white text-qems-text-primary font-bold' : 'text-qems-text-muted '
               }`}
             >
               90 Days
@@ -112,7 +112,7 @@ export const QualityIntelligence: React.FC = () => {
             <button
               onClick={() => setSelectedTimeframe('12m')}
               className={`px-2.5 py-1 rounded transition ${
-                selectedTimeframe === '12m' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white font-bold' : 'text-slate-600 dark:text-slate-400'
+                selectedTimeframe === '12m' ? 'bg-qems-bg-white text-qems-text-primary font-bold' : 'text-qems-text-muted '
               }`}
             >
               12 Months
@@ -121,7 +121,7 @@ export const QualityIntelligence: React.FC = () => {
 
           <button
             onClick={handleExportReport}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold flex items-center space-x-1.5 transition"
+            className="px-3 py-1.5 bg-qems-brand hover:bg-qems-brand-dark text-white rounded text-xs font-semibold flex items-center space-x-1.5 transition"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export Briefing</span>
@@ -131,85 +131,85 @@ export const QualityIntelligence: React.FC = () => {
 
       {/* Intelligence KPI Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-qems-bg-white border border-qems-border rounded-lg p-3.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-qems-text-disabled ">
             First-Time-Right (FTR)
           </span>
-          <div className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-1">{ftrRate}%</div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Benchmark: &gt;85%</div>
+          <div className="text-xl font-bold font-mono text-qems-success mt-1">{ftrRate}%</div>
+          <div className="text-[11px] text-qems-text-muted mt-0.5">Benchmark: &gt;85%</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-qems-bg-white border border-qems-border rounded-lg p-3.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-qems-text-disabled ">
             Rebuttal Overturn Rate
           </span>
-          <div className="text-xl font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-1">{overturnRate}%</div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Target: 25%–35%</div>
+          <div className="text-xl font-bold font-mono text-qems-brand-dark mt-1">{overturnRate}%</div>
+          <div className="text-[11px] text-qems-text-muted mt-0.5">Target: 25%–35%</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-qems-bg-white border border-qems-border rounded-lg p-3.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-qems-text-disabled ">
             SLA Resolution Adherence
           </span>
-          <div className="text-xl font-bold font-mono text-slate-900 dark:text-slate-100 mt-1">{slaCompliance}%</div>
-          <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">+1.4% vs prior cycle</div>
+          <div className="text-xl font-bold font-mono text-qems-text-primary mt-1">{slaCompliance}%</div>
+          <div className="text-[11px] text-qems-success mt-0.5">+1.4% vs prior cycle</div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="bg-qems-bg-white border border-qems-border rounded-lg p-3.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-qems-text-disabled ">
             Repeat Defect Recurrence
           </span>
-          <div className="text-xl font-bold font-mono text-amber-600 dark:text-amber-400 mt-1">11.8%</div>
-          <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Down from 16.2% Q2</div>
+          <div className="text-xl font-bold font-mono text-qems-warning mt-1">11.8%</div>
+          <div className="text-[11px] text-qems-text-muted mt-0.5">Down from 16.2% Q2</div>
         </div>
       </div>
 
       {/* Team vs Process Heatmap Matrix */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-        <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4">
+        <div className="flex items-center justify-between pb-3 border-b border-qems-border ">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-qems-text-primary ">
               Operational Quality Defect Heatmap (Team vs Process Area)
             </h3>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-[11px] text-qems-text-muted mt-0.5">
               Identifies concentrated risk pockets requiring targeted SOP reviews or system automation.
             </p>
           </div>
           <div className="flex items-center space-x-2 text-[10px] font-mono">
-            <span className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 rounded border border-emerald-200 dark:border-emerald-800">0-2 Low</span>
-            <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 rounded border border-amber-200 dark:border-amber-800">3-6 Moderate</span>
-            <span className="px-2 py-0.5 bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 rounded border border-rose-200 dark:border-rose-800">7+ High Focus</span>
+            <span className="px-2 py-0.5 bg-qems-success-bg text-emerald-800 rounded border border-emerald-200 ">0-2 Low</span>
+            <span className="px-2 py-0.5 bg-qems-warning-bg text-amber-800 rounded border border-amber-200 ">3-6 Moderate</span>
+            <span className="px-2 py-0.5 bg-qems-danger-bg text-rose-800 rounded border border-rose-200 ">7+ High Focus</span>
           </div>
         </div>
 
         <div className="overflow-x-auto mt-3">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-slate-800">
-                <th className="py-2.5 px-3 font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-850">Team</th>
+              <tr className="border-b border-qems-border ">
+                <th className="py-2.5 px-3 font-semibold text-qems-text-secondary bg-qems-bg-surface ">Team</th>
                 {processes.map((p) => (
-                  <th key={p} className="py-2.5 px-3 font-semibold text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-850 text-center">
+                  <th key={p} className="py-2.5 px-3 font-semibold text-qems-text-secondary bg-qems-bg-surface text-center">
                     {p}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-100 ">
               {TEAMS.map((team) => (
-                <tr key={team} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50">
-                  <td className="py-2.5 px-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap bg-slate-50/50 dark:bg-slate-850/40">
+                <tr key={team} className="hover:bg-qems-bg-surface/80 :bg-slate-800/50">
+                  <td className="py-2.5 px-3 font-semibold text-qems-text-primary whitespace-nowrap bg-qems-bg-surface/50 ">
                     {team}
                   </td>
                   {processes.map((proc) => {
                     const count = heatmapData[team]?.[proc] || 0;
                     const bgStyle =
                       count >= 7
-                        ? 'bg-rose-100 dark:bg-rose-950 text-rose-900 dark:text-rose-300 font-bold border border-rose-300 dark:border-rose-800'
+                        ? 'bg-rose-100 text-rose-900 font-bold border border-rose-300 '
                         : count >= 3
-                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-300 font-semibold border border-amber-300 dark:border-amber-800'
+                        ? 'bg-amber-100 text-amber-900 font-semibold border border-amber-300 '
                         : count > 0
-                        ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
-                        : 'bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-700';
+                        ? 'bg-qems-success-bg text-emerald-800 border border-emerald-200 '
+                        : 'bg-qems-bg-surface text-qems-text-disabled border border-qems-border ';
 
                     return (
                       <td key={proc} className="py-2.5 px-3 text-center">
@@ -231,17 +231,17 @@ export const QualityIntelligence: React.FC = () => {
       {/* Secondary Row: Repeat Defect Radar & SOP Defect Drivers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Repeat Defect Detection */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4">
+          <div className="flex items-center justify-between pb-3 border-b border-qems-border ">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-qems-text-primary ">
                 Repeat Defect Early Detection (Coaching Opportunities)
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-qems-text-muted mt-0.5">
                 Frontline employees with &gt;3 recurring procedural flags in the last 30 days.
               </p>
             </div>
-            <span className="text-[10px] px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold rounded border border-indigo-200 dark:border-indigo-800">
+            <span className="text-[10px] px-2 py-0.5 bg-qems-brand-light text-qems-brand-dark font-semibold rounded border border-qems-brand ">
               Non-Punitive
             </span>
           </div>
@@ -250,20 +250,20 @@ export const QualityIntelligence: React.FC = () => {
             {repeatEmployees.map((emp) => (
               <div
                 key={emp.name}
-                className="p-2.5 rounded border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between text-xs"
+                className="p-2.5 rounded border border-qems-border bg-qems-bg-surface/60 flex items-center justify-between text-xs"
               >
                 <div>
-                  <div className="font-bold text-slate-800 dark:text-slate-200">{emp.name}</div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {emp.team} • Frequent issue: <strong className="text-slate-700 dark:text-slate-300">{emp.primaryError}</strong>
+                  <div className="font-bold text-qems-text-primary ">{emp.name}</div>
+                  <div className="text-[11px] text-qems-text-muted ">
+                    {emp.team} • Frequent issue: <strong className="text-qems-text-secondary ">{emp.primaryError}</strong>
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <span className="font-mono font-bold text-amber-700 dark:text-amber-300 px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 rounded border border-amber-200 dark:border-amber-800 text-xs">
+                  <span className="font-mono font-bold text-qems-warning-dark px-2 py-0.5 bg-qems-warning-bg rounded border border-amber-200 text-xs">
                     {emp.count} Defects
                   </span>
-                  <button className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-300 font-medium hover:bg-indigo-50 dark:hover:bg-indigo-950/40 hover:text-indigo-600 dark:hover:text-indigo-300 transition">
+                  <button className="px-2.5 py-1 bg-qems-bg-white border border-qems-border rounded text-qems-text-secondary font-medium hover:bg-qems-brand-light :bg-indigo-950/40 hover:text-qems-brand-dark :text-indigo-300 transition">
                     Assign Coaching
                   </button>
                 </div>
@@ -273,17 +273,17 @@ export const QualityIntelligence: React.FC = () => {
         </div>
 
         {/* SOP Defect Drivers */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4">
+          <div className="flex items-center justify-between pb-3 border-b border-qems-border ">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-qems-text-primary ">
                 SOP Procedural Clarity Gap Index
               </h3>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-[11px] text-qems-text-muted mt-0.5">
                 Standards generating high dispute overturn rates, signaling ambiguous wording.
               </p>
             </div>
-            <span className="text-[10px] px-2 py-0.5 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-mono font-bold rounded border border-amber-200 dark:border-amber-800">
+            <span className="text-[10px] px-2 py-0.5 bg-qems-warning-bg text-amber-800 font-mono font-bold rounded border border-amber-200 ">
               SOP Revision Needed
             </span>
           </div>
@@ -297,18 +297,18 @@ export const QualityIntelligence: React.FC = () => {
             ].map((sop) => (
               <div
                 key={sop.id}
-                className="p-2.5 rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 flex items-center justify-between"
+                className="p-2.5 rounded border border-qems-border bg-qems-bg-white flex items-center justify-between"
               >
                 <div>
-                  <div className="font-bold font-mono text-indigo-700 dark:text-indigo-400">{sop.id}</div>
-                  <div className="text-[11px] text-slate-600 dark:text-slate-400">{sop.name}</div>
+                  <div className="font-bold font-mono text-qems-brand-dark ">{sop.id}</div>
+                  <div className="text-[11px] text-qems-text-muted ">{sop.name}</div>
                 </div>
                 <div className="flex items-center space-x-2 text-right">
                   <div>
-                    <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block">{sop.overturns}</span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500">Overturn rate</span>
+                    <span className="font-mono font-bold text-qems-text-primary block">{sop.overturns}</span>
+                    <span className="text-[10px] text-qems-text-disabled ">Overturn rate</span>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-qems-bg-secondary text-qems-text-secondary ">
                     {sop.status}
                   </span>
                 </div>

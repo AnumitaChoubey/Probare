@@ -91,21 +91,21 @@ export const AiAssistantDrawer: React.FC = () => {
   ];
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-96 md:w-[420px] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-xl z-50 flex flex-col">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-96 md:w-[420px] bg-qems-bg-white border-l border-qems-border shadow-xl z-50 flex flex-col">
       {/* Header */}
-      <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/40">
+      <div className="p-3.5 border-b border-qems-border flex items-center justify-between bg-qems-bg-surface/70 ">
         <div className="flex items-center space-x-2.5">
-          <div className="w-7 h-7 rounded bg-indigo-600 dark:bg-indigo-700 text-white flex items-center justify-center">
+          <div className="w-7 h-7 rounded bg-qems-brand text-white flex items-center justify-center">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
             <div className="flex items-center space-x-1.5">
-              <h3 className="font-bold text-xs text-slate-900 dark:text-white">QEMS Quality Copilot</h3>
-              <span className="text-[10px] px-1.5 py-0.2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-mono font-semibold rounded border border-indigo-200 dark:border-indigo-800">
+              <h3 className="font-bold text-xs text-qems-text-primary ">QEMS Quality Copilot</h3>
+              <span className="text-[10px] px-1.5 py-0.2 bg-qems-brand-light text-qems-brand-dark font-mono font-semibold rounded border border-qems-brand ">
                 GEMINI 3.8
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400">
+            <p className="text-[10px] text-qems-text-muted ">
               Assistive AI • Requires human sign-off
             </p>
           </div>
@@ -113,7 +113,7 @@ export const AiAssistantDrawer: React.FC = () => {
 
         <button
           onClick={() => setIsAiDrawerOpen(false)}
-          className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded"
+          className="text-qems-text-disabled hover:text-qems-text-secondary :text-slate-200 p-1 rounded"
         >
           <X className="w-4 h-4" />
         </button>
@@ -130,7 +130,7 @@ export const AiAssistantDrawer: React.FC = () => {
           >
             <div
               className={`w-6 h-6 rounded flex items-center justify-center shrink-0 text-white text-[10px] font-bold ${
-                m.sender === 'ai' ? 'bg-indigo-600' : 'bg-slate-700'
+                m.sender === 'ai' ? 'bg-qems-brand' : 'bg-slate-700'
               }`}
             >
               {m.sender === 'ai' ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
@@ -139,12 +139,12 @@ export const AiAssistantDrawer: React.FC = () => {
             <div
               className={`max-w-[85%] p-2.5 rounded leading-relaxed border ${
                 m.sender === 'user'
-                  ? 'bg-indigo-600 border-indigo-600 text-white'
-                  : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200'
+                  ? 'bg-qems-brand border-qems-brand-dark text-white'
+                  : 'bg-qems-bg-surface border-qems-border text-qems-text-primary '
               }`}
             >
               {m.sender === 'ai' && (
-                <div className="flex items-center space-x-1 text-[10px] font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-1">
+                <div className="flex items-center space-x-1 text-[10px] font-semibold text-qems-brand-dark uppercase tracking-wider mb-1">
                   <Sparkles className="w-3 h-3" />
                   <span>AI Copilot Analysis</span>
                 </div>
@@ -152,7 +152,7 @@ export const AiAssistantDrawer: React.FC = () => {
               <div className="whitespace-pre-wrap">{m.text}</div>
               <div
                 className={`text-[9px] mt-1 text-right font-mono ${
-                  m.sender === 'user' ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'
+                  m.sender === 'user' ? 'text-indigo-200' : 'text-qems-text-disabled '
                 }`}
               >
                 {m.timestamp}
@@ -162,16 +162,16 @@ export const AiAssistantDrawer: React.FC = () => {
         ))}
 
         {loading && (
-          <div className="flex items-center space-x-2 text-xs text-indigo-700 dark:text-indigo-300 p-2 bg-indigo-50 dark:bg-indigo-950/40 rounded border border-indigo-200 dark:border-indigo-800">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+          <div className="flex items-center space-x-2 text-xs text-qems-brand-dark p-2 bg-qems-brand-light rounded border border-qems-brand ">
+            <Sparkles className="w-3.5 h-3.5 text-qems-brand-dark " />
             <span>Consulting Gemini quality operations model...</span>
           </div>
         )}
       </div>
 
       {/* Suggested Quick Prompts */}
-      <div className="p-2.5 bg-slate-50/70 dark:bg-slate-800/40 border-t border-slate-200 dark:border-slate-800">
-        <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block mb-1.5">
+      <div className="p-2.5 bg-qems-bg-surface/70 border-t border-qems-border ">
+        <span className="text-[10px] uppercase font-bold text-qems-text-muted block mb-1.5">
           Suggested Inquiries
         </span>
         <div className="flex flex-wrap gap-1.5">
@@ -179,7 +179,7 @@ export const AiAssistantDrawer: React.FC = () => {
             <button
               key={prompt}
               onClick={() => handleSendMessage(prompt)}
-              className="text-left text-[11px] px-2 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-700 dark:hover:text-indigo-300 rounded transition text-slate-700 dark:text-slate-300 truncate max-w-full"
+              className="text-left text-[11px] px-2 py-1 bg-qems-bg-white border border-qems-border hover:border-indigo-300 :border-indigo-700 hover:text-qems-brand-dark :text-indigo-300 rounded transition text-qems-text-secondary truncate max-w-full"
             >
               {prompt}
             </button>
@@ -188,7 +188,7 @@ export const AiAssistantDrawer: React.FC = () => {
       </div>
 
       {/* Input Box */}
-      <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+      <div className="p-3 border-t border-qems-border bg-qems-bg-white ">
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -201,17 +201,17 @@ export const AiAssistantDrawer: React.FC = () => {
             placeholder="Ask about an error, SOP, or root cause..."
             value={inputMsg}
             onChange={(e) => setInputMsg(e.target.value)}
-            className="flex-1 px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:border-indigo-500"
+            className="flex-1 px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-xs text-qems-text-primary placeholder-slate-400 focus:bg-qems-bg-white :bg-slate-800 focus:outline-none focus:border-qems-brand"
           />
           <button
             type="submit"
             disabled={!inputMsg.trim() || loading}
-            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded text-xs font-semibold flex items-center space-x-1 transition"
+            className="px-3 py-1.5 bg-qems-brand hover:bg-qems-brand-dark disabled:opacity-50 text-white rounded text-xs font-semibold flex items-center space-x-1 transition"
           >
             <Send className="w-3 h-3" />
           </button>
         </form>
-        <div className="text-[10px] text-slate-400 dark:text-slate-500 text-center mt-1.5 font-mono">
+        <div className="text-[10px] text-qems-text-disabled text-center mt-1.5 font-mono">
           Strict Human-in-the-Loop • ISO 9001 Compliance
         </div>
       </div>

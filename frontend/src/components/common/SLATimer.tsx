@@ -30,21 +30,21 @@ export const SLATimer: React.FC<SLATimerProps> = ({
     return (
       <div className="inline-flex items-center space-x-1 font-mono text-xs">
         {isBreached ? (
-          <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+          <AlertCircle className="w-3.5 h-3.5 text-qems-danger " />
         ) : isAtRisk ? (
-          <AlertTriangle className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+          <AlertTriangle className="w-3.5 h-3.5 text-orange-600 " />
         ) : (
-          <Clock className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+          <Clock className="w-3.5 h-3.5 text-qems-text-muted " />
         )}
         <span
           className={`font-medium ${
             isBreached
-              ? 'text-rose-700 dark:text-rose-400 font-bold'
+              ? 'text-qems-danger-dark font-bold'
               : isAtRisk
-              ? 'text-orange-700 dark:text-orange-400 font-semibold'
+              ? 'text-orange-700 font-semibold'
               : isWarning
-              ? 'text-amber-700 dark:text-amber-400'
-              : 'text-slate-600 dark:text-slate-300'
+              ? 'text-qems-warning-dark '
+              : 'text-qems-text-muted '
           }`}
         >
           {formatHoursToCountdown(hoursRemaining)}
@@ -59,29 +59,29 @@ export const SLATimer: React.FC<SLATimerProps> = ({
   const percentElapsed = Math.min(100, Math.round((elapsed / totalWindow) * 100));
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3">
+    <div className="bg-qems-bg-white border border-qems-border rounded-lg p-3">
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center space-x-1.5">
           {isBreached ? (
-            <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+            <AlertCircle className="w-4 h-4 text-qems-danger " />
           ) : isAtRisk ? (
-            <AlertTriangle className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+            <AlertTriangle className="w-4 h-4 text-orange-600 " />
           ) : (
-            <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <Clock className="w-4 h-4 text-qems-brand-dark " />
           )}
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-qems-text-secondary ">
             SLA Resolution Window
           </span>
         </div>
         <span
           className={`text-[11px] px-2 py-0.5 rounded font-mono font-bold ${
             isBreached
-              ? 'bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200'
+              ? 'bg-rose-100 text-rose-800 '
               : isAtRisk
-              ? 'bg-orange-100 text-orange-800 dark:bg-orange-950 dark:text-orange-200'
+              ? 'bg-orange-100 text-orange-800 '
               : isWarning
-              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200'
-              : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200'
+              ? 'bg-amber-100 text-amber-800 '
+              : 'bg-emerald-100 text-emerald-800 '
           }`}
         >
           {status}
@@ -89,18 +89,18 @@ export const SLATimer: React.FC<SLATimerProps> = ({
       </div>
 
       <div className="flex items-baseline justify-between mb-2">
-        <span className="text-lg font-bold font-mono text-slate-900 dark:text-slate-100 tabular-nums">
+        <span className="text-lg font-bold font-mono text-qems-text-primary tabular-nums">
           {formatHoursToCountdown(hoursRemaining)}
         </span>
         {deadline && (
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">
-            Due: <strong className="text-slate-700 dark:text-slate-300 font-mono">{deadline}</strong>
+          <span className="text-[11px] text-qems-text-muted ">
+            Due: <strong className="text-qems-text-secondary font-mono">{deadline}</strong>
           </span>
         )}
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700">
+      <div className="w-full bg-qems-bg-secondary h-1.5 rounded-full overflow-hidden border border-qems-border ">
         <div
           className={`h-full transition-all duration-300 rounded-full ${
             isBreached
@@ -115,7 +115,7 @@ export const SLATimer: React.FC<SLATimerProps> = ({
         />
       </div>
 
-      <div className="flex justify-between items-center mt-1.5 text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+      <div className="flex justify-between items-center mt-1.5 text-[10px] text-qems-text-disabled font-mono">
         <span>Logged: 0h</span>
         <span>Warning: 24h</span>
         <span>Target SLA: 48h</span>

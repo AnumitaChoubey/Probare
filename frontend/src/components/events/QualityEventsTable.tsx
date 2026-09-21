@@ -228,25 +228,25 @@ export const QualityEventsTable: React.FC = () => {
       return <ArrowUpDown className="w-3 h-3 text-slate-300 ml-1 inline" />;
     }
     return sortDirection === 'asc' ? (
-      <ChevronUp className="w-3 h-3 text-indigo-600 ml-1 inline" />
+      <ChevronUp className="w-3 h-3 text-qems-brand-dark ml-1 inline" />
     ) : (
-      <ChevronDown className="w-3 h-3 text-indigo-600 ml-1 inline" />
+      <ChevronDown className="w-3 h-3 text-qems-brand-dark ml-1 inline" />
     );
   };
 
   return (
     <div className="p-6 space-y-4 max-w-7xl mx-auto">
       {/* Table Header Controls */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 space-y-3">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4 space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           <div>
-            <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center space-x-2">
+            <h1 className="text-base font-bold text-qems-text-primary tracking-tight flex items-center space-x-2">
               <span>Quality Events Registry</span>
-              <span className="text-xs px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium border border-slate-200 dark:border-slate-700">
+              <span className="text-xs px-2 py-0.5 rounded bg-qems-bg-secondary text-qems-text-secondary font-mono font-medium border border-qems-border ">
                 {sortedEvents.length} of {events.length} records
               </span>
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            <p className="text-xs text-qems-text-muted mt-0.5">
               High-density auditable log of evaluated transactions and procedural deviations.
             </p>
           </div>
@@ -254,20 +254,20 @@ export const QualityEventsTable: React.FC = () => {
           {/* Action Tools */}
           <div className="flex items-center space-x-2 shrink-0">
             {selectedIds.length > 0 && (
-              <div className="flex items-center space-x-2 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded border border-indigo-200 dark:border-indigo-800">
-                <span className="text-xs font-semibold text-indigo-900 dark:text-indigo-200 font-mono">
+              <div className="flex items-center space-x-2 bg-qems-brand-light px-2.5 py-1 rounded border border-qems-brand ">
+                <span className="text-xs font-semibold text-indigo-900 font-mono">
                   {selectedIds.length} Selected
                 </span>
                 <button
                   onClick={() => setIsBulkAssignOpen(true)}
-                  className="px-2 py-1 bg-indigo-600 text-white rounded text-[11px] font-medium hover:bg-indigo-700 flex items-center space-x-1"
+                  className="px-2 py-1 bg-qems-brand text-white rounded text-[11px] font-medium hover:bg-qems-brand-dark flex items-center space-x-1"
                 >
                   <UserCheck className="w-3 h-3" />
                   <span>Assign</span>
                 </button>
                 <button
                   onClick={() => bulkUpdateStatus(selectedIds, 'QA Review')}
-                  className="px-2 py-1 bg-white dark:bg-slate-800 border border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-300 rounded text-[11px] font-medium hover:bg-indigo-50 dark:hover:bg-slate-700"
+                  className="px-2 py-1 bg-qems-bg-white border border-indigo-300 text-qems-brand-dark rounded text-[11px] font-medium hover:bg-qems-brand-light :bg-slate-700"
                 >
                   Move to QA
                 </button>
@@ -278,22 +278,22 @@ export const QualityEventsTable: React.FC = () => {
             <div className="relative">
               <button
                 onClick={() => setIsColMenuOpen(!isColMenuOpen)}
-                className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center space-x-1"
+                className="px-2.5 py-1.5 bg-qems-bg-white border border-qems-border rounded text-xs font-medium text-qems-text-secondary hover:bg-qems-bg-surface :bg-slate-700 flex items-center space-x-1"
                 title="Toggle Columns"
               >
-                <Columns3 className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                <Columns3 className="w-3.5 h-3.5 text-qems-text-muted " />
                 <span className="hidden sm:inline">Columns</span>
               </button>
 
               {isColMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-2 z-40 text-xs">
-                  <div className="font-semibold text-slate-700 dark:text-slate-200 pb-1 mb-1 border-b border-slate-100 dark:border-slate-800">
+                <div className="absolute right-0 mt-2 w-48 bg-qems-bg-white border border-qems-border rounded-lg shadow-lg p-2 z-40 text-xs">
+                  <div className="font-semibold text-qems-text-secondary pb-1 mb-1 border-b border-qems-border-light ">
                     Visible Columns
                   </div>
                   {Object.keys(visibleColumns).map((col) => (
                     <label
                       key={col}
-                      className="flex items-center space-x-2 py-1 px-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded cursor-pointer capitalize text-slate-700 dark:text-slate-300"
+                      className="flex items-center space-x-2 py-1 px-1 hover:bg-qems-bg-surface :bg-slate-800 rounded cursor-pointer capitalize text-qems-text-secondary "
                     >
                       <input
                         type="checkbox"
@@ -304,7 +304,7 @@ export const QualityEventsTable: React.FC = () => {
                             [col]: e.target.checked,
                           }))
                         }
-                        className="rounded text-indigo-600 focus:ring-0"
+                        className="rounded text-qems-brand-dark focus:ring-0"
                       />
                       <span>{col}</span>
                     </label>
@@ -316,17 +316,17 @@ export const QualityEventsTable: React.FC = () => {
             {/* Export CSV */}
             <button
               onClick={handleExportCSV}
-              className="px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center space-x-1"
+              className="px-2.5 py-1.5 bg-qems-bg-white border border-qems-border rounded text-xs font-medium text-qems-text-secondary hover:bg-qems-bg-surface :bg-slate-700 flex items-center space-x-1"
             >
-              <Download className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              <Download className="w-3.5 h-3.5 text-qems-text-muted " />
               <span>Export CSV</span>
             </button>
           </div>
         </div>
 
         {/* Filter Bar */}
-        <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center space-x-1 text-slate-500 dark:text-slate-400 font-medium mr-1">
+        <div className="pt-2 border-t border-qems-border-light flex flex-wrap items-center gap-2 text-xs">
+          <div className="flex items-center space-x-1 text-qems-text-muted font-medium mr-1">
             <Filter className="w-3.5 h-3.5" />
             <span>Filters:</span>
           </div>
@@ -335,7 +335,7 @@ export const QualityEventsTable: React.FC = () => {
           <select
             value={selectedSeverity}
             onChange={(e) => setSelectedSeverity(e.target.value)}
-            className="px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-200 focus:outline-none focus:bg-white dark:focus:bg-slate-800 text-xs"
+            className="px-2 py-1 bg-qems-bg-surface border border-qems-border rounded text-qems-text-secondary focus:outline-none focus:bg-qems-bg-white :bg-slate-800 text-xs"
           >
             <option value="ALL">All Severities</option>
             <option value="CRITICAL">Critical</option>
@@ -348,7 +348,7 @@ export const QualityEventsTable: React.FC = () => {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-200 focus:outline-none focus:bg-white dark:focus:bg-slate-800 text-xs"
+            className="px-2 py-1 bg-qems-bg-surface border border-qems-border rounded text-qems-text-secondary focus:outline-none focus:bg-qems-bg-white :bg-slate-800 text-xs"
           >
             <option value="ALL">All Statuses</option>
             <option value="Logged">Logged</option>
@@ -367,7 +367,7 @@ export const QualityEventsTable: React.FC = () => {
           <select
             value={selectedTeam}
             onChange={(e) => setSelectedTeam(e.target.value)}
-            className="px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-200 focus:outline-none focus:bg-white dark:focus:bg-slate-800 text-xs"
+            className="px-2 py-1 bg-qems-bg-surface border border-qems-border rounded text-qems-text-secondary focus:outline-none focus:bg-qems-bg-white :bg-slate-800 text-xs"
           >
             <option value="ALL">All Teams</option>
             {TEAMS.map((t) => (
@@ -381,7 +381,7 @@ export const QualityEventsTable: React.FC = () => {
           <select
             value={selectedSLA}
             onChange={(e) => setSelectedSLA(e.target.value)}
-            className="px-2 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-700 dark:text-slate-200 focus:outline-none focus:bg-white dark:focus:bg-slate-800 text-xs"
+            className="px-2 py-1 bg-qems-bg-surface border border-qems-border rounded text-qems-text-secondary focus:outline-none focus:bg-qems-bg-white :bg-slate-800 text-xs"
           >
             <option value="ALL">All SLA States</option>
             <option value="On Track">On Track</option>
@@ -398,7 +398,7 @@ export const QualityEventsTable: React.FC = () => {
             searchQuery) && (
             <button
               onClick={resetFilters}
-              className="px-2 py-1 text-[11px] text-rose-600 dark:text-rose-400 hover:underline flex items-center space-x-1"
+              className="px-2 py-1 text-[11px] text-qems-danger hover:underline flex items-center space-x-1"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Clear filters</span>
@@ -408,18 +408,18 @@ export const QualityEventsTable: React.FC = () => {
       </div>
 
       {/* Main High-Density Enterprise Table */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 font-bold text-[11px] uppercase tracking-wider select-none sticky top-0 z-10">
+            <thead className="bg-qems-bg-surface text-qems-text-muted border-b border-qems-border font-bold text-[11px] uppercase tracking-wider select-none sticky top-0 z-10">
               <tr>
                 <th className="py-2 px-3 w-8 text-center">
                   <button
                     onClick={toggleSelectAll}
-                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                    className="text-qems-text-disabled hover:text-qems-text-muted :text-slate-200"
                   >
                     {selectedIds.length === paginatedEvents.length && paginatedEvents.length > 0 ? (
-                      <CheckSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <CheckSquare className="w-4 h-4 text-qems-brand-dark " />
                     ) : (
                       <Square className="w-4 h-4" />
                     )}
@@ -429,7 +429,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.id && (
                   <th
                     onClick={() => handleSort('id')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Error ID {renderSortIndicator('id')}
                   </th>
@@ -438,7 +438,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.date && (
                   <th
                     onClick={() => handleSort('date')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Date {renderSortIndicator('date')}
                   </th>
@@ -447,7 +447,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.employee && (
                   <th
                     onClick={() => handleSort('employee')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Employee {renderSortIndicator('employee')}
                   </th>
@@ -456,7 +456,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.team && (
                   <th
                     onClick={() => handleSort('team')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Team {renderSortIndicator('team')}
                   </th>
@@ -465,7 +465,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.process && (
                   <th
                     onClick={() => handleSort('processArea')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Process Area {renderSortIndicator('processArea')}
                   </th>
@@ -474,7 +474,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.category && (
                   <th
                     onClick={() => handleSort('errorType')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Error Type {renderSortIndicator('errorType')}
                   </th>
@@ -483,7 +483,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.severity && (
                   <th
                     onClick={() => handleSort('severity')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Severity {renderSortIndicator('severity')}
                   </th>
@@ -492,7 +492,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.status && (
                   <th
                     onClick={() => handleSort('status')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Status {renderSortIndicator('status')}
                   </th>
@@ -501,7 +501,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.sla && (
                   <th
                     onClick={() => handleSort('slaStatus')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     SLA Clock {renderSortIndicator('slaStatus')}
                   </th>
@@ -510,7 +510,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.owner && (
                   <th
                     onClick={() => handleSort('owner')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Owner {renderSortIndicator('owner')}
                   </th>
@@ -519,7 +519,7 @@ export const QualityEventsTable: React.FC = () => {
                 {visibleColumns.rootCause && (
                   <th
                     onClick={() => handleSort('rootCause')}
-                    className="py-2 px-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition whitespace-nowrap"
+                    className="py-2 px-3 cursor-pointer hover:bg-qems-bg-secondary :bg-slate-700/50 transition whitespace-nowrap"
                   >
                     Root Cause {renderSortIndicator('rootCause')}
                   </th>
@@ -529,10 +529,10 @@ export const QualityEventsTable: React.FC = () => {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-sans">
+            <tbody className="divide-y divide-slate-100 font-sans">
               {paginatedEvents.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="py-12 text-center text-slate-400 dark:text-slate-500 text-xs">
+                  <td colSpan={13} className="py-12 text-center text-qems-text-disabled text-xs">
                     No quality records match current filter criteria.
                   </td>
                 </tr>
@@ -545,29 +545,29 @@ export const QualityEventsTable: React.FC = () => {
                     <tr
                       key={ev.id}
                       onClick={() => setSelectedEventId(ev.id)}
-                      className={`hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition select-none group ${
+                      className={`hover:bg-qems-bg-surface :bg-slate-800/60 cursor-pointer transition select-none group ${
                         isSelected
-                          ? 'bg-indigo-50/60 dark:bg-indigo-950/40'
+                          ? 'bg-qems-brand-light/60 '
                           : isHeroCase
-                          ? 'bg-amber-50/30 dark:bg-amber-950/20'
+                          ? 'bg-qems-warning-bg/30 '
                           : ''
                       }`}
                     >
                       {/* Checkbox */}
                       <td className="py-1.5 px-3 text-center" onClick={(e) => toggleSelectRow(ev.id, e)}>
                         {isSelected ? (
-                          <CheckSquare className="w-4 h-4 text-indigo-600 dark:text-indigo-400 inline" />
+                          <CheckSquare className="w-4 h-4 text-qems-brand-dark inline" />
                         ) : (
-                          <Square className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-slate-500 dark:group-hover:text-slate-400 inline" />
+                          <Square className="w-4 h-4 text-slate-300 group-hover:text-qems-text-muted :text-qems-text-disabled inline" />
                         )}
                       </td>
 
                       {/* ID */}
                       {visibleColumns.id && (
-                        <td className="py-1.5 px-3 font-mono font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                        <td className="py-1.5 px-3 font-mono font-bold text-qems-brand-dark whitespace-nowrap">
                           {ev.id}
                           {isHeroCase && (
-                            <span className="ml-1.5 px-1 py-0.2 bg-indigo-600 text-white text-[9px] font-sans font-bold rounded">
+                            <span className="ml-1.5 px-1 py-0.2 bg-qems-brand text-white text-[9px] font-sans font-bold rounded">
                               HERO
                             </span>
                           )}
@@ -576,35 +576,35 @@ export const QualityEventsTable: React.FC = () => {
 
                       {/* Date */}
                       {visibleColumns.date && (
-                        <td className="py-1.5 px-3 text-slate-500 dark:text-slate-400 font-mono text-[11px] whitespace-nowrap tabular-nums">
+                        <td className="py-1.5 px-3 text-qems-text-muted font-mono text-[11px] whitespace-nowrap tabular-nums">
                           {ev.date}
                         </td>
                       )}
 
                       {/* Employee */}
                       {visibleColumns.employee && (
-                        <td className="py-1.5 px-3 font-medium text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                        <td className="py-1.5 px-3 font-medium text-qems-text-primary whitespace-nowrap">
                           {ev.employee}
                         </td>
                       )}
 
                       {/* Team */}
                       {visibleColumns.team && (
-                        <td className="py-1.5 px-3 text-slate-600 dark:text-slate-300 whitespace-nowrap">
+                        <td className="py-1.5 px-3 text-qems-text-muted whitespace-nowrap">
                           {ev.team}
                         </td>
                       )}
 
                       {/* Process */}
                       {visibleColumns.process && (
-                        <td className="py-1.5 px-3 font-medium text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                        <td className="py-1.5 px-3 font-medium text-qems-text-primary whitespace-nowrap">
                           {ev.processArea}
                         </td>
                       )}
 
                       {/* Error Type */}
                       {visibleColumns.category && (
-                        <td className="py-1.5 px-3 text-slate-700 dark:text-slate-300 whitespace-nowrap max-w-xs truncate" title={ev.title}>
+                        <td className="py-1.5 px-3 text-qems-text-secondary whitespace-nowrap max-w-xs truncate" title={ev.title}>
                           {ev.errorType}
                         </td>
                       )}
@@ -632,21 +632,21 @@ export const QualityEventsTable: React.FC = () => {
 
                       {/* Owner */}
                       {visibleColumns.owner && (
-                        <td className="py-1.5 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap text-[11px]">
+                        <td className="py-1.5 px-3 text-qems-text-muted whitespace-nowrap text-[11px]">
                           {ev.owner}
                         </td>
                       )}
 
                       {/* Root Cause */}
                       {visibleColumns.rootCause && (
-                        <td className="py-1.5 px-3 text-slate-500 dark:text-slate-400 whitespace-nowrap text-[11px]">
-                          {ev.rootCause || <span className="text-slate-300 dark:text-slate-600 italic">Pending RCA</span>}
+                        <td className="py-1.5 px-3 text-qems-text-muted whitespace-nowrap text-[11px]">
+                          {ev.rootCause || <span className="text-slate-300 italic">Pending RCA</span>}
                         </td>
                       )}
 
                       {/* Action */}
                       <td className="py-1.5 px-3 text-right whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-0.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[11px] font-medium text-slate-700 dark:text-slate-300 group-hover:border-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                        <span className="inline-flex items-center px-2 py-0.5 bg-qems-bg-white border border-qems-border rounded text-[11px] font-medium text-qems-text-secondary group-hover:border-indigo-400 group-hover:text-qems-brand-dark :text-indigo-400 transition">
                           <Eye className="w-3 h-3 mr-1" />
                           Open
                         </span>
@@ -660,34 +660,34 @@ export const QualityEventsTable: React.FC = () => {
         </div>
 
         {/* Table Footer & Pagination */}
-        <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="p-3 border-t border-qems-border bg-qems-bg-surface/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-qems-text-muted ">
           <div>
             Showing{' '}
-            <strong className="text-slate-800 dark:text-slate-200 font-mono">
+            <strong className="text-qems-text-primary font-mono">
               {Math.min((currentPage - 1) * pageSize + 1, sortedEvents.length)}
             </strong>{' '}
             to{' '}
-            <strong className="text-slate-800 dark:text-slate-200 font-mono">
+            <strong className="text-qems-text-primary font-mono">
               {Math.min(currentPage * pageSize, sortedEvents.length)}
             </strong>{' '}
-            of <strong className="text-slate-800 dark:text-slate-200 font-mono">{sortedEvents.length}</strong> entries
+            of <strong className="text-qems-text-primary font-mono">{sortedEvents.length}</strong> entries
           </div>
 
           <div className="flex items-center space-x-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-700 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="px-2.5 py-1 bg-qems-bg-white border border-qems-border rounded text-xs text-qems-text-secondary disabled:opacity-40 hover:bg-qems-bg-surface :bg-slate-700"
             >
               Previous
             </button>
-            <span className="px-2 font-mono text-xs text-slate-600 dark:text-slate-300">
+            <span className="px-2 font-mono text-xs text-qems-text-muted ">
               Page {currentPage} of {totalPages || 1}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages}
-              className="px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-700 dark:text-slate-300 disabled:opacity-40 hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="px-2.5 py-1 bg-qems-bg-white border border-qems-border rounded text-xs text-qems-text-secondary disabled:opacity-40 hover:bg-qems-bg-surface :bg-slate-700"
             >
               Next
             </button>
@@ -697,29 +697,29 @@ export const QualityEventsTable: React.FC = () => {
 
       {/* Bulk Assignment Modal */}
       {isBulkAssignOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-xl max-w-sm w-full p-5 space-y-4">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="font-bold text-sm text-slate-900 dark:text-white">Bulk Reassign Quality Events</h3>
+        <div className="fixed inset-0 bg-slate-900/60  flex items-center justify-center z-50 p-4">
+          <div className="bg-qems-bg-white rounded-lg border border-qems-border shadow-xl max-w-sm w-full p-5 space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-qems-border-light ">
+              <h3 className="font-bold text-sm text-qems-text-primary ">Bulk Reassign Quality Events</h3>
               <button
                 onClick={() => setIsBulkAssignOpen(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="text-qems-text-disabled hover:text-qems-text-muted :text-slate-200"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300">
+            <p className="text-xs text-qems-text-muted ">
               Select an authorized QA Auditor to reassign <strong>{selectedIds.length}</strong> selected
               quality events.
             </p>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+              <label className="block text-xs font-semibold text-qems-text-secondary mb-1">
                 Assignee
               </label>
               <select
                 value={bulkOwner}
                 onChange={(e) => setBulkOwner(e.target.value)}
-                className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-800 dark:text-slate-200 focus:outline-none"
+                className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-xs text-qems-text-primary focus:outline-none"
               >
                 {QA_AUDITORS.map((auditor) => (
                   <option key={auditor} value={auditor}>
@@ -728,16 +728,16 @@ export const QualityEventsTable: React.FC = () => {
                 ))}
               </select>
             </div>
-            <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex justify-end space-x-2 pt-2 border-t border-qems-border-light ">
               <button
                 onClick={() => setIsBulkAssignOpen(false)}
-                className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                className="px-3 py-1.5 border border-qems-border rounded text-xs font-medium text-qems-text-muted hover:bg-qems-bg-surface :bg-slate-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleBulkAssignConfirm}
-                className="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs font-medium hover:bg-indigo-700"
+                className="px-3 py-1.5 bg-qems-brand text-white rounded text-xs font-medium hover:bg-qems-brand-dark"
               >
                 Confirm Reassignment
               </button>

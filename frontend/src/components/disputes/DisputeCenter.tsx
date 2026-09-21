@@ -77,33 +77,33 @@ export const DisputeCenter: React.FC = () => {
   return (
     <div className="p-4 sm:p-5 lg:p-6 space-y-4 max-w-7xl mx-auto">
       {/* Header Banner */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded border border-amber-200 dark:border-amber-800">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-qems-warning-bg px-2 py-0.5 rounded border border-amber-200 ">
               Fairness & Due Process
             </span>
-            <span className="text-xs text-slate-400 dark:text-slate-600">•</span>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+            <span className="text-xs text-qems-text-disabled ">•</span>
+            <span className="text-xs font-medium text-qems-text-muted ">
               QA Adjudication Engine
             </span>
           </div>
-          <h1 className="text-base font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
+          <h1 className="text-base font-bold text-qems-text-primary mt-1 tracking-tight">
             Dispute & Rebuttal Resolution Center
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-qems-text-muted mt-0.5">
             Transparent arbitration of frontline appeals against documented procedural defects.
           </p>
         </div>
 
         <div className="flex items-center space-x-2 text-xs font-mono">
-          <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded">
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Pending QA</span>
-            <strong className="text-amber-600 dark:text-amber-400 text-sm">{pendingCount}</strong>
+          <div className="bg-qems-bg-surface border border-qems-border px-3 py-1.5 rounded">
+            <span className="text-qems-text-disabled text-[10px] block">Pending QA</span>
+            <strong className="text-qems-warning text-sm">{pendingCount}</strong>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded">
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] block">Overturn Rate</span>
-            <strong className="text-indigo-600 dark:text-indigo-400 text-sm">{overturnRate}%</strong>
+          <div className="bg-qems-bg-surface border border-qems-border px-3 py-1.5 rounded">
+            <span className="text-qems-text-disabled text-[10px] block">Overturn Rate</span>
+            <strong className="text-qems-brand-dark text-sm">{overturnRate}%</strong>
           </div>
         </div>
       </div>
@@ -111,15 +111,15 @@ export const DisputeCenter: React.FC = () => {
       {/* Main Dispute Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left Queue List (5 Cols) */}
-        <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden flex flex-col h-[640px]">
-          <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+        <div className="lg:col-span-5 bg-qems-bg-white border border-qems-border rounded-lg overflow-hidden flex flex-col h-[640px]">
+          <div className="p-3 border-b border-qems-border bg-qems-bg-surface/70 flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-qems-text-secondary ">
               Active Appeals & Rebuttals ({disputeEvents.length})
             </span>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Sorted by SLA</span>
+            <span className="text-[10px] text-qems-text-disabled font-mono">Sorted by SLA</span>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 ">
             {disputeEvents.map((ev) => {
               const isSelected = ev.id === selectedDisputeId;
               return (
@@ -128,38 +128,38 @@ export const DisputeCenter: React.FC = () => {
                   onClick={() => setSelectedDisputeId(ev.id)}
                   className={`p-3 cursor-pointer transition ${
                     isSelected
-                      ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-l-4 border-indigo-600'
-                      : 'hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                      ? 'bg-qems-brand-light/80 border-l-4 border-qems-brand-dark'
+                      : 'hover:bg-qems-bg-surface :bg-slate-800/60'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-mono text-xs font-bold text-indigo-700 dark:text-indigo-400">
+                    <span className="font-mono text-xs font-bold text-qems-brand-dark ">
                       {ev.id}
                     </span>
                     <SLABadge status={ev.slaStatus} hoursRemaining={ev.slaHoursRemaining} />
                   </div>
 
-                  <h4 className="text-xs font-semibold text-slate-900 dark:text-slate-100 line-clamp-1">
+                  <h4 className="text-xs font-semibold text-qems-text-primary line-clamp-1">
                     {ev.title}
                   </h4>
 
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
+                  <div className="text-[11px] text-qems-text-muted mt-1 flex items-center justify-between">
                     <span>
-                      Emp: <strong className="text-slate-700 dark:text-slate-300">{ev.employee}</strong>
+                      Emp: <strong className="text-qems-text-secondary ">{ev.employee}</strong>
                     </span>
-                    <span className="font-mono text-[10px] text-slate-400 dark:text-slate-500">{ev.sopId}</span>
+                    <span className="font-mono text-[10px] text-qems-text-disabled ">{ev.sopId}</span>
                   </div>
 
                   {ev.rebuttal && (
-                    <div className="mt-1.5 text-[11px] bg-white dark:bg-slate-800/90 p-2 rounded border border-amber-200 dark:border-amber-800/70 text-amber-900 dark:text-amber-200 line-clamp-2">
-                      <strong className="text-amber-800 dark:text-amber-300">Grounds: [{ev.rebuttal.category}]</strong>{' '}
+                    <div className="mt-1.5 text-[11px] bg-qems-bg-white p-2 rounded border border-amber-200 text-amber-900 line-clamp-2">
+                      <strong className="text-amber-800 ">Grounds: [{ev.rebuttal.category}]</strong>{' '}
                       {ev.rebuttal.explanation}
                     </div>
                   )}
 
                   <div className="mt-2 flex items-center justify-between text-[10px]">
                     <StatusBadge status={ev.status} />
-                    <span className="text-slate-400 dark:text-slate-500">{ev.team}</span>
+                    <span className="text-qems-text-disabled ">{ev.team}</span>
                   </div>
                 </div>
               );
@@ -170,19 +170,19 @@ export const DisputeCenter: React.FC = () => {
         {/* Right Adjudication Detail (7 Cols) */}
         <div className="lg:col-span-7 space-y-4">
           {selectedEvent ? (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 space-y-3.5">
-              <div className="flex items-start justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4 space-y-3.5">
+              <div className="flex items-start justify-between pb-3 border-b border-qems-border ">
                 <div>
                   <div className="flex items-center space-x-2 mb-1">
-                    <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                    <span className="font-mono text-xs font-bold text-qems-brand-dark ">
                       {selectedEvent.id}
                     </span>
                     <StatusBadge status={selectedEvent.status} />
                     <SeverityBadge severity={selectedEvent.severity} />
                   </div>
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-white">{selectedEvent.title}</h2>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Evaluated: <strong className="text-slate-700 dark:text-slate-300">{selectedEvent.employee}</strong> ({selectedEvent.team}) •
+                  <h2 className="text-sm font-bold text-qems-text-primary ">{selectedEvent.title}</h2>
+                  <div className="text-xs text-qems-text-muted mt-0.5">
+                    Evaluated: <strong className="text-qems-text-secondary ">{selectedEvent.employee}</strong> ({selectedEvent.team}) •
                     Auditor: {selectedEvent.owner}
                   </div>
                 </div>
@@ -192,7 +192,7 @@ export const DisputeCenter: React.FC = () => {
                     setSelectedEventId(selectedEvent.id);
                     setActiveSection('QUALITY EVENTS');
                   }}
-                  className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded text-xs font-semibold flex items-center space-x-1 border border-slate-200 dark:border-slate-700 transition"
+                  className="px-2.5 py-1 bg-qems-bg-secondary hover:bg-slate-200 :bg-slate-700 text-qems-text-secondary rounded text-xs font-semibold flex items-center space-x-1 border border-qems-border transition"
                 >
                   <span>Full Workspace</span>
                   <ArrowRight className="w-3 h-3" />
@@ -208,21 +208,21 @@ export const DisputeCenter: React.FC = () => {
 
               {/* Frontline Claim Card */}
               {selectedEvent.rebuttal ? (
-                <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded p-3 space-y-1.5">
+                <div className="bg-qems-warning-bg/60 border border-amber-200 rounded p-3 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-amber-900 dark:text-amber-200 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
                       Employee Rebuttal Claim ({selectedEvent.rebuttal.category})
                     </span>
-                    <span className="text-[10px] text-amber-700 dark:text-amber-400 font-mono">
+                    <span className="text-[10px] text-qems-warning-dark font-mono">
                       Filed: {selectedEvent.rebuttal.submittedAt}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800/90 p-2.5 rounded border border-amber-200/60 dark:border-amber-800/60 leading-relaxed">
+                  <p className="text-xs text-qems-text-primary bg-qems-bg-white p-2.5 rounded border border-amber-200/60 leading-relaxed">
                     {selectedEvent.rebuttal.explanation}
                   </p>
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50 dark:bg-slate-800/60 rounded border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 text-center">
+                <div className="p-3 bg-qems-bg-surface rounded border border-qems-border text-xs text-qems-text-muted text-center">
                   No rebuttal currently on file for this record.
                 </div>
               )}
@@ -233,17 +233,17 @@ export const DisputeCenter: React.FC = () => {
                 currentRole === 'Quality Governance') && (
                 <form
                   onSubmit={handleResolve}
-                  className="p-3.5 rounded border border-indigo-200 dark:border-indigo-800 bg-indigo-50/40 dark:bg-indigo-950/20 space-y-3 text-xs"
+                  className="p-3.5 rounded border border-qems-brand bg-qems-brand-light/40 space-y-3 text-xs"
                 >
                   <div className="flex items-center space-x-2">
-                    <Scale className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                    <span className="font-bold text-indigo-900 dark:text-indigo-200">
+                    <Scale className="w-4 h-4 text-qems-brand-dark " />
+                    <span className="font-bold text-indigo-900 ">
                       QA Formal Arbitration Decision
                     </span>
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block font-semibold text-qems-text-secondary mb-1">
                       Adjudication Decision
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -259,14 +259,14 @@ export const DisputeCenter: React.FC = () => {
                           onClick={() => setQaDecision(opt.id as any)}
                           className={`p-2 rounded border text-left transition ${
                             qaDecision === opt.id
-                              ? 'bg-indigo-600 text-white border-indigo-600'
-                              : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
+                              ? 'bg-qems-brand text-white border-qems-brand-dark'
+                              : 'bg-qems-bg-white text-qems-text-secondary border-qems-border hover:bg-qems-bg-surface :bg-slate-700'
                           }`}
                         >
                           <div className="font-bold">{opt.label}</div>
                           <div
                             className={`text-[10px] ${
-                              qaDecision === opt.id ? 'text-indigo-100' : 'text-slate-400 dark:text-slate-500'
+                              qaDecision === opt.id ? 'text-indigo-100' : 'text-qems-text-disabled '
                             }`}
                           >
                             {opt.desc}
@@ -277,7 +277,7 @@ export const DisputeCenter: React.FC = () => {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                    <label className="block font-semibold text-qems-text-secondary mb-1">
                       Auditor Rationale & SOP Citation
                     </label>
                     <textarea
@@ -286,14 +286,14 @@ export const DisputeCenter: React.FC = () => {
                       placeholder="Detail transparent findings. E.g. 'Evidence review confirmed regional UI tool latency issue per SOP 014 exemption.'"
                       value={qaRationale}
                       onChange={(e) => setQaRationale(e.target.value)}
-                      className="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-slate-800 dark:text-slate-200 placeholder-slate-400"
+                      className="w-full px-2.5 py-1.5 bg-qems-bg-white border border-qems-border rounded text-qems-text-primary placeholder-slate-400"
                     />
                   </div>
 
                   <div className="flex justify-end">
                     <button
                       type="submit"
-                      className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-semibold flex items-center space-x-1.5 transition"
+                      className="px-3.5 py-1.5 bg-qems-brand hover:bg-qems-brand-dark text-white rounded font-semibold flex items-center space-x-1.5 transition"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Submit Arbitration Ruling</span>
@@ -304,7 +304,7 @@ export const DisputeCenter: React.FC = () => {
 
               {/* Discussion thread */}
               <div className="space-y-2.5 pt-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 block">
+                <span className="text-xs font-bold uppercase tracking-wider text-qems-text-secondary block">
                   Appeal Discussion History ({selectedEvent.rebuttal?.discussions?.length || 0})
                 </span>
 
@@ -312,18 +312,18 @@ export const DisputeCenter: React.FC = () => {
                   {(selectedEvent.rebuttal?.discussions || []).map((d) => (
                     <div
                       key={d.id}
-                      className="p-2.5 rounded border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 text-xs space-y-1"
+                      className="p-2.5 rounded border border-qems-border bg-qems-bg-surface/60 text-xs space-y-1"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <strong className="text-slate-800 dark:text-slate-200">{d.author}</strong>
-                          <span className="text-[10px] px-1 rounded bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                          <strong className="text-qems-text-primary ">{d.author}</strong>
+                          <span className="text-[10px] px-1 rounded bg-qems-brand-light text-qems-brand-dark border border-qems-brand ">
                             {d.authorRole}
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">{d.timestamp}</span>
+                        <span className="text-[10px] text-qems-text-disabled font-mono">{d.timestamp}</span>
                       </div>
-                      <p className="text-slate-700 dark:text-slate-300">{d.message}</p>
+                      <p className="text-qems-text-secondary ">{d.message}</p>
                     </div>
                   ))}
                 </div>
@@ -334,11 +334,11 @@ export const DisputeCenter: React.FC = () => {
                     placeholder="Add comment to arbitration thread..."
                     value={discussionMsg}
                     onChange={(e) => setDiscussionMsg(e.target.value)}
-                    className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-800 dark:text-slate-200"
+                    className="flex-1 px-3 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-xs text-qems-text-primary "
                   />
                   <button
                     type="submit"
-                    className="px-3 py-1.5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded text-xs font-semibold hover:bg-slate-800 dark:hover:bg-white transition"
+                    className="px-3 py-1.5 bg-slate-900 text-white rounded text-xs font-semibold hover:bg-slate-800 :bg-qems-bg-white transition"
                   >
                     Post
                   </button>
@@ -346,7 +346,7 @@ export const DisputeCenter: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-12 text-center text-xs text-slate-400 dark:text-slate-500">
+            <div className="bg-qems-bg-white border border-qems-border rounded-lg p-12 text-center text-xs text-qems-text-disabled ">
               Select a dispute record from the queue to review.
             </div>
           )}

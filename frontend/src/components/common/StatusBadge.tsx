@@ -8,31 +8,31 @@ export const StatusBadge: React.FC<{ status: QualityStatus; className?: string }
   const getStyle = (st: QualityStatus) => {
     switch (st) {
       case 'Draft':
-        return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+        return 'bg-qems-bg-secondary text-qems-text-secondary border-qems-border ';
       case 'Logged':
-        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800';
+        return 'bg-blue-50 text-blue-700 border-blue-200 ';
       case 'Under Review':
-        return 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/50 dark:text-indigo-300 dark:border-indigo-800';
+        return 'bg-qems-brand-light text-qems-brand-dark border-qems-brand ';
       case 'Rebuttal Pending':
-        return 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-700 font-medium';
+        return 'bg-qems-warning-bg text-amber-800 border-amber-300 font-medium';
       case 'QA Review':
-        return 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/50 dark:text-violet-300 dark:border-violet-800';
+        return 'bg-violet-50 text-violet-700 border-violet-200 ';
       case 'Escalated':
-        return 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-700 font-semibold';
+        return 'bg-qems-danger-bg text-qems-danger-dark border-rose-300 font-semibold';
       case 'Manager Review':
-        return 'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800';
+        return 'bg-purple-50 text-purple-700 border-purple-200 ';
       case 'Overturned':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700';
+        return 'bg-qems-success-bg text-qems-success-dark border-emerald-300 ';
       case 'Upheld':
-        return 'bg-orange-50 text-orange-800 border-orange-200 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-800';
+        return 'bg-orange-50 text-orange-800 border-orange-200 ';
       case 'Corrective Action':
-        return 'bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-cyan-950/50 dark:text-cyan-300 dark:border-cyan-800';
+        return 'bg-cyan-50 text-cyan-800 border-cyan-300 ';
       case 'Effectiveness Review':
-        return 'bg-teal-50 text-teal-800 border-teal-300 dark:bg-teal-950/50 dark:text-teal-300 dark:border-teal-800';
+        return 'bg-teal-50 text-teal-800 border-teal-300 ';
       case 'Closed':
-        return 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-700';
+        return 'bg-qems-success-bg text-emerald-800 border-emerald-300 ';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+        return 'bg-qems-bg-secondary text-qems-text-secondary border-qems-border ';
     }
   };
 
@@ -65,15 +65,15 @@ export const SeverityBadge: React.FC<{ severity: Severity; className?: string }>
   const getStyle = (sev: Severity) => {
     switch (sev) {
       case 'CRITICAL':
-        return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-300 dark:border-red-800 font-semibold';
+        return 'bg-red-50 text-red-700 border-red-200 font-semibold';
       case 'HIGH':
-        return 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-700 font-medium';
+        return 'bg-qems-warning-bg text-amber-800 border-amber-200 font-medium';
       case 'MEDIUM':
-        return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800';
+        return 'bg-blue-50 text-blue-700 border-blue-200 ';
       case 'LOW':
-        return 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
+        return 'bg-qems-bg-secondary text-qems-text-muted border-qems-border ';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+        return 'bg-qems-bg-secondary text-qems-text-secondary border-qems-border ';
     }
   };
 
@@ -96,17 +96,17 @@ export const SLABadge: React.FC<{ status: SLAStatus; hoursRemaining?: number; cl
   const getStyle = (sla: SLAStatus) => {
     switch (sla) {
       case 'On Track':
-        return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800';
+        return 'bg-qems-success-bg text-qems-success-dark border-emerald-200 ';
       case 'Warning':
-        return 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-700';
+        return 'bg-qems-warning-bg text-amber-800 border-amber-300 ';
       case 'At Risk':
-        return 'bg-orange-50 text-orange-800 border-orange-300 dark:bg-orange-950/50 dark:text-orange-300 dark:border-orange-700 font-medium';
+        return 'bg-orange-50 text-orange-800 border-orange-300 font-medium';
       case 'Breached':
-        return 'bg-rose-50 text-rose-700 border-rose-300 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-700 font-bold';
+        return 'bg-qems-danger-bg text-qems-danger-dark border-rose-300 font-bold';
       case 'Escalated':
-        return 'bg-purple-50 text-purple-700 border-purple-300 dark:bg-purple-950/50 dark:text-purple-300 dark:border-purple-800 font-semibold';
+        return 'bg-purple-50 text-purple-700 border-purple-300 font-semibold';
       default:
-        return 'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+        return 'bg-qems-bg-secondary text-qems-text-secondary border-qems-border ';
     }
   };
 

@@ -158,35 +158,35 @@ export const MyWork: React.FC = () => {
   return (
     <div className="p-6 space-y-5 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded border border-indigo-200 dark:border-indigo-800">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-qems-brand-dark bg-qems-brand-light px-2 py-0.5 rounded border border-qems-brand ">
               Personal Work Queue
             </span>
-            <span className="text-xs text-slate-300 dark:text-slate-700">•</span>
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Operating Role: <strong className="text-slate-800 dark:text-slate-200">{currentRole}</strong>
+            <span className="text-xs text-slate-300 ">•</span>
+            <span className="text-xs font-medium text-qems-text-muted ">
+              Operating Role: <strong className="text-qems-text-primary ">{currentRole}</strong>
             </span>
           </div>
-          <h1 className="text-base font-bold text-slate-900 dark:text-white mt-1 tracking-tight">
+          <h1 className="text-base font-bold text-qems-text-primary mt-1 tracking-tight">
             My Action Items & Assigned Quality Tasks
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs text-qems-text-muted mt-0.5">
             Execute pending reviews, dispute arbitrations, and corrective action tasks with instant quick-action controls.
           </p>
         </div>
 
         <div className="flex items-center space-x-2.5 text-xs font-mono">
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded text-center">
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] block uppercase font-bold tracking-wider">Needs Action</span>
-            <strong className="text-indigo-600 dark:text-indigo-400 text-sm tabular-nums">
+          <div className="bg-qems-bg-surface border border-qems-border px-3 py-1.5 rounded text-center">
+            <span className="text-qems-text-disabled text-[10px] block uppercase font-bold tracking-wider">Needs Action</span>
+            <strong className="text-qems-brand-dark text-sm tabular-nums">
               {allTasks.filter((t) => t.isNeedsAction && !t.isCompleted).length}
             </strong>
           </div>
-          <div className="bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded text-center">
-            <span className="text-slate-400 dark:text-slate-500 text-[10px] block uppercase font-bold tracking-wider">Due Soon / Overdue</span>
-            <strong className="text-rose-600 dark:text-rose-400 text-sm tabular-nums">
+          <div className="bg-qems-bg-surface border border-qems-border px-3 py-1.5 rounded text-center">
+            <span className="text-qems-text-disabled text-[10px] block uppercase font-bold tracking-wider">Due Soon / Overdue</span>
+            <strong className="text-qems-danger text-sm tabular-nums">
               {allTasks.filter((t) => (t.isDueSoon || t.isOverdue) && !t.isCompleted).length}
             </strong>
           </div>
@@ -194,19 +194,19 @@ export const MyWork: React.FC = () => {
       </div>
 
       {/* Primary Work Tabs (All, Needs Action, Due Soon, Overdue, Completed) */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
-        <div className="px-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50 flex items-center justify-between overflow-x-auto">
+      <div className="bg-qems-bg-white border border-qems-border rounded-lg overflow-hidden">
+        <div className="px-4 border-b border-qems-border bg-qems-bg-surface/70 flex items-center justify-between overflow-x-auto">
           <div className="flex space-x-1 py-2">
             <button
               onClick={() => setActiveTab('ALL')}
               className={`px-3 py-1 rounded text-xs font-semibold transition flex items-center space-x-1.5 ${
                 activeTab === 'ALL'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700'
+                  ? 'bg-slate-900 text-white '
+                  : 'text-qems-text-muted hover:bg-slate-200/60 :bg-slate-700'
               }`}
             >
               <span>All Tasks</span>
-              <span className="px-1.5 py-0.2 bg-black/10 dark:bg-black/20 text-[10px] rounded font-mono tabular-nums">
+              <span className="px-1.5 py-0.2 bg-black/10 text-[10px] rounded font-mono tabular-nums">
                 {allTasks.length}
               </span>
             </button>
@@ -215,12 +215,12 @@ export const MyWork: React.FC = () => {
               onClick={() => setActiveTab('NEEDS_ACTION')}
               className={`px-3 py-1 rounded text-xs font-semibold transition flex items-center space-x-1.5 ${
                 activeTab === 'NEEDS_ACTION'
-                  ? 'bg-indigo-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700'
+                  ? 'bg-qems-brand text-white'
+                  : 'text-qems-text-muted hover:bg-slate-200/60 :bg-slate-700'
               }`}
             >
               <span>Needs Action</span>
-              <span className="px-1.5 py-0.2 bg-indigo-100 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-200 text-[10px] rounded font-mono font-bold tabular-nums">
+              <span className="px-1.5 py-0.2 bg-qems-brand-light text-indigo-900 text-[10px] rounded font-mono font-bold tabular-nums">
                 {allTasks.filter((t) => t.isNeedsAction && !t.isCompleted).length}
               </span>
             </button>
@@ -229,12 +229,12 @@ export const MyWork: React.FC = () => {
               onClick={() => setActiveTab('DUE_SOON')}
               className={`px-3 py-1 rounded text-xs font-semibold transition flex items-center space-x-1.5 ${
                 activeTab === 'DUE_SOON'
-                  ? 'bg-amber-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700'
+                  ? 'bg-qems-warning text-white'
+                  : 'text-qems-text-muted hover:bg-slate-200/60 :bg-slate-700'
               }`}
             >
               <span>Due Soon</span>
-              <span className="px-1.5 py-0.2 bg-amber-100 dark:bg-amber-950 text-amber-900 dark:text-amber-200 text-[10px] rounded font-mono font-bold tabular-nums">
+              <span className="px-1.5 py-0.2 bg-amber-100 text-amber-900 text-[10px] rounded font-mono font-bold tabular-nums">
                 {allTasks.filter((t) => t.isDueSoon && !t.isCompleted).length}
               </span>
             </button>
@@ -243,12 +243,12 @@ export const MyWork: React.FC = () => {
               onClick={() => setActiveTab('OVERDUE')}
               className={`px-3 py-1 rounded text-xs font-semibold transition flex items-center space-x-1.5 ${
                 activeTab === 'OVERDUE'
-                  ? 'bg-rose-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700'
+                  ? 'bg-qems-danger text-white'
+                  : 'text-qems-text-muted hover:bg-slate-200/60 :bg-slate-700'
               }`}
             >
               <span>Overdue</span>
-              <span className="px-1.5 py-0.2 bg-rose-100 dark:bg-rose-950 text-rose-900 dark:text-rose-200 text-[10px] rounded font-mono font-bold tabular-nums">
+              <span className="px-1.5 py-0.2 bg-rose-100 text-rose-900 text-[10px] rounded font-mono font-bold tabular-nums">
                 {allTasks.filter((t) => t.isOverdue && !t.isCompleted).length}
               </span>
             </button>
@@ -257,18 +257,18 @@ export const MyWork: React.FC = () => {
               onClick={() => setActiveTab('COMPLETED')}
               className={`px-3 py-1 rounded text-xs font-semibold transition flex items-center space-x-1.5 ${
                 activeTab === 'COMPLETED'
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-700'
+                  ? 'bg-qems-success text-white'
+                  : 'text-qems-text-muted hover:bg-slate-200/60 :bg-slate-700'
               }`}
             >
               <span>Completed</span>
-              <span className="px-1.5 py-0.2 bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 text-[10px] rounded font-mono font-bold tabular-nums">
+              <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-900 text-[10px] rounded font-mono font-bold tabular-nums">
                 {allTasks.filter((t) => t.isCompleted).length}
               </span>
             </button>
           </div>
 
-          <span className="text-[11px] text-slate-400 dark:text-slate-500 shrink-0 font-medium">
+          <span className="text-[11px] text-qems-text-disabled shrink-0 font-medium">
             Showing {filteredTasks.length} task records
           </span>
         </div>
@@ -276,7 +276,7 @@ export const MyWork: React.FC = () => {
         {/* Task Items Table with Quick Actions */}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-[10px] uppercase font-bold tracking-wider select-none">
+            <thead className="bg-qems-bg-surface text-qems-text-muted border-b border-qems-border text-[10px] uppercase font-bold tracking-wider select-none">
               <tr>
                 <th className="py-2.5 px-4">Event ID</th>
                 <th className="py-2.5 px-3">Task & Context</th>
@@ -288,22 +288,22 @@ export const MyWork: React.FC = () => {
                 <th className="py-2.5 px-4 text-right">Quick Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+            <tbody className="divide-y divide-slate-100 ">
               {filteredTasks.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-500 dark:text-slate-400">
+                  <td colSpan={8} className="py-12 text-center text-qems-text-muted ">
                     <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-                    <p className="font-semibold text-slate-700 dark:text-slate-300 text-sm">No tasks in this view</p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">All action items under this category are up to date.</p>
+                    <p className="font-semibold text-qems-text-secondary text-sm">No tasks in this view</p>
+                    <p className="text-xs text-qems-text-disabled mt-1">All action items under this category are up to date.</p>
                   </td>
                 </tr>
               ) : (
                 filteredTasks.slice(0, 25).map((item) => (
                   <tr
                     key={item.eventId}
-                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition group"
+                    className="hover:bg-qems-bg-surface/80 :bg-slate-800/60 transition group"
                   >
-                    <td className="py-2 px-4 font-mono font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap">
+                    <td className="py-2 px-4 font-mono font-bold text-qems-brand-dark whitespace-nowrap">
                       <button
                         onClick={() => openEvent(item.eventId)}
                         className="hover:underline flex items-center space-x-1"
@@ -312,24 +312,24 @@ export const MyWork: React.FC = () => {
                       </button>
                     </td>
                     <td className="py-2 px-3">
-                      <div className="font-semibold text-slate-900 dark:text-slate-100">{item.task}</div>
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 truncate max-w-xs">
+                      <div className="font-semibold text-qems-text-primary ">{item.task}</div>
+                      <div className="text-[10px] text-qems-text-muted truncate max-w-xs">
                         {item.event.title} • {item.event.sopId}
                       </div>
                     </td>
                     <td className="py-2 px-3 whitespace-nowrap">
                       <SeverityBadge severity={item.priority} />
                     </td>
-                    <td className="py-2 px-3 font-mono text-[11px] text-slate-600 dark:text-slate-400 whitespace-nowrap tabular-nums">
+                    <td className="py-2 px-3 font-mono text-[11px] text-qems-text-muted whitespace-nowrap tabular-nums">
                       <div className="flex items-center space-x-1">
-                        <Calendar className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                        <Calendar className="w-3 h-3 text-qems-text-disabled " />
                         <span>{item.dueDate}</span>
                       </div>
                     </td>
                     <td className="py-2 px-3 whitespace-nowrap">
                       <SLABadge status={item.sla} hoursRemaining={item.slaHours} />
                     </td>
-                    <td className="py-2 px-3 text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap">
+                    <td className="py-2 px-3 text-qems-text-secondary font-medium whitespace-nowrap">
                       {item.owner}
                     </td>
                     <td className="py-2 px-3 whitespace-nowrap">
@@ -348,7 +348,7 @@ export const MyWork: React.FC = () => {
                             });
                           }}
                           title="Quick Approve / Sign-off"
-                          className="px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded text-[11px] font-semibold transition flex items-center space-x-1"
+                          className="px-2 py-0.5 bg-qems-success-bg hover:bg-emerald-100 :bg-emerald-900/60 text-qems-success-dark border border-emerald-200 rounded text-[11px] font-semibold transition flex items-center space-x-1"
                         >
                           <Check className="w-3 h-3" />
                           <span>Approve</span>
@@ -364,7 +364,7 @@ export const MyWork: React.FC = () => {
                             });
                           }}
                           title="Request SLA Extension"
-                          className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded text-[11px] font-medium transition"
+                          className="px-2 py-0.5 bg-qems-bg-secondary hover:bg-slate-200 :bg-slate-700 text-qems-text-secondary border border-qems-border rounded text-[11px] font-medium transition"
                         >
                           Extend
                         </button>
@@ -372,7 +372,7 @@ export const MyWork: React.FC = () => {
                         <button
                           onClick={() => openEvent(item.eventId)}
                           title="Open Full Record Workspace"
-                          className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded text-[11px] font-medium transition flex items-center space-x-0.5"
+                          className="px-2 py-0.5 bg-qems-brand-light hover:bg-qems-brand-light :bg-indigo-900/60 text-qems-brand-dark border border-qems-brand rounded text-[11px] font-medium transition flex items-center space-x-0.5"
                         >
                           <Eye className="w-3 h-3" />
                           <span>Open</span>
@@ -389,14 +389,14 @@ export const MyWork: React.FC = () => {
 
       {/* Quick Action Confirmation Modal */}
       {quickActionModal.isOpen && quickActionModal.event && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl border border-slate-200 dark:border-slate-700 max-w-md w-full p-5 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/60  flex items-center justify-center p-4">
+          <div className="bg-qems-bg-white rounded-lg shadow-xl border border-qems-border max-w-md w-full p-5 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-qems-border-light ">
               <div className="flex items-center space-x-2">
-                <span className="p-1.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-800">
+                <span className="p-1.5 rounded bg-qems-brand-light text-qems-brand-dark border border-indigo-100 ">
                   <FastForward className="w-4 h-4" />
                 </span>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">
+                <h3 className="font-bold text-qems-text-primary text-sm">
                   {quickActionModal.actionType === 'approve'
                     ? `Quick Sign-off: ${quickActionModal.event.id}`
                     : `Request SLA Extension: ${quickActionModal.event.id}`}
@@ -404,13 +404,13 @@ export const MyWork: React.FC = () => {
               </div>
               <button
                 onClick={() => setQuickActionModal({ isOpen: false, actionType: null, event: null })}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+                className="text-qems-text-disabled hover:text-qems-text-muted :text-slate-200 p-1"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="text-xs space-y-2 text-slate-600 dark:text-slate-300">
+            <div className="text-xs space-y-2 text-qems-text-muted ">
               <p>
                 <strong>Event:</strong> {quickActionModal.event.title}
               </p>
@@ -418,7 +418,7 @@ export const MyWork: React.FC = () => {
                 <strong>Standard:</strong> {quickActionModal.event.sopId} ({quickActionModal.event.processArea})
               </p>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-qems-text-secondary mb-1">
                   {quickActionModal.actionType === 'approve'
                     ? 'Assessment / Arbitration Note'
                     : 'Extension Justification'}
@@ -432,23 +432,23 @@ export const MyWork: React.FC = () => {
                       ? 'Confirm verified adherence to SOP or arbitration outcome...'
                       : 'State operational grounds for extending the 24h SLA...'
                   }
-                  className="w-full px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-xs text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:border-indigo-500"
+                  className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-xs text-qems-text-primary focus:bg-qems-bg-white :bg-slate-800 focus:outline-none focus:border-qems-brand"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex justify-end space-x-2 pt-2 border-t border-qems-border-light ">
               <button
                 type="button"
                 onClick={() => setQuickActionModal({ isOpen: false, actionType: null, event: null })}
-                className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded text-xs font-semibold transition"
+                className="px-3 py-1.5 bg-qems-bg-secondary hover:bg-slate-200 :bg-slate-700 text-qems-text-secondary border border-qems-border rounded text-xs font-semibold transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={executeQuickAction}
-                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition flex items-center space-x-1"
+                className="px-3.5 py-1.5 bg-qems-brand hover:bg-qems-brand-dark text-white rounded text-xs font-semibold transition flex items-center space-x-1"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Confirm & Execute</span>

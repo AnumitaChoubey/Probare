@@ -51,34 +51,34 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div
           role="alert"
           aria-live="assertive"
-          className="min-h-[400px] flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-950"
+          className="min-h-[400px] flex items-center justify-center p-6 bg-qems-bg-surface "
         >
-          <div className="max-w-lg w-full bg-white dark:bg-slate-900 border border-rose-200 dark:border-rose-900/60 rounded-xl p-6 shadow-xl space-y-4">
+          <div className="max-w-lg w-full bg-qems-bg-white border border-rose-200 rounded-xl p-6 shadow-xl space-y-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+              <div className="p-2.5 rounded-lg bg-qems-danger-bg text-qems-danger border border-rose-200 ">
                 <AlertOctagon className="w-6 h-6" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                <h2 className="text-base font-bold text-qems-text-primary ">
                   {this.props.fallbackTitle || 'Operational Workspace Interrupted'}
                 </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-qems-text-muted ">
                   An isolated rendering anomaly occurred. Session state is safeguarded.
                 </p>
               </div>
             </div>
 
             {this.state.error && (
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded border border-slate-200 dark:border-slate-700 text-xs font-mono text-rose-700 dark:text-rose-300 overflow-x-auto">
+              <div className="p-3 bg-qems-bg-surface rounded border border-qems-border text-xs font-mono text-qems-danger-dark overflow-x-auto">
                 {this.state.error.message || 'Unknown error'}
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between pt-2 border-t border-qems-border-light ">
               <button
                 type="button"
                 onClick={this.handleReset}
-                className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold rounded hover:bg-slate-800 dark:hover:bg-slate-100 transition flex items-center space-x-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded hover:bg-slate-800 :bg-qems-bg-secondary transition flex items-center space-x-1.5 focus:outline-none focus:ring-2 focus:ring-qems-brand"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reload Workspace</span>
@@ -87,7 +87,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
               <button
                 type="button"
                 onClick={this.handlePurgeStorage}
-                className="text-xs text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 underline transition"
+                className="text-xs text-qems-text-muted hover:text-qems-danger :text-rose-400 underline transition"
               >
                 Restore Factory Defaults
               </button>
