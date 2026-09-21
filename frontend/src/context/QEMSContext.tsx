@@ -131,17 +131,16 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeSavedView, setActiveSavedView] = useState<SavedViewType>('ALL');
   const [paretoDrillDownCategory, setParetoDrillDownCategory] = useState<string | null>(null);
 
-  const [theme, setTheme] = useState<AppTheme>(() => (localStorage.getItem('qems_theme') as AppTheme) || 'light');
+  const [theme, setTheme] = useState<AppTheme>('light');
   const [density, setDensity] = useState<AppDensity>(() => (localStorage.getItem('qems_density') as AppDensity) || 'comfortable');
 
   useEffect(() => {
-    localStorage.setItem('qems_theme', theme);
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+    document.documentElement.classList.remove('dark');
+  }, []);
 
   useEffect(() => { localStorage.setItem('qems_density', density); }, [density]);
 
-  const toggleTheme = () => setTheme(p => p === 'light' ? 'dark' : 'light');
+  const toggleTheme = () => { /* Disabled */ };
   const toggleDensity = () => setDensity(p => p === 'comfortable' ? 'compact' : 'comfortable');
 
   const hasPermission = (permission: keyof RolePermissions | string): boolean => {
