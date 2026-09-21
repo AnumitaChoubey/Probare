@@ -1,6 +1,52 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  /* Darker, richer brown for the brand */
+  --color-qems-brand: #A08361;
+  --color-qems-brand-dark: #7A6247;
+  --color-qems-brand-light: #C6AC8F;
+
+  --color-qems-bg-primary: #EAE0D5;
+  --color-qems-bg-secondary: #F1E9DF;
+  --color-qems-bg-surface: #F7F3EE;
+  --color-qems-bg-white: #FFFFFF;
+
+  --color-qems-border: #D8CBBE;
+  --color-qems-border-strong: #A08361;
+  --color-qems-border-light: #E8DED4;
+
+  --color-qems-text-primary: #0A0908;
+  --color-qems-text-secondary: #4B433B;
+  --color-qems-text-muted: #766C61;
+  --color-qems-text-disabled: #A69B90;
+
+  /* Darker status colors */
+  --color-qems-success: #055A34;
+  --color-qems-success-dark: #034125;
+  --color-qems-success-bg: #E4F2EB;
+  --color-qems-success-border: #8BC9A8;
+  --color-qems-success-text: #034125;
+
+  --color-qems-warning: #8A5000;
+  --color-qems-warning-dark: #6B3E00;
+  --color-qems-warning-bg: #FFF1D6;
+  --color-qems-warning-border: #E8B55C;
+  --color-qems-warning-text: #6B3E00;
+
+  --color-qems-danger: #941B1B;
+  --color-qems-danger-dark: #7A1616;
+  --color-qems-danger-bg: #FCE8E8;
+  --color-qems-danger-border: #E7A0A0;
+  --color-qems-danger-text: #7A1616;
+
+  --color-qems-info: #394650;
+  --color-qems-info-dark: #232C33;
+  --color-qems-info-bg: #EDF0F2;
+  --color-qems-info-border: #C7D0D6;
+
+  --color-qems-neutral: #766C61;
+  --color-qems-neutral-bg: #EEE9E3;
+}
 
 @layer base {
   :root {
@@ -8,16 +54,10 @@
   }
 
   body {
-    background-color: #ffffff;
-    color: #0f172a;
+    background-color: var(--color-qems-bg-primary);
+    color: var(--color-qems-text-primary);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
     -webkit-font-smoothing: antialiased;
-  }
-
-  html.dark body,
-  .dark body {
-    background-color: #090d16;
-    color: #f8fafc;
   }
 }
 
@@ -30,18 +70,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: var(--color-qems-border);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
-}
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: var(--color-qems-text-muted);
 }
 
 /* Enterprise Density Modifiers */
