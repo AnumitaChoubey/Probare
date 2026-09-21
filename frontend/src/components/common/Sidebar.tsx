@@ -52,20 +52,20 @@ export const Sidebar: React.FC = () => {
 
   return (
     <aside
-      className={`bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-all duration-200 select-none z-20 ${
+      className={`bg-qems-bg-white border-r border-qems-border flex flex-col justify-between transition-all duration-200 select-none z-20 ${
         collapsed ? 'w-16' : 'w-60'
       }`}
     >
       <div className="flex flex-col flex-1 py-3 overflow-y-auto">
         <div className="px-3 pb-2 flex items-center justify-between">
           {!collapsed && (
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-qems-text-disabled ">
               Operations Navigation
             </span>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 ml-auto"
+            className="p-1 rounded text-qems-text-disabled hover:text-qems-text-secondary :text-slate-200 hover:bg-qems-bg-secondary :bg-slate-800 ml-auto"
             title={collapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
@@ -85,14 +85,14 @@ export const Sidebar: React.FC = () => {
                 title={collapsed ? item.label : undefined}
                 className={`w-full flex items-center rounded-md px-2.5 py-2 text-xs font-medium transition ${
                   isActive
-                    ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-semibold border-l-2 border-indigo-600'
-                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                    ? 'bg-qems-brand-light text-qems-brand-dark font-semibold border-l-2 border-qems-brand-dark'
+                    : 'text-qems-text-muted hover:text-qems-text-primary hover:bg-qems-bg-surface'
                 } ${collapsed ? 'justify-center' : 'justify-between'}`}
               >
                 <div className="flex items-center space-x-2.5">
                   <Icon
                     className={`w-4 h-4 shrink-0 ${
-                      isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+                      isActive ? 'text-qems-brand-dark ' : 'text-qems-text-disabled '
                     }`}
                   />
                   {!collapsed && <span className="truncate">{item.label}</span>}
@@ -102,8 +102,8 @@ export const Sidebar: React.FC = () => {
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded font-mono ${
                       isActive
-                        ? 'bg-indigo-100 dark:bg-indigo-900/60 text-indigo-800 dark:text-indigo-200'
-                        : item.badgeColor || 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                        ? 'bg-qems-brand text-white'
+                        : item.badgeColor || 'bg-qems-bg-secondary text-qems-text-secondary '
                     }`}
                   >
                     {badgeValue}
@@ -117,17 +117,17 @@ export const Sidebar: React.FC = () => {
 
       {/* Footer info in sidebar */}
       {!collapsed ? (
-        <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-          <div className="flex items-center space-x-2 text-[11px] text-slate-500 dark:text-slate-400">
-            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+        <div className="p-3 border-t border-qems-border-light bg-qems-bg-surface/50 ">
+          <div className="flex items-center space-x-2 text-[11px] text-qems-text-muted ">
+            <ShieldCheck className="w-3.5 h-3.5 text-qems-success shrink-0" />
             <span className="truncate font-medium">ISO 9001 / CAPA Ready</span>
           </div>
-          <div className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-mono">
+          <div className="text-[10px] text-qems-text-disabled mt-1 font-mono">
             Build 2026.4 • SLA Engine Active
           </div>
         </div>
       ) : (
-        <div className="p-2 border-t border-slate-100 dark:border-slate-800 flex justify-center text-emerald-600 dark:text-emerald-400">
+        <div className="p-2 border-t border-qems-border-light flex justify-center text-qems-success ">
           <ShieldCheck className="w-4 h-4" />
         </div>
       )}
