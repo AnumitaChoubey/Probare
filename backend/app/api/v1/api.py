@@ -26,3 +26,5 @@ api_router.include_router(rca.router)
 api_router.include_router(capa.router)
 api_router.include_router(effectiveness.router)
 api_router.include_router(communications.router, prefix="/projects", tags=["communications"])
+from app.api.v1.routers import notifications
+api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])

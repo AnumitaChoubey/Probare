@@ -76,3 +76,45 @@ class NotificationService:
             )
 
         return notification
+
+    async def get_notifications(self, session: AsyncSession, user_id: str, tenant_id: str, limit: int = 50) -> list[Notification]:
+        stmt = select(Notification).where(
+            Notification.user_id == user_id,
+            Notification.tenant_id == tenant_id
+        ).order_by(Notification.created_at.desc()).limit(limit)
+        
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
+
+    async def mark_read(self, session: AsyncSession, notification_id: str, user_id: str, tenant_id: str) -> bool:
+        from datetime import datetime, timezone
+        stmt = select(Notification).where(
+            Notification.id == notification_id,
+            Notification.user_id == user_id,
+            Notification.tenant_id == tenant_id
+        )
+        result = await session.execute(stmt)
+        notif = result.scalars().first()
+        
+        if notif and not getattr(notif, 'read_at', None):
+            notif.read_at = datetime.now(timezone.utc)
+            return True
+        return False
+
+    async def mark_all_read(self, session: AsyncSession, user_id: str, tenant_id: str) -> int:
+        from datetime import datetime, timezone
+        stmt = select(Notification).where(
+            Notification.user_id == user_id,
+            Notification.tenant_id == tenant_id,
+            Notification.read_at.is_(None)
+        )
+        result = await session.execute(stmt)
+        notifs = result.scalars().all()
+        
+        now = datetime.now(timezone.utc)
+        count = 0
+        for notif in notifs:
+            notif.read_at = now
+            count += 1
+            
+        return count

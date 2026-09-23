@@ -42,8 +42,7 @@ export const Header: React.FC = () => {
     resetDemoData,
     theme,
     toggleTheme,
-    density,
-    toggleDensity,
+    sessionData,
   } = useQEMS();
 
   const [isNotifOpen, setIsNotifOpen] = useState(false);
@@ -102,6 +101,25 @@ export const Header: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Project Selector */}
+        {sessionData?.accessible_projects && sessionData.accessible_projects.length > 0 && (
+          <div className="hidden md:flex items-center ml-4 pl-4 border-l border-qems-border">
+            <span className="text-[10px] font-bold text-qems-text-disabled uppercase mr-2 tracking-wider">Project</span>
+            <select
+              className="text-xs py-1 px-2 bg-qems-bg-surface border border-qems-border rounded focus:outline-none focus:border-qems-brand text-qems-text-primary font-mono"
+              onChange={(e) => {
+                // Changing project changes the global API context, reload to refresh state safely
+                window.location.reload();
+              }}
+              defaultValue={sessionData.accessible_projects[0]}
+            >
+              {sessionData.accessible_projects.map((pid: string) => (
+                <option key={pid} value={pid}>{pid}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Center: Global Search & Shortcuts */}
@@ -221,21 +239,7 @@ export const Header: React.FC = () => {
           )}
         </div>
 
-        {/* Density Toggle (Compact / Comfortable) */}
-        <button
-          onClick={toggleDensity}
-          className="h-8 px-2 flex items-center space-x-1 rounded-md border border-qems-border text-qems-text-muted hover:text-qems-text-primary :text-white hover:bg-qems-bg-surface :bg-slate-800 transition text-xs font-mono"
-          title={`Data Density: ${density === 'compact' ? 'Compact' : 'Comfortable'} (Click to toggle)`}
-        >
-          {density === 'compact' ? (
-            <Rows3 className="w-3.5 h-3.5 text-qems-brand-dark " />
-          ) : (
-            <Rows4 className="w-3.5 h-3.5 text-qems-text-muted " />
-          )}
-          <span className="hidden md:inline text-[10px] uppercase font-semibold">
-            {density === 'compact' ? 'Compact' : 'Comfort'}
-          </span>
-        </button>
+
 
         {/* Help & Shortcuts Guide */}
         <button
