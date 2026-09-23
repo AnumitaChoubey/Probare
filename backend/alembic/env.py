@@ -38,9 +38,13 @@ def do_run_migrations(connection) -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+from app.core.database import get_engine_config
+
 async def run_migrations_online() -> None:
+    db_url, db_connect_args = get_engine_config()
     connectable = create_async_engine(
-        settings.DATABASE_URL,
+        db_url,
+        connect_args=db_connect_args,
         poolclass=pool.NullPool,
     )
 
