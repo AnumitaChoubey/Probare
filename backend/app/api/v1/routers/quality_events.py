@@ -103,12 +103,11 @@ async def create_quality_event(
     await session.commit()
     await session.refresh(event)
     
-    # Create notification for owner (if different from creator)
-    if owner_id != auth_context.qems_user_id:
-        # In this router, we can reuse workflow_service.outbox_service or instantiate a new one
-        notif_service = NotificationService(outbox_service=workflow_service.outbox_service)
-        await notif_service.create_notification(
-            session=session,
+    # Create notification for owner (even if same as creator, for demo purposes)
+    # In this router, we can reuse workflow_service.outbox_service or instantiate a new one
+    notif_service = NotificationService(outbox_service=workflow_service.outbox_service)
+    await notif_service.create_notification(
+        session=session,
             user_id=owner_id,
             tenant_id=auth_context.qems_tenant_id,
             title="New Quality Event Assigned",
@@ -116,8 +115,8 @@ async def create_quality_event(
             notification_type="SYSTEM_ALERT",
             event_id=event.id,
             link=event.id
-        )
-        await session.commit()
+    )
+    await session.commit()
 
     return event
 

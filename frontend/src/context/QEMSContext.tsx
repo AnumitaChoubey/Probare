@@ -22,6 +22,7 @@ interface QEMSContextType {
   currentRole: UserRole;
   setCurrentRole: (role: UserRole) => void;
   currentUser: { name: string; email: string; team: string; avatar: string };
+  sessionData: any;
   hasPermission: (permission: keyof RolePermissions) => boolean;
   theme: AppTheme; setTheme: (theme: AppTheme) => void; toggleTheme: () => void;
   activeSavedView: SavedViewType; setActiveSavedView: (view: SavedViewType) => void;
@@ -275,8 +276,8 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <QEMSContext.Provider value={{
-      currentRole, setCurrentRole, currentUser, hasPermission,
-      theme, setTheme, toggleTheme, density, setDensity, toggleDensity,
+      currentRole, setCurrentRole, currentUser, sessionData, hasPermission,
+      theme, setTheme, toggleTheme,
       activeSavedView, setActiveSavedView, paretoDrillDownCategory, setParetoDrillDownCategory,
       activeSection, setActiveSection, selectedEventId, setSelectedEventId,
       events, calibrations, slaPolicies: [], notifications, toasts, addToast, removeToast,
