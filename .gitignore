@@ -23,3 +23,15 @@ htmlcov/
 .mypy_cache/
 
 docs/
+
+# Debug / one-off scripts - never commit these
+seed_db.py
+provision_me.py
+provision_clerk_user.py
+drop_db.py
+test_db.py
+backend/seed_db.py
+backend/provision_me.py
+backend/audit_script.py
+backend/init_db.py
+backend/test_health_ready_manual.py
