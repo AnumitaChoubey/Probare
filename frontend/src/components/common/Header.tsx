@@ -248,6 +248,11 @@ export const Header: React.FC = () => {
 
         <div className="h-4 w-px bg-slate-200 mx-1" />
 
+        {/* User Account & Logout (Clerk) */}
+        <div className="flex items-center justify-center h-8 w-8">
+          <UserButton afterSignOutUrl="/" />
+        </div>
+
         {/* Demo Persona Role Switcher */}
         <div className="relative" ref={roleRef}>
           <button

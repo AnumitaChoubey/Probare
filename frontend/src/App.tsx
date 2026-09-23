@@ -21,9 +21,9 @@ import { NewErrorModal } from './components/entry/NewErrorModal';
 import { AiAssistantDrawer } from './components/ai/AiAssistantDrawer';
 
 const AppContent: React.FC = () => {
-  const { activeSection, selectedEventId, setIsNewErrorModalOpen, theme, density, toggleTheme } = useQEMS();
+  const { activeSection, selectedEventId, setIsNewErrorModalOpen, setIsCommandPaletteOpen, theme, density, toggleTheme } = useQEMS();
 
-  // Keyboard shortcut listener ('D' key toggles theme when not focused on an input)
+  // Keyboard shortcut listener
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -37,11 +37,21 @@ const AppContent: React.FC = () => {
       if (!isInput && (e.key === 'd' || e.key === 'D') && !e.ctrlKey && !e.metaKey && !e.altKey) {
         toggleTheme();
       }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsCommandPaletteOpen(true);
+      }
+
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'n' || e.key === 'N')) {
+        e.preventDefault();
+        setIsNewErrorModalOpen(true);
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleTheme]);
+  }, [toggleTheme, setIsCommandPaletteOpen, setIsNewErrorModalOpen]);
 
   const renderMainContent = () => {
     switch (activeSection) {
