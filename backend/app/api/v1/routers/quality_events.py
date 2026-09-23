@@ -52,6 +52,7 @@ async def create_quality_event(
     import uuid
     from sqlalchemy.future import select
     from app.models.core import Team
+    from datetime import datetime, timezone, timedelta
 
     def is_valid_uuid(val):
         try:
@@ -62,6 +63,8 @@ async def create_quality_event(
 
     employee_id = event_in.employee_id if is_valid_uuid(event_in.employee_id) else auth_context.qems_user_id
     owner_id = event_in.owner_id if is_valid_uuid(event_in.owner_id) else auth_context.qems_user_id
+    
+    # Always resolve a valid team_id - look up or create default team
     team_id = event_in.team_id
     if not is_valid_uuid(team_id):
         team_res = await session.execute(select(Team).filter_by(tenant_id=auth_context.qems_tenant_id))
@@ -72,28 +75,31 @@ async def create_quality_event(
             await session.flush()
         team_id = team.id
 
-    # Enforce created_by and tenant explicitly from context
+    # Default sub_process_id if not provided
+    sub_process_id = event_in.sub_process_id or "General"
+    process_id = event_in.process_id or "General"
+    error_type_id = event_in.error_type_id or "Unclassified"
+    sop_id = event_in.sop_id or "SOP-GEN-001"
+
     event = workflow_service.event_service.create_event(
         session=session,
         tenant_id=auth_context.qems_tenant_id,
         project_id=project_id,
         title=event_in.title,
-        description=event_in.description,
+        description=event_in.description or "",
         employee_id=employee_id,
         team_id=team_id,
-        process_id=event_in.process_id,
-        sub_process_id=event_in.sub_process_id,
-        error_type_id=event_in.error_type_id,
-        sop_id=event_in.sop_id,
+        process_id=process_id,
+        sub_process_id=sub_process_id,
+        error_type_id=error_type_id,
+        sop_id=sop_id,
         severity=event_in.severity,
         owner_id=owner_id,
         created_by_id=auth_context.qems_user_id,
-        customer_impact=event_in.customer_impact
+        customer_impact=event_in.customer_impact or "None"
     )
     
-    # Explicit commit for transaction boundary
     await session.commit()
-    # Refresh to load SLA, etc.
     await session.refresh(event)
     return event
 

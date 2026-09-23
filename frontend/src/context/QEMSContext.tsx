@@ -281,10 +281,10 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetDemoData = () => { console.warn("Reset disabled in production context."); };
 
   const currentUser = {
-    name: sessionData?.qems_user_id || 'System User',
-    email: 'user@qems.internal',
-    team: 'Operations',
-    avatar: 'US'
+    name: sessionData?.user_name || sessionData?.qems_user_id || 'System User',
+    email: sessionData?.user_email || 'user@qems.internal',
+    team: sessionData?.roles?.[0] || 'Operations',
+    avatar: (sessionData?.user_name || 'SU').substring(0, 2).toUpperCase()
   };
 
   return (

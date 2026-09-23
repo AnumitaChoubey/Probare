@@ -22,10 +22,19 @@ class GeminiProvider(AIProvider):
                 structured_output={},
                 provider="gemini",
                 model="unknown",
-                error_info="Gemini API key is missing. Analysis failed."
+                error_info="Gemini API key is missing. Set AI_API_KEY in backend/.env"
+            )
+        
+        if not self.api_key.startswith("AIza"):
+            logger.warning(f"AI_API_KEY does not look like a valid Gemini key (should start with 'AIza'). Got prefix: {self.api_key[:6]}...")
+            return AIAnalysisResult(
+                structured_output={},
+                provider="gemini",
+                model="unknown",
+                error_info="Invalid Gemini API key format. Key should start with 'AIza'. Get one from https://aistudio.google.com/apikey"
             )
 
-        model = request.model_config_override.get('model', 'gemini-1.5-pro-latest') if request.model_config_override else 'gemini-1.5-pro-latest'
+        model = request.model_config_override.get('model', 'gemini-1.5-flash') if request.model_config_override else 'gemini-1.5-flash'
         url = f"{self.base_url}/{model}:generateContent?key={self.api_key}"
 
         # Construct prompt from structured_input

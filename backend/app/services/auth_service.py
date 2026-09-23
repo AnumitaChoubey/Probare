@@ -264,5 +264,7 @@ class AuthService:
             external_tenant_id=external_tenant_id,
             roles=list(roles),
             permissions=permissions,
-            accessible_projects=list(accessible_projects)
+            accessible_projects=list(accessible_projects),
+            user_name=user.name,
+            user_email=user.email,
         )

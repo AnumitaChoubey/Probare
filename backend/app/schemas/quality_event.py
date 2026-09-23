@@ -17,7 +17,7 @@ class QualityEventBase(BaseModel):
     sop_id: Optional[str] = None
     team_id: Optional[str] = None
     owner_id: Optional[str] = None
-    employee_id: str
+    employee_id: Optional[str] = None
 
 class QualityEventCreate(QualityEventBase):
     pass

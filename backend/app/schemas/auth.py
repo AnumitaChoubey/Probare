@@ -11,3 +11,5 @@ class AuthContext(BaseModel):
     roles: List[str]
     permissions: List[str]
     accessible_projects: List[str]
+    user_name: Optional[str] = None
+    user_email: Optional[str] = None
