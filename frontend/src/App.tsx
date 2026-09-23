@@ -21,7 +21,7 @@ import { NewErrorModal } from './components/entry/NewErrorModal';
 import { AiAssistantDrawer } from './components/ai/AiAssistantDrawer';
 
 const AppContent: React.FC = () => {
-  const { activeSection, selectedEventId, setIsNewErrorModalOpen, setIsCommandPaletteOpen, theme, density, toggleTheme } = useQEMS();
+  const { activeSection, selectedEventId, setIsNewErrorModalOpen, setIsCommandPaletteOpen, theme, toggleTheme } = useQEMS();
 
   // Keyboard shortcut listener
   useEffect(() => {
@@ -128,7 +128,7 @@ const AppContent: React.FC = () => {
     <div
       className={`flex flex-col h-screen font-sans antialiased overflow-hidden ${
         theme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-white text-slate-900'
-      } ${density === 'compact' ? 'qems-density-compact' : 'qems-density-comfortable'}`}
+      }`}
     >
       {/* Skip to main content accessibility link */}
       <a

@@ -4,8 +4,12 @@ import { CalibrationSession } from '../../types';
 
 export const calibrationsApi = {
   getCalibrations: async (): Promise<CalibrationSession[]> => {
-    const response = await apiClient.get(`/projects/${getActiveProjectId()}/calibrations`);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/projects/${getActiveProjectId()}/calibrations`);
+      return response.data;
+    } catch (e) {
+      return [];
+    }
   },
   
   submitEvaluation: async (sessionId: string, userId: string, scoreData: any): Promise<CalibrationSession> => {

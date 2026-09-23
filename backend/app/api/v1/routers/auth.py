@@ -62,6 +62,7 @@ async def register_user(
                 return {"message": "User already mapped"}
                 
             new_user = await AuthService.register_clerk_identity(session, sub, email, name)
+            await session.commit()
             return {"message": "User provisioned successfully", "user_id": new_user.id}
             
         except jwt.PyJWTError as e:

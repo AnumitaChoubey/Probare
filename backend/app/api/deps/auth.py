@@ -60,7 +60,9 @@ class ClerkAuthProvider(AuthenticationProvider):
             if not user:
                 # Auto-provision: First-time Clerk user → create QEMS account automatically
                 email = payload.get("email") or payload.get("email_address") or f"{external_subject}@clerk.local"
-                name = payload.get("name") or payload.get("full_name") or email.split("@")[0]
+                name = payload.get("name") or payload.get("full_name")
+                if not name or name == email.split("@")[0] or name.startswith("user_"):
+                    name = "New User"
                 user = await AuthService.register_clerk_identity(
                     session=session,
                     provider_subject=external_subject,
@@ -69,7 +71,9 @@ class ClerkAuthProvider(AuthenticationProvider):
                 )
                 await session.commit()
                 
-            return await AuthService.get_auth_context(session, user, external_tenant_id=user.tenant_id)
+            context = await AuthService.get_auth_context(session, user, external_tenant_id=user.tenant_id)
+            print(f"DEBUG: Returning AuthContext for user {user.id}. user_name: {context.user_name}, qems_user_id: {context.qems_user_id}")
+            return context
             
         except jwt.PyJWTError as e:
             logger.error(f"JWT Validation Error (Clerk): {e}")

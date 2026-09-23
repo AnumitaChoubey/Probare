@@ -24,7 +24,6 @@ interface QEMSContextType {
   currentUser: { name: string; email: string; team: string; avatar: string };
   hasPermission: (permission: keyof RolePermissions) => boolean;
   theme: AppTheme; setTheme: (theme: AppTheme) => void; toggleTheme: () => void;
-  density: AppDensity; setDensity: (density: AppDensity) => void; toggleDensity: () => void;
   activeSavedView: SavedViewType; setActiveSavedView: (view: SavedViewType) => void;
   paretoDrillDownCategory: string | null; setParetoDrillDownCategory: (category: string | null) => void;
   activeSection: NavSection; setActiveSection: (section: NavSection) => void;
@@ -123,16 +122,12 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [paretoDrillDownCategory, setParetoDrillDownCategory] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<AppTheme>('light');
-  const [density, setDensity] = useState<AppDensity>(() => (localStorage.getItem('qems_density') as AppDensity) || 'comfortable');
 
   useEffect(() => {
     document.documentElement.classList.remove('dark');
   }, []);
 
-  useEffect(() => { localStorage.setItem('qems_density', density); }, [density]);
-
   const toggleTheme = () => { /* Disabled */ };
-  const toggleDensity = () => setDensity(p => p === 'comfortable' ? 'compact' : 'comfortable');
 
   const hasPermission = (permission: keyof RolePermissions | string): boolean => {
     if (!sessionData?.permissions) return false;

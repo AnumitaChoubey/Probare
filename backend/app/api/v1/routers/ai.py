@@ -70,15 +70,8 @@ async def classify_error(
     result = await provider.analyze(request)
     
     if result.error_info:
-        # Fallback gently instead of throwing 500 if AI is down or misconfigured
-        return ClassifyResponse(
-            errorType="Unclassified Error",
-            sopId="SOP-GEN-001",
-            suggestedTitle=f"Procedural deviation during {payload.processArea or 'process'}",
-            expectedOutcome="Transaction processed in strict compliance with SOP guidelines.",
-            actualOutcome="Incorrect parameter applied.",
-            suggestedSeverity="MEDIUM"
-        )
+        # User requested to connect with real AI and remove mock data fallback
+        raise HTTPException(status_code=500, detail=f"AI Classification Failed: {result.error_info}")
         
     out = result.structured_output
     

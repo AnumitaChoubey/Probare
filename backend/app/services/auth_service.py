@@ -46,55 +46,70 @@ class AuthService:
             session.add(tenant)
             await session.flush()
             
-        user = User(
-            id=str(uuid.uuid4()),
-            tenant_id=tenant.id,
-            email=email,
-            name=name
-        )
-        session.add(user)
-        await session.flush()
+        import logging
+        logger = logging.getLogger("auth_service")
+        logger.setLevel(logging.DEBUG)
         
-        # Ensure a default project exists
-        from app.models.core import Project, ProjectMember, Role, UserRole
-        project_res = await session.execute(select(Project).filter(Project.tenant_id == tenant.id, Project.name == "Default Project"))
-        project = project_res.scalars().first()
-        if not project:
-            project = Project(
+        # Check if user with this email already exists
+        logger.debug(f"Attempting to provision Clerk user with email: {email}, subject: {provider_subject}")
+        user_res = await session.execute(select(User).filter(User.email == email))
+        user = user_res.scalars().first()
+        
+        if not user:
+            logger.debug(f"User with email {email} not found. Creating new user.")
+            user = User(
                 id=str(uuid.uuid4()),
                 tenant_id=tenant.id,
-                name="Default Project"
+                email=email,
+                name=name
             )
-            session.add(project)
+            session.add(user)
             await session.flush()
             
-        # Add user to project as QA Manager (full permissions for initial setup)
-        pm = ProjectMember(
-            project_id=project.id,
-            user_id=user.id,
-            role="QA Manager"
-        )
-        session.add(pm)
-        
-        # Ensure 'QA Manager' role exists and assign it
-        role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == "QA Manager"))
-        role = role_res.scalars().first()
-        if not role:
-            role = Role(
+            # Ensure a default project exists
+            from app.models.core import Project, ProjectMember, Role, UserRole
+            project_res = await session.execute(select(Project).filter(Project.tenant_id == tenant.id, Project.name == "Default Project"))
+            project = project_res.scalars().first()
+            if not project:
+                logger.debug("Creating Default Project.")
+                project = Project(
+                    id=str(uuid.uuid4()),
+                    tenant_id=tenant.id,
+                    name="Default Project"
+                )
+                session.add(project)
+                await session.flush()
+                
+            # Add user to project as QA Manager (full permissions for initial setup)
+            pm = ProjectMember(
+                project_id=project.id,
+                user_id=user.id,
+                role="QA Manager"
+            )
+            session.add(pm)
+            
+            # Ensure 'QA Manager' role exists and assign it
+            role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == "QA Manager"))
+            role = role_res.scalars().first()
+            if not role:
+                logger.debug("Creating QA Manager role.")
+                role = Role(
+                    id=str(uuid.uuid4()),
+                    tenant_id=tenant.id,
+                    name="QA Manager"
+                )
+                session.add(role)
+                await session.flush()
+                
+            ur = UserRole(
                 id=str(uuid.uuid4()),
-                tenant_id=tenant.id,
-                name="QA Manager"
+                user_id=user.id,
+                role_id=role.id
             )
-            session.add(role)
-            await session.flush()
+            session.add(ur)
+        else:
+            logger.debug(f"Found existing user {user.id} for email {email}. Linking identity.")
             
-        ur = UserRole(
-            id=str(uuid.uuid4()),
-            user_id=user.id,
-            role_id=role.id
-        )
-        session.add(ur)
-        
         identity = UserIdentity(
             id=str(uuid.uuid4()),
             user_id=user.id,
@@ -104,6 +119,7 @@ class AuthService:
         session.add(identity)
         await session.flush()
         
+        logger.debug(f"Successfully finished register_clerk_identity for {provider_subject}.")
         return user
 
     @classmethod
@@ -151,6 +167,31 @@ class AuthService:
             entra_id_sub=external_subject
         )
         session.add(user)
+        await session.flush()
+        
+        # Provision a default Project for the new Tenant
+        project_res = await session.execute(
+            select(Project).filter(Project.tenant_id == tenant.id)
+        )
+        project = project_res.scalars().first()
+        if not project:
+            project = Project(
+                id=str(uuid.uuid4()),
+                tenant_id=tenant.id,
+                name="Default Quality Project",
+                description="Auto-provisioned default project"
+            )
+            session.add(project)
+            await session.flush()
+            
+        # Map user to project
+        pm = ProjectMember(
+            id=str(uuid.uuid4()),
+            project_id=project.id,
+            user_id=user.id,
+            role="Administrator"
+        )
+        session.add(pm)
         await session.flush()
         
         # Assign default Administrator role

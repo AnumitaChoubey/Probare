@@ -43,7 +43,7 @@ function mapEventFromApi(e: any): QualityEvent {
 export const eventsApi = {
   getEvents: async (params?: Record<string, any>): Promise<QualityEvent[]> => {
     const response = await apiClient.get(`/projects/${getActiveProjectId()}/quality-events`, {
-      params: { limit: 500, ...params }
+      params: { limit: 100, ...params }
     });
     const items = response.data.items || response.data;
     return Array.isArray(items) ? items.map(mapEventFromApi) : [];
