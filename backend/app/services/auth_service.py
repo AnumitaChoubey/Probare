@@ -68,22 +68,22 @@ class AuthService:
             session.add(project)
             await session.flush()
             
-        # Add user to project
+        # Add user to project as QA Manager (full permissions for initial setup)
         pm = ProjectMember(
             project_id=project.id,
             user_id=user.id,
-            role="Employee"
+            role="QA Manager"
         )
         session.add(pm)
         
-        # Ensure 'Employee' role exists and assign it
-        role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == "Employee"))
+        # Ensure 'QA Manager' role exists and assign it
+        role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == "QA Manager"))
         role = role_res.scalars().first()
         if not role:
             role = Role(
                 id=str(uuid.uuid4()),
                 tenant_id=tenant.id,
-                name="Employee"
+                name="QA Manager"
             )
             session.add(role)
             await session.flush()

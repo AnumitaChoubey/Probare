@@ -58,11 +58,16 @@ class ClerkAuthProvider(AuthenticationProvider):
             )
             
             if not user:
-                # If user hasn't completed QEMS onboarding mapping
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="User is authenticated via Clerk but lacks a QEMS user mapping."
+                # Auto-provision: First-time Clerk user → create QEMS account automatically
+                email = payload.get("email") or payload.get("email_address") or f"{external_subject}@clerk.local"
+                name = payload.get("name") or payload.get("full_name") or email.split("@")[0]
+                user = await AuthService.register_clerk_identity(
+                    session=session,
+                    provider_subject=external_subject,
+                    email=email,
+                    name=name
                 )
+                await session.commit()
                 
             return await AuthService.get_auth_context(session, user, external_tenant_id=user.tenant_id)
             
