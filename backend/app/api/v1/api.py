@@ -5,6 +5,7 @@ from app.api.v1.routers import auth
 from app.api.v1.routers import quality_events
 from app.api.v1.routers import evidence
 from app.api.v1.routers import ai_insights
+from app.api.v1.routers import ai
 from app.api.v1.routers import microsoft_integrations
 from app.api.v1.routers import rebuttals
 from app.api.v1.routers import rca
@@ -18,6 +19,7 @@ api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(quality_events.router, prefix="/projects", tags=["quality_events"])
 api_router.include_router(evidence.router)
 api_router.include_router(ai_insights.router)
+api_router.include_router(ai.router)
 api_router.include_router(microsoft_integrations.router)
 api_router.include_router(rebuttals.router)
 api_router.include_router(rca.router)
