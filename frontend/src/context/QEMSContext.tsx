@@ -93,19 +93,10 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [currentRole, setCurrentRole] = useState<UserRole>('QA Manager');
 
-  const getRoleFilters = (role: UserRole) => {
-    switch (role) {
-      case 'Frontline Employee': return { involving_me: true };
-      case 'QA Auditor': return { assigned_to_me: true };
-      case 'Team Lead': return { my_team_only: true };
-      case 'QA Manager':
-      case 'QA Reviewer': return { awaiting_my_review: true };
-      case 'Quality Governance':
-      case 'Executive / Leadership':
-      case 'Administrator':
-      case 'System Administrator': return {};
-      default: return {};
-    }
+  const getRoleFilters = (_role: UserRole) => {
+    // All filtering is handled client-side for performance.
+    // Backend returns all events the user has access to via project membership.
+    return {};
   };
 
   // Data fetching

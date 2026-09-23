@@ -26,6 +26,9 @@ export const Sidebar: React.FC = () => {
   const roleNavItems = useRoleNavigation(currentRole);
 
   // Compute live badges
+  const myWorkCount = events.filter(
+    (e) => e.status !== 'Closed' && e.status !== 'Overturned'
+  ).length;
   const pendingRebuttals = events.filter(
     (e) => e.status === 'Rebuttal Pending' || e.status === 'QA Review'
   ).length;
@@ -41,8 +44,8 @@ export const Sidebar: React.FC = () => {
   const getBadgeValue = (type?: NavItemDef['badgeType']): number | string | undefined => {
     switch (type) {
       case 'alerts': return activeSlaAlerts > 0 ? `${activeSlaAlerts} Risk` : undefined;
-      case 'tasks': return currentRole === 'Frontline Employee' ? '3 Tasks' : '7 Actions';
-      case 'total': return events.length;
+      case 'tasks': return myWorkCount > 0 ? `${myWorkCount} Actions` : undefined;
+      case 'total': return events.length > 0 ? events.length : undefined;
       case 'rebuttals': return pendingRebuttals > 0 ? pendingRebuttals : undefined;
       case 'capas': return activeCapas > 0 ? activeCapas : undefined;
       case 'calibrations': return activeCalibrations > 0 ? activeCalibrations : undefined;
