@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey, Table
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from .base import Base, UUIDMixin, TimestampMixin, TenantMixin
 
@@ -10,6 +11,7 @@ class Tenant(Base, UUIDMixin, TimestampMixin):
 class Project(Base, UUIDMixin, TimestampMixin, TenantMixin):
     __tablename__ = "projects"
     name = Column(String(255), nullable=False)
+    taxonomy_config = Column(JSONB, nullable=True)
     tenant = relationship("Tenant")
 
 class User(Base, UUIDMixin, TimestampMixin, TenantMixin):

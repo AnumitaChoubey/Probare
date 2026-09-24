@@ -12,10 +12,15 @@ from app.api.v1.routers import rca
 from app.api.v1.routers import capa
 from app.api.v1.routers import effectiveness
 from app.api.v1.routers import communications
+from app.api.v1.routers import notifications
+from app.api.v1.routers import projects
+from app.api.v1.routers import admin
 
 api_router = APIRouter()
 
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+api_router.include_router(projects.router, prefix="/projects", tags=["projects"])
 api_router.include_router(quality_events.router, prefix="/projects", tags=["quality_events"])
 api_router.include_router(evidence.router)
 api_router.include_router(ai_insights.router)
