@@ -80,23 +80,28 @@ class AuthService:
                 session.add(project)
                 await session.flush()
                 
-            # Add user to project as QA Manager (full permissions for initial setup)
+            if email in ["charanchandra1006@gmail.com", "charanchandra200623@gmail.com"]:
+                default_role_name = "System Administrator"
+            else:
+                default_role_name = "Frontline Employee"
+            
+            # Add user to project as default role
             pm = ProjectMember(
                 project_id=project.id,
                 user_id=user.id,
-                role="QA Manager"
+                role=default_role_name
             )
             session.add(pm)
             
-            # Ensure 'QA Manager' role exists and assign it
-            role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == "QA Manager"))
+            # Ensure the role exists and assign it globally
+            role_res = await session.execute(select(Role).filter(Role.tenant_id == tenant.id, Role.name == default_role_name))
             role = role_res.scalars().first()
             if not role:
-                logger.debug("Creating QA Manager role.")
+                logger.debug(f"Creating {default_role_name} role.")
                 role = Role(
                     id=str(uuid.uuid4()),
                     tenant_id=tenant.id,
-                    name="QA Manager"
+                    name=default_role_name
                 )
                 session.add(role)
                 await session.flush()

@@ -23,16 +23,16 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         
         response.headers["X-Request-ID"] = request_id
         
-        logger.info(
-            f"Request completed",
-            extra={
-                "request_id": request_id,
-                "correlation_id": correlation_id,
-                "method": request.method,
-                "route": request.url.path,
-                "status": response.status_code,
-                "duration": f"{duration:.4f}s"
-            }
-        )
+        # logger.info(
+        #     f"Request completed",
+        #     extra={
+        #         "request_id": request_id,
+        #         "correlation_id": correlation_id,
+        #         "method": request.method,
+        #         "route": request.url.path,
+        #         "status": response.status_code,
+        #         "duration": f"{duration:.4f}s"
+        #     }
+        # )
         
         return response

@@ -23,6 +23,8 @@ import {
 import { useQEMS } from '../../context/QEMSContext';
 import { UserRole } from '../../types';
 import { UserButton } from '@clerk/clerk-react';
+import { useQuery } from '@tanstack/react-query';
+import { projectsApi } from '../../services/api/projects';
 
 export const Header: React.FC = () => {
   const {
@@ -67,16 +69,17 @@ export const Header: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const roles: UserRole[] = [
-    'Frontline Employee',
-    'QA Auditor',
-    'QA Reviewer',
-    'Team Lead',
-    'QA Manager',
-    'Quality Governance',
-    'Executive / Leadership',
-    'System Administrator',
+  const backendRoles: UserRole[] = (sessionData?.roles || ['Frontline Employee']) as UserRole[];
+  const allRoles: UserRole[] = [
+    'Frontline Employee', 'QA Auditor', 'Team Lead', 'QA Manager', 
+    'QA Reviewer', 'Quality Governance', 'Executive / Leadership', 'System Administrator'
   ];
+  const roles = backendRoles.includes('System Administrator') ? allRoles : backendRoles;
+  
+  const { data: projects = [] } = useQuery({
+    queryKey: ['myProjects'],
+    queryFn: projectsApi.list
+  });
 
   return (
     <header className="h-14 bg-qems-bg-white border-b border-qems-border px-4 flex items-center justify-between sticky top-0 z-30 select-none">
@@ -103,19 +106,21 @@ export const Header: React.FC = () => {
         </div>
 
         {/* Project Selector */}
-        {sessionData?.accessible_projects && sessionData.accessible_projects.length > 0 && (
+        {projects.length > 0 && (
           <div className="hidden md:flex items-center ml-4 pl-4 border-l border-qems-border">
             <span className="text-[10px] font-bold text-qems-text-disabled uppercase mr-2 tracking-wider">Project</span>
             <select
               className="text-xs py-1 px-2 bg-qems-bg-surface border border-qems-border rounded focus:outline-none focus:border-qems-brand text-qems-text-primary font-mono"
               onChange={(e) => {
-                // Changing project changes the global API context, reload to refresh state safely
+                // To actually change the project we would update the API client active project ID and refetch.
+                // For now, let's just reload the page with a query param or assume the backend context knows it.
+                // In a real app we'd call setActiveProjectId() and invalidate queries.
                 window.location.reload();
               }}
-              defaultValue={sessionData.accessible_projects[0]}
+              defaultValue={sessionData?.accessible_projects?.[0]}
             >
-              {sessionData.accessible_projects.map((pid: string) => (
-                <option key={pid} value={pid}>{pid}</option>
+              {projects.map((p: any) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
           </div>
@@ -282,7 +287,7 @@ export const Header: React.FC = () => {
             <div className="absolute right-0 mt-2 w-64 bg-qems-bg-white border border-qems-border rounded-lg shadow-lg py-2 z-50 animate-in fade-in duration-100">
               <div className="px-3 pb-2 border-b border-qems-border-light ">
                 <span className="text-[10px] font-bold tracking-wider text-qems-text-disabled uppercase">
-                  Switch Demo Role
+                  Switch Role
                 </span>
                 <p className="text-[11px] text-qems-text-muted mt-0.5">
                   Changes visible actions, dashboards, and dispute permissions.
@@ -312,13 +317,12 @@ export const Header: React.FC = () => {
               <div className="pt-2 border-t border-qems-border-light px-2">
                 <button
                   onClick={() => {
-                    resetDemoData();
                     setIsRoleMenuOpen(false);
                   }}
-                  className="w-full text-left px-2 py-1.5 text-xs text-qems-danger hover:bg-qems-danger-bg :bg-rose-950/40 rounded flex items-center space-x-1.5 transition"
+                  className="w-full text-left px-2 py-1.5 text-xs text-qems-text-muted rounded flex items-center space-x-1.5 transition"
                 >
                   <RotateCcw className="w-3 h-3" />
-                  <span>Reset Demo Data (160 Events)</span>
+                  <span>Roles are managed in Administration</span>
                 </button>
               </div>
             </div>
