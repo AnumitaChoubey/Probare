@@ -7,6 +7,7 @@ import {
   AppDensity, SavedViewType, RolePermissions
 } from '../types';
 import { authApi, eventsApi, evidenceApi, rebuttalsApi, rcaApi, capaApi, effectivenessApi, notificationsApi, calibrationsApi } from '../services/api';
+import { projectsApi } from '../services/api/projects';
 import { setActiveProjectId } from '../services/api/client';
 
 export type NavSection = 'COMMAND CENTER' | 'MY WORK' | 'QUALITY EVENTS' | 'NEW ERROR' | 'DISPUTE CENTER' | 'EVIDENCE' | 'ROOT CAUSE' | 'CORRECTIVE ACTIONS' | 'CAPA' | 'CALIBRATION' | 'QUALITY INTELLIGENCE' | 'REPORTS' | 'ADMINISTRATION';
@@ -23,6 +24,8 @@ interface QEMSContextType {
   setCurrentRole: (role: UserRole) => void;
   currentUser: { name: string; email: string; team: string; avatar: string };
   sessionData: any;
+  taxonomy: any;
+  projectUsers: any[];
   hasPermission: (permission: keyof RolePermissions) => boolean;
   theme: AppTheme; setTheme: (theme: AppTheme) => void; toggleTheme: () => void;
   activeSavedView: SavedViewType; setActiveSavedView: (view: SavedViewType) => void;
@@ -91,7 +94,22 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [sessionData]);
 
-  const [currentRole, setCurrentRole] = useState<UserRole>('QA Manager');
+  const [currentRole, setCurrentRole] = useState<UserRole>('System Administrator');
+
+  useEffect(() => {
+    if (sessionData?.roles?.length > 0) {
+      const isSystemAdmin = sessionData.roles.includes('System Administrator');
+      const allRoles: UserRole[] = [
+        'Frontline Employee', 'QA Auditor', 'Team Lead', 'QA Manager', 
+        'QA Reviewer', 'Quality Governance', 'Executive / Leadership', 'System Administrator'
+      ];
+      const validRoles = isSystemAdmin ? allRoles : sessionData.roles;
+      
+      if (!validRoles.includes(currentRole)) {
+         setCurrentRole(sessionData.roles[0] as UserRole);
+      }
+    }
+  }, [sessionData, currentRole]);
 
   const getRoleFilters = (_role: UserRole) => {
     // All filtering is handled client-side for performance.
@@ -107,6 +125,20 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const { data: calibrations = [] } = useQuery({ queryKey: ['calibrations'], queryFn: calibrationsApi.getCalibrations });
   const { data: notifications = [] } = useQuery({ queryKey: ['notifications'], queryFn: notificationsApi.getNotifications, refetchInterval: 30000 });
+  
+  // Real taxonomy and users based on active project
+  const activeProjectId = sessionData?.accessible_projects?.[0] || '';
+  const { data: taxonomy } = useQuery({
+    queryKey: ['taxonomy', activeProjectId],
+    queryFn: () => projectsApi.getTaxonomy(activeProjectId),
+    enabled: !!activeProjectId
+  });
+  
+  const { data: projectUsers = [] } = useQuery({
+    queryKey: ['projectUsers', activeProjectId],
+    queryFn: () => projectsApi.getUsers(activeProjectId),
+    enabled: !!activeProjectId
+  });
 
   const [activeSection, setActiveSection] = useState<NavSection>('COMMAND CENTER');
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -276,7 +308,7 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <QEMSContext.Provider value={{
-      currentRole, setCurrentRole, currentUser, sessionData, hasPermission,
+      currentRole, setCurrentRole, currentUser, sessionData, taxonomy, projectUsers, hasPermission,
       theme, setTheme, toggleTheme,
       activeSavedView, setActiveSavedView, paretoDrillDownCategory, setParetoDrillDownCategory,
       activeSection, setActiveSection, selectedEventId, setSelectedEventId,

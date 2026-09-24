@@ -13,10 +13,10 @@ import {
   Grid,
 } from 'lucide-react';
 import { useQEMS } from '../../context/QEMSContext';
-import { TEAMS } from '../../data/mockData';
 
 export const QualityIntelligence: React.FC = () => {
-  const { events, addToast } = useQEMS();
+  const { events, addToast, taxonomy } = useQEMS();
+  const teamsList = taxonomy?.teams || [];
   const [selectedTimeframe, setSelectedTimeframe] = useState<'30d' | '90d' | '12m'>('30d');
 
   // Compute intelligence metrics
@@ -40,7 +40,7 @@ export const QualityIntelligence: React.FC = () => {
 
   // Heatmap matrix: Team vs Process Area counts
   const heatmapData: Record<string, Record<string, number>> = {};
-  TEAMS.forEach((t) => {
+  teamsList.forEach((t: string) => {
     heatmapData[t] = {};
     processes.forEach((p) => {
       heatmapData[t][p] = 0;
@@ -195,7 +195,7 @@ export const QualityIntelligence: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 ">
-              {TEAMS.map((team) => (
+              {teamsList.map((team: string) => (
                 <tr key={team} className="hover:bg-qems-bg-surface/80 :bg-slate-800/50">
                   <td className="py-2.5 px-3 font-semibold text-qems-text-primary whitespace-nowrap bg-qems-bg-surface/50 ">
                     {team}

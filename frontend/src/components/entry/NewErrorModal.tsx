@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useQEMS } from '../../context/QEMSContext';
 import { Severity, QualityEvent } from '../../types';
-import { TEAMS, EMPLOYEES, SOP_CATALOG, ERROR_TYPES, QA_AUDITORS } from '../../data/mockData';
 import { aiApi } from '../../services/api';
 
 export const NewErrorModal: React.FC = () => {
@@ -26,14 +25,25 @@ export const NewErrorModal: React.FC = () => {
     setSelectedEventId,
     setActiveSection,
     addToast,
+    taxonomy,
+    projectUsers
   } = useQEMS();
 
+  // Derived lists from context
+  const employeesList = projectUsers?.length > 0 ? projectUsers : [{ id: 'none', name: 'No users found', project_role: 'N/A' }];
+  const auditorsList = projectUsers?.filter(u => u.project_role.includes('QA')) || [];
+  const teamsList = taxonomy?.teams || [];
+  const processKeys = Object.keys(taxonomy?.processes || {});
+  const errorTypesList = Object.values(taxonomy?.processes || {})
+    .flatMap((p: any) => p.errorTypes || [])
+    .filter((value, index, self) => self.indexOf(value) === index);
+  
   // Form states
-  const [employee, setEmployee] = useState(EMPLOYEES[0].name);
-  const [team, setTeam] = useState(EMPLOYEES[0].team);
-  const [processArea, setProcessArea] = useState('Payment Operations');
-  const [sopId, setSopId] = useState('SOP-PAY-014');
-  const [errorType, setErrorType] = useState('Incorrect Payout Calculation');
+  const [employee, setEmployee] = useState(employeesList[0]?.name || '');
+  const [team, setTeam] = useState(teamsList[0] || '');
+  const [processArea, setProcessArea] = useState(processKeys[0] || '');
+  const [sopId, setSopId] = useState('');
+  const [errorType, setErrorType] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [expectedOutcome, setExpectedOutcome] = useState('');
@@ -62,13 +72,9 @@ export const NewErrorModal: React.FC = () => {
 
   const currentSeverity = calculateSeverity();
 
-  // Update team when employee changes
+  // Update team when employee changes (simplified for now, ideally users have default teams)
   const handleEmployeeChange = (empName: string) => {
     setEmployee(empName);
-    const found = EMPLOYEES.find((e) => e.name === empName);
-    if (found) {
-      setTeam(found.team);
-    }
   };
 
   // AI Assistance: Classify error based on description
@@ -309,9 +315,9 @@ export const NewErrorModal: React.FC = () => {
                 onChange={(e) => handleEmployeeChange(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-qems-text-primary "
               >
-                {EMPLOYEES.map((emp) => (
+                {employeesList.map((emp) => (
                   <option key={emp.name} value={emp.name}>
-                    {emp.name} ({emp.team})
+                    {emp.name} ({emp.project_role})
                   </option>
                 ))}
               </select>
@@ -324,11 +330,10 @@ export const NewErrorModal: React.FC = () => {
                 onChange={(e) => setProcessArea(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-qems-text-primary "
               >
-                <option value="Payment Operations">Payment Operations</option>
-                <option value="Claims Adjudication">Claims Adjudication</option>
-                <option value="KYC & Identity">KYC & Identity</option>
-                <option value="Customer Support">Customer Support</option>
-                <option value="Billing & Invoicing">Billing & Invoicing</option>
+                {processKeys.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+                {processKeys.length === 0 && <option value="General">General</option>}
               </select>
             </div>
 
@@ -339,11 +344,12 @@ export const NewErrorModal: React.FC = () => {
                 onChange={(e) => setSopId(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-qems-text-primary font-mono text-[11px]"
               >
-                {SOP_CATALOG.map((sop) => (
+                {Object.values(taxonomy?.processes || {}).map((p: any) => p.defaultSop).filter(Boolean).map((sop: any) => (
                   <option key={sop.id} value={sop.id}>
-                    {sop.id} - {sop.name}
+                    {sop.id} - {sop.title}
                   </option>
                 ))}
+                <option value="SOP-GEN-001">SOP-GEN-001 - General Quality Standard</option>
               </select>
             </div>
           </div>
@@ -414,11 +420,12 @@ export const NewErrorModal: React.FC = () => {
                 onChange={(e) => setErrorType(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-qems-text-primary "
               >
-                {ERROR_TYPES.map((et) => (
+                {errorTypesList.map((et) => (
                   <option key={et} value={et}>
                     {et}
                   </option>
                 ))}
+                {errorTypesList.length === 0 && <option value="Unclassified">Unclassified</option>}
               </select>
             </div>
           </div>

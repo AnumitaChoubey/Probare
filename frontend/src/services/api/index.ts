@@ -8,3 +8,5 @@ export * from './workflows';
 export * from './communications';
 export * from './notifications';
 export * from './calibrations';
+export * from './projects';
+export * from './admin';

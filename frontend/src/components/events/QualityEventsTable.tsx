@@ -18,7 +18,6 @@ import {
 import { useQEMS } from '../../context/QEMSContext';
 import { StatusBadge, SeverityBadge, SLABadge } from '../common/StatusBadge';
 import { QualityEvent, Severity, QualityStatus, SLAStatus } from '../../types';
-import { TEAMS, QA_AUDITORS } from '../../data/mockData';
 
 export const QualityEventsTable: React.FC = () => {
   const {
@@ -29,7 +28,12 @@ export const QualityEventsTable: React.FC = () => {
     bulkAssign,
     bulkUpdateStatus,
     addToast,
+    taxonomy,
+    projectUsers
   } = useQEMS();
+  
+  const teamsList = taxonomy?.teams || [];
+  const auditorsList = projectUsers?.filter(u => u.project_role.includes('QA')) || [];
 
   // Filters State
   const [selectedSeverity, setSelectedSeverity] = useState<string>('ALL');
@@ -44,7 +48,7 @@ export const QualityEventsTable: React.FC = () => {
   // Multi-select State
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isBulkAssignOpen, setIsBulkAssignOpen] = useState(false);
-  const [bulkOwner, setBulkOwner] = useState(QA_AUDITORS[0]);
+  const [bulkOwner, setBulkOwner] = useState(auditorsList[0]?.name || '');
 
   // Column Visibility
   const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
@@ -370,7 +374,7 @@ export const QualityEventsTable: React.FC = () => {
             className="px-2 py-1 bg-qems-bg-surface border border-qems-border rounded text-qems-text-secondary focus:outline-none focus:bg-qems-bg-white :bg-slate-800 text-xs"
           >
             <option value="ALL">All Teams</option>
-            {TEAMS.map((t) => (
+            {teamsList.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
@@ -721,9 +725,9 @@ export const QualityEventsTable: React.FC = () => {
                 onChange={(e) => setBulkOwner(e.target.value)}
                 className="w-full px-2.5 py-1.5 bg-qems-bg-surface border border-qems-border rounded text-xs text-qems-text-primary focus:outline-none"
               >
-                {QA_AUDITORS.map((auditor) => (
-                  <option key={auditor} value={auditor}>
-                    {auditor}
+                {auditorsList.map((auditor) => (
+                  <option key={auditor.id} value={auditor.name}>
+                    {auditor.name}
                   </option>
                 ))}
               </select>
