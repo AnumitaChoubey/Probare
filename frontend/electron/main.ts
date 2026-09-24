@@ -25,7 +25,25 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+    // Serve the dist directory via a local express server to avoid file:// protocol issues
+    // which break Clerk Auth and React Router
+    const express = require('express');
+    const http = require('http');
+    const expressApp = express();
+    
+    expressApp.use(express.static(path.join(__dirname, '../dist')));
+    
+    // For single page applications, fallback to index.html for unknown routes
+    expressApp.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../dist/index.html'));
+    });
+    
+    const server = http.createServer(expressApp);
+    server.listen(0, '127.0.0.1', () => {
+      const port = server.address().port;
+      console.log(`Local server started on port ${port}`);
+      mainWindow.loadURL(`http://127.0.0.1:${port}`);
+    });
   }
 
   mainWindow.on('closed', () => {

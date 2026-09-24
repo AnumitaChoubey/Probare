@@ -38,12 +38,15 @@ export const NewErrorModal: React.FC = () => {
     .flatMap((p: any) => p.errorTypes || [])
     .filter((value, index, self) => self.indexOf(value) === index);
   
+  const availableSops = Object.values(taxonomy?.processes || {}).map((p: any) => p.defaultSop).filter(Boolean);
+  const initialSop = availableSops.length > 0 ? (availableSops[0] as any).id : 'SOP-GEN-001';
+  
   // Form states
   const [employee, setEmployee] = useState(employeesList[0]?.name || '');
   const [team, setTeam] = useState(teamsList[0] || '');
   const [processArea, setProcessArea] = useState(processKeys[0] || '');
-  const [sopId, setSopId] = useState('');
-  const [errorType, setErrorType] = useState('');
+  const [sopId, setSopId] = useState(initialSop);
+  const [errorType, setErrorType] = useState(errorTypesList[0] || 'Unclassified');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [expectedOutcome, setExpectedOutcome] = useState('');
@@ -219,8 +222,9 @@ export const NewErrorModal: React.FC = () => {
     }
 
     setErrors({});
-    const empObj = EMPLOYEES.find((e) => e.name === employee);
-    const sopObj = SOP_CATALOG.find((s) => s.id === sopId);
+    const empObj = employeesList.find((e: any) => e.name === employee);
+    const availableSops = Object.values(taxonomy?.processes || {}).map((p: any) => p.defaultSop).filter(Boolean);
+    const sopObj = availableSops.find((s: any) => s.id === sopId);
 
     try {
       const newEv = await addQualityEvent({
