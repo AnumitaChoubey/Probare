@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     APPLICATION_ENV: str = "development"
     AUTH_PROVIDER: str = "entra"
     
-    CORS_ORIGINS: Union[List[str], str] = ["*"]
+    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000", "https://probare.onrender.com"]
     
     DATABASE_URL: str
     REDIS_URL: str
