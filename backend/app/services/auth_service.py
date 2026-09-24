@@ -246,7 +246,24 @@ class AuthService:
             select(ProjectMember.project_id)
             .filter(ProjectMember.user_id == user.id)
         )
-        accessible_projects = projects_res.scalars().all()
+        accessible_projects = list(projects_res.scalars().all())
+        
+        # Self-healing: if user is an orphan (0 projects), add them to Default Project
+        if not accessible_projects:
+            from app.models.core import Project
+            default_proj_res = await session.execute(
+                select(Project).filter(Project.tenant_id == external_tenant_id, Project.name == "Default Project")
+            )
+            default_proj = default_proj_res.scalars().first()
+            if default_proj:
+                new_pm = ProjectMember(
+                    project_id=default_proj.id,
+                    user_id=user.id,
+                    role="System Administrator" if user.email in ["charanchandra1006@gmail.com", "charanchandra200623@gmail.com"] else "Frontline Employee"
+                )
+                session.add(new_pm)
+                await session.commit()
+                accessible_projects = [default_proj.id]
         
         # Provide an exact mapping from recognized Frontend roles to Backend permissions
         # This acts as the Server-Authoritative source of truth, removing UI hardcodes.
