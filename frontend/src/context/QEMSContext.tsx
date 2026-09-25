@@ -117,17 +117,19 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {};
   };
 
+  // Real taxonomy and users based on active project
+  const activeProjectId = sessionData?.accessible_projects?.[0] || '';
+
   // Data fetching
   const { data: events = [] } = useQuery({ 
-    queryKey: ['events', currentRole], 
-    queryFn: () => eventsApi.getEvents(getRoleFilters(currentRole)), 
+    queryKey: ['events', currentRole, activeProjectId], 
+    queryFn: () => eventsApi.getEvents(getRoleFilters(currentRole)),
+    enabled: !!activeProjectId,
     refetchInterval: 60000 
   });
   const { data: calibrations = [] } = useQuery({ queryKey: ['calibrations'], queryFn: calibrationsApi.getCalibrations });
   const { data: notifications = [] } = useQuery({ queryKey: ['notifications'], queryFn: notificationsApi.getNotifications, refetchInterval: 30000 });
   
-  // Real taxonomy and users based on active project
-  const activeProjectId = sessionData?.accessible_projects?.[0] || '';
   const { data: taxonomy } = useQuery({
     queryKey: ['taxonomy', activeProjectId],
     queryFn: () => projectsApi.getTaxonomy(activeProjectId),
