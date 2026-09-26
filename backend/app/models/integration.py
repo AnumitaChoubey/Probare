@@ -329,3 +329,80 @@ class NotificationDelivery(Base, UUIDMixin, TimestampMixin, TenantMixin):
     status = Column(String(50), nullable=False, default="pending") # 'pending'|'sent'|'failed'|'queued_offline'
     attempt_count = Column(Integer, nullable=False, default=0)
     sent_at = Column(DateTime(timezone=True), nullable=True)
+
+# ---------------------------------------------------------------------------
+# Phase F — Bulk Operations (spec Section 12)
+# ---------------------------------------------------------------------------
+
+class BulkOperationJob(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    """
+    Top-level job record for a bulk operation submitted by a user.
+    Tracks overall status; individual results live in BulkOperationItem.
+    """
+    __tablename__ = "bulk_operation_jobs"
+    project_id = Column(String(36), nullable=True, index=True)
+    operation_type = Column(String(50), nullable=False, index=True) # 'status_update'|'assign'|'export'
+    submitted_by = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+    filter_criteria = Column(JSONB, nullable=False)          # What events were selected
+    operation_payload = Column(JSONB, nullable=False)        # The change to apply (e.g. {"target_status": "Closed"})
+    total_count = Column(Integer, nullable=False, default=0)
+    processed_count = Column(Integer, nullable=False, default=0)
+    success_count = Column(Integer, nullable=False, default=0)
+    failure_count = Column(Integer, nullable=False, default=0)
+    status = Column(String(50), nullable=False, default="pending") # 'pending'|'running'|'completed'|'partial'|'failed'
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    export_storage_key = Column(String(1024), nullable=True)  # Populated for export jobs
+
+class BulkOperationItem(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    """
+    Per-entity result record for a bulk operation job.
+    Ensures every affected entity is auditable individually.
+    """
+    __tablename__ = "bulk_operation_items"
+    job_id = Column(String(36), ForeignKey('bulk_operation_jobs.id', ondelete='CASCADE'), nullable=False, index=True)
+    entity_id = Column(String(36), nullable=False, index=True)
+    entity_type = Column(String(50), nullable=False, default="quality_error")
+    success = Column(Boolean, nullable=False)
+    error_detail = Column(String, nullable=True)             # e.g. "INVALID_TRANSITION" or None
+    old_value = Column(JSONB, nullable=True)
+    new_value = Column(JSONB, nullable=True)
+
+# ---------------------------------------------------------------------------
+# Phase F — Reporting (spec Section 13)
+# ---------------------------------------------------------------------------
+
+class ReportTemplate(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    """
+    Configurable report template defining what columns/filters/groupings to include.
+    Can be scheduled or run on demand.
+    """
+    __tablename__ = "report_templates"
+    project_id = Column(String(36), nullable=True, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(String, nullable=True)
+    report_type = Column(String(100), nullable=False)        # 'event_summary'|'sla_performance'|'trend'|'capa_tracker'
+    columns = Column(ARRAY(String), nullable=False)          # ordered list of columns to include
+    filters = Column(JSONB, nullable=False, server_default='{}')  # e.g. {"severity": ["CRITICAL"]}
+    group_by = Column(String(50), nullable=True)             # e.g. "process_id", "team_id"
+    cron_schedule = Column(String(50), nullable=True)        # null = on-demand only
+    recipients = Column(ARRAY(String), nullable=True)        # user_ids to email on schedule
+    created_by = Column(String(36), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+
+class ReportRun(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    """
+    Tracks each execution of a ReportTemplate — on-demand or scheduled.
+    """
+    __tablename__ = "report_runs"
+    template_id = Column(String(36), ForeignKey('report_templates.id', ondelete='CASCADE'), nullable=False, index=True)
+    triggered_by = Column(String(36), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)  # null for scheduled
+    trigger_type = Column(String(50), nullable=False, default="manual")  # 'manual'|'scheduled'
+    status = Column(String(50), nullable=False, default="pending")       # 'pending'|'running'|'completed'|'failed'
+    date_range_from = Column(DateTime(timezone=True), nullable=True)
+    date_range_to = Column(DateTime(timezone=True), nullable=True)
+    row_count = Column(Integer, nullable=True)
+    export_format = Column(String(20), nullable=False, default="csv")    # 'csv'|'xlsx'|'pdf'
+    storage_key = Column(String(1024), nullable=True)                    # Set when export is ready
+    error_detail = Column(String, nullable=True)
+    started_at = Column(DateTime(timezone=True), nullable=True)
+    completed_at = Column(DateTime(timezone=True), nullable=True)
