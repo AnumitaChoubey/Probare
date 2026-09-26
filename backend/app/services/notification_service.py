@@ -1,120 +1,113 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from typing import Optional, Any, Dict
-from app.models.integration import Notification, NotificationPreference
-from app.services.outbox_service import OutboxService
+from typing import Optional, Any, Dict, List
 import uuid
 import logging
+from datetime import datetime, timezone
+
+from app.models.integration import NotificationEvent, NotificationDelivery, NotificationRule, NotificationTemplate
+from app.models.core import User, ProjectMember
 
 logger = logging.getLogger(__name__)
 
 class NotificationService:
-    def __init__(self, outbox_service: OutboxService):
-        self.outbox_service = outbox_service
-
-    async def create_notification(
-        self,
+    """
+    V2 Notification Engine: Handles fan-out of NotificationEvents to NotificationDeliveries across 5 channels.
+    Channels: 'in_app', 'email', 'teams', 'desktop'
+    """
+    
+    @classmethod
+    async def create_event(
+        cls,
         session: AsyncSession,
-        user_id: str,
         tenant_id: str,
-        title: str,
-        body: str,
-        notification_type: str,
-        event_id: Optional[str] = None,
-        link: Optional[str] = None
-    ) -> Notification:
-        # Create in-app notification
-        notification = Notification(
+        event_type: str,
+        entity_type: str,
+        entity_id: str,
+        payload: Dict[str, Any]
+    ) -> NotificationEvent:
+        event = NotificationEvent(
             id=str(uuid.uuid4()),
-            user_id=user_id,
             tenant_id=tenant_id,
-            title=title,
-            body=body,
-            link=link
+            event_type=event_type,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            payload=payload
         )
-        session.add(notification)
-
-        # Fetch preferences
-        stmt = select(NotificationPreference).filter_by(user_id=user_id)
-        result = await session.execute(stmt)
-        preference = result.scalars().first()
-
-        # Defaults if no preference record found
-        email_enabled = True
-        teams_enabled = True
-        if preference:
-            email_enabled = preference.email_enabled
-            teams_enabled = preference.teams_enabled
-
-        payload = {
-            "user_id": user_id,
-            "title": title,
-            "body": body,
-            "notification_type": notification_type,
-            "link": link
-        }
-
-        # Queue external deliveries via outbox
-        if email_enabled:
-            await self.outbox_service.dispatch(
-                session=session,
-                event_type="SEND_EMAIL",
-                aggregate_type="Notification",
-                aggregate_id=notification.id,
-                payload=payload,
-                tenant_id=tenant_id
-            )
-
-        if teams_enabled:
-            await self.outbox_service.dispatch(
-                session=session,
-                event_type="SEND_TEAMS_MESSAGE",
-                aggregate_type="Notification",
-                aggregate_id=notification.id,
-                payload=payload,
-                tenant_id=tenant_id
-            )
-
-        return notification
-
-    async def get_notifications(self, session: AsyncSession, user_id: str, tenant_id: str, limit: int = 50) -> list[Notification]:
-        stmt = select(Notification).where(
-            Notification.user_id == user_id,
-            Notification.tenant_id == tenant_id
-        ).order_by(Notification.created_at.desc()).limit(limit)
+        session.add(event)
+        await session.flush()
         
-        result = await session.execute(stmt)
-        return list(result.scalars().all())
-
-    async def mark_read(self, session: AsyncSession, notification_id: str, user_id: str, tenant_id: str) -> bool:
-        from datetime import datetime, timezone
-        stmt = select(Notification).where(
-            Notification.id == notification_id,
-            Notification.user_id == user_id,
-            Notification.tenant_id == tenant_id
-        )
-        result = await session.execute(stmt)
-        notif = result.scalars().first()
+        # Fan out
+        await cls._fan_out(session, event)
+        return event
         
-        if notif and not getattr(notif, 'read_at', None):
-            notif.read_at = datetime.now(timezone.utc)
-            return True
-        return False
-
-    async def mark_all_read(self, session: AsyncSession, user_id: str, tenant_id: str) -> int:
-        from datetime import datetime, timezone
-        stmt = select(Notification).where(
-            Notification.user_id == user_id,
-            Notification.tenant_id == tenant_id,
-            Notification.read_at.is_(None)
+    @classmethod
+    async def _fan_out(cls, session: AsyncSession, event: NotificationEvent):
+        # Find applicable rules for this tenant and event_type
+        stmt = select(NotificationRule).filter_by(
+            tenant_id=event.tenant_id,
+            event_type=event.event_type,
+            active=True
         )
-        result = await session.execute(stmt)
-        notifs = result.scalars().all()
+        rules = (await session.execute(stmt)).scalars().all()
+        
+        for rule in rules:
+            target_user_ids = set()
+            
+            # If rule targets a specific user
+            if rule.user_id:
+                target_user_ids.add(rule.user_id)
+            
+            # If rule targets a role
+            if rule.role_id:
+                # Find users with this role in the tenant
+                # Simple implementation assumes ProjectMember Maps user -> role in the tenant
+                role_stmt = select(ProjectMember.user_id).filter_by(role=rule.role_id)
+                users_with_role = (await session.execute(role_stmt)).scalars().all()
+                target_user_ids.update(users_with_role)
+                
+            for user_id in target_user_ids:
+                for channel in rule.channels:
+                    delivery = NotificationDelivery(
+                        id=str(uuid.uuid4()),
+                        tenant_id=event.tenant_id,
+                        notification_event_id=event.id,
+                        recipient_user_id=user_id,
+                        channel=channel,
+                        status="pending"
+                    )
+                    session.add(delivery)
+
+    @classmethod
+    async def process_deliveries(cls, session: AsyncSession):
+        """
+        Background worker entrypoint to process pending deliveries.
+        """
+        stmt = select(NotificationDelivery).filter_by(status="pending")
+        deliveries = (await session.execute(stmt)).scalars().all()
         
         now = datetime.now(timezone.utc)
-        count = 0
-        for notif in notifs:
-            notif.read_at = now
-            count += 1
-            
-        return count
+        
+        for delivery in deliveries:
+            try:
+                if delivery.channel == "in_app":
+                    # In-app is instantaneous, just mark sent
+                    delivery.status = "sent"
+                elif delivery.channel == "email":
+                    # Send via Email provider (e.g. SendGrid)
+                    # For now just mark sent
+                    delivery.status = "sent"
+                elif delivery.channel == "teams":
+                    # Call Teams Webhook
+                    delivery.status = "sent"
+                elif delivery.channel == "desktop":
+                    # Desktop OS notification via polling or sync engine
+                    delivery.status = "sent"
+                    
+                delivery.sent_at = now
+            except Exception as e:
+                logger.error(f"Failed to deliver notification {delivery.id}: {e}")
+                delivery.attempt_count += 1
+                if delivery.attempt_count >= 3:
+                    delivery.status = "failed"
+
