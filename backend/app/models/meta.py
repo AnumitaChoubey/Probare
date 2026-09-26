@@ -53,16 +53,47 @@ class SOP(Base, UUIDMixin, TimestampMixin, TenantMixin):
     title = Column(String(255), nullable=False)
     document_url = Column(String(1024), nullable=True)
 
+from sqlalchemy import Boolean, DateTime, SmallInteger, Text
+from sqlalchemy.dialects.postgresql import ARRAY
+
+class EscalationMatrix(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "escalation_matrices"
+    name = Column(String(255), nullable=False)
+
+class EscalationRule(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "escalation_rules"
+    escalation_matrix_id = Column(String(36), ForeignKey('escalation_matrices.id', ondelete='CASCADE'), nullable=False, index=True)
+    stage = Column(String(50), nullable=False)
+    severity = Column(String(50), nullable=True)
+    threshold_pct = Column(Integer, nullable=False)
+    escalation_level = Column(SmallInteger, nullable=False)
+    recipient_role = Column(String(100), nullable=True)
+    recipient_user_id = Column(String(36), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    notification_channels = Column(ARRAY(String), nullable=False) # Requires postgres ARRAY or JSON fallback
+
+class WorkingHoursCalendar(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "working_hours_calendars"
+    day_of_week = Column(SmallInteger, nullable=False)
+    start_time = Column(String(10), nullable=False) # e.g. "09:00"
+    end_time = Column(String(10), nullable=False)
+
+class Holiday(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "holidays"
+    holiday_date = Column(DateTime, nullable=False)
+    description = Column(String, nullable=True)
+
 class SLAPolicy(Base, UUIDMixin, TimestampMixin, TenantMixin):
     __tablename__ = "sla_policies"
-    name = Column(String(255), nullable=False)
-    process_id = Column(String(36), nullable=False, index=True)
+    process_id = Column(String(36), nullable=True, index=True) # Optional link to specific process
+    stage = Column(String(50), nullable=False)
     severity = Column(String(50), nullable=True)
-    resolution_target_hours = Column(Integer, nullable=True)
-    rebuttal_window_hours = Column(Integer, nullable=False, default=48)
-    qa_response_hours = Column(Integer, nullable=False, default=24)
-    escalation_window_hours = Column(Integer, nullable=False, default=24)
-    warning_threshold_percent = Column(Integer, nullable=False, default=75)
+    duration_minutes = Column(Integer, nullable=False)
+    use_working_hours = Column(String(50), nullable=False) # 'calendar' | 'working_hours_only'
+    warning_threshold_pct = Column(Integer, nullable=False, default=80)
+    pause_on = Column(JSONB, nullable=True)
+    escalation_matrix_id = Column(String(36), ForeignKey('escalation_matrices.id', ondelete='SET NULL'), nullable=True)
+    active = Column(Boolean, nullable=False, default=True)
+    effective_from = Column(DateTime(timezone=True), nullable=False)
 
     __table_args__ = (
         ForeignKeyConstraint(

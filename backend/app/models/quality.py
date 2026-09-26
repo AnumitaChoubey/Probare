@@ -236,3 +236,22 @@ class EffectivenessReview(Base, UUIDMixin, TimestampMixin, ProjectMixin):
             ondelete='CASCADE'
         ),
     )
+
+class SLAClock(Base, UUIDMixin, TimestampMixin, ProjectMixin):
+    __tablename__ = "sla_clocks"
+    quality_event_id = Column(String(36), nullable=False, index=True)
+    stage = Column(String(50), nullable=False)
+    sla_policy_id = Column(String(36), ForeignKey('sla_policies.id', ondelete='SET NULL'), nullable=True)
+    started_at = Column(DateTime(timezone=True), nullable=False)
+    paused_intervals = Column(JSONB, nullable=False, default=list) # [{start, end, reason}]
+    elapsed_minutes = Column(Integer, nullable=False, default=0)
+    status = Column(String(50), nullable=False, default="running") # 'running' | 'paused' | 'breached' | 'completed'
+    breached_at = Column(DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ['project_id', 'quality_event_id'],
+            ['quality_events.project_id', 'quality_events.id'],
+            ondelete='CASCADE'
+        ),
+    )
