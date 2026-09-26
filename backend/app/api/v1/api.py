@@ -33,3 +33,6 @@ api_router.include_router(effectiveness.router)
 api_router.include_router(communications.router, prefix="/projects", tags=["communications"])
 from app.api.v1.routers import notifications
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
+
+from app.api.v1.routers import sync
+api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
