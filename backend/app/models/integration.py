@@ -37,6 +37,31 @@ class AIModelConfiguration(Base, UUIDMixin, TimestampMixin, TenantMixin):
     api_key_secret_ref = Column(String(255), nullable=True)
     is_active = Column(Boolean, nullable=False, default=True)
 
+    # Per-capability feature flags (spec Section 11.1)
+    # JSON map of capability -> enabled bool, e.g. {"duplicate_check": true, "ask": false}
+    capability_flags = Column(JSONB, nullable=False, server_default='{}')
+
+    # Per-capability daily cost/call caps (spec Section 11.4)
+    # JSON map of capability -> {"daily_call_cap": int, "daily_spend_cap": float}
+    capability_caps = Column(JSONB, nullable=False, server_default='{}')
+
+class AIInvocationLog(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    """
+    Immutable audit record for every AI capability call (spec Section 11.3).
+    Never updated after creation — only inserted.
+    """
+    __tablename__ = "ai_invocation_logs"
+    capability = Column(String(100), nullable=False, index=True)        # e.g. 'duplicate_check'
+    provider = Column(String(100), nullable=False)
+    entity_type = Column(String(100), nullable=True)
+    entity_id = Column(String(36), nullable=True, index=True)
+    prompt_hash = Column(String(64), nullable=False)                    # SHA-256 of prompt, never raw prompt
+    response_summary = Column(String, nullable=False)
+    accepted_by_user = Column(Boolean, nullable=True)                   # NULL until user acts on suggestion
+    tokens_used = Column(Integer, nullable=True)
+    cost_estimate = Column(String(30), nullable=True)                   # e.g. "0.0024"
+    invoked_by = Column(String(36), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+
 class AIAnalysisRun(Base, UUIDMixin, TimestampMixin, ProjectMixin):
     __tablename__ = "ai_analysis_runs"
     quality_event_id = Column(String(36), nullable=True, index=True)
