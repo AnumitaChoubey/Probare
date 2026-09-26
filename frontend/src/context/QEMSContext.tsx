@@ -180,50 +180,58 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   const removeToast = (id: string) => setToasts(prev => prev.filter(t => t.id !== id));
 
-  // Mutations
   const createEventMutation = useMutation({
     mutationFn: eventsApi.createEvent,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const updateEventMutation = useMutation({
     mutationFn: ({ id, data }: { id: string, data: Partial<QualityEvent> }) => eventsApi.updateEvent(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const statusMutation = useMutation({
     mutationFn: ({ id, status, version }: { id: string, status: QualityStatus, version: number }) => eventsApi.updateStatus(id, status, version),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const rebuttalMutation = useMutation({
     mutationFn: ({ id, data }: { id: string, data: any }) => rebuttalsApi.submitRebuttal(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const resolveRebuttalMutation = useMutation({
     mutationFn: ({ id, data }: { id: string, data: any }) => rebuttalsApi.resolveRebuttal(id, data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const rcaMutation = useMutation({
     mutationFn: ({ id, rca }: { id: string, rca: RootCauseAnalysis }) => rcaApi.saveRCA(id, rca),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const capaCreateMutation = useMutation({
     mutationFn: ({ id, capa }: { id: string, capa: any }) => capaApi.addCorrectiveAction(id, capa),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const capaUpdateMutation = useMutation({
     mutationFn: ({ actionId, status, notes }: { actionId: string, status: string, notes?: string }) => capaApi.updateCorrectiveActionStatus(actionId, status, notes),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const effReviewMutation = useMutation({
     mutationFn: ({ id, review }: { id: string, review: any }) => effectivenessApi.submitEffectivenessReview(id, review),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+    onError: (err: any) => addToast({ type: 'error', title: 'Operation Failed', description: err?.response?.data?.detail || err.message }),
   });
 
   const addQualityEvent = async (data: any) => {
