@@ -44,14 +44,19 @@ class Evidence(Base, UUIDMixin, TimestampMixin, ProjectMixin):
     quality_event_id = Column(String(36), nullable=False, index=True)
     title = Column(String(255), nullable=False)
     file_name = Column(String(255), nullable=False)
-    file_size = Column(String(50), nullable=False)
-    mime_type = Column(String(100), nullable=True)
-    storage_path = Column(String(1024), nullable=True)
+    file_size = Column(Integer, nullable=False) # Changed to Integer
+    mime_type = Column(String(100), nullable=False)
+    storage_path = Column(String(1024), nullable=True) # Will be deprecated in favor of storage_key
+    storage_key = Column(String(1024), nullable=False, server_default="") # MinIO/blob key
     uploaded_by_id = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
     description = Column(String, nullable=True)
-    checksum = Column(String(64), nullable=True) # SHA-256 is 64 hex chars
+    checksum = Column(String(64), nullable=True)
     duration = Column(String(50), nullable=True)
     highlight_timestamp = Column(String(50), nullable=True)
+    version = Column(Integer, nullable=False, default=1)
+    status = Column(String(50), nullable=False, default="active") # 'active' | 'soft_deleted'
+    soft_deleted_at = Column(DateTime(timezone=True), nullable=True)
+    soft_deleted_by = Column(String(36), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
     
     __table_args__ = (
         ForeignKeyConstraint(
@@ -59,7 +64,14 @@ class Evidence(Base, UUIDMixin, TimestampMixin, ProjectMixin):
             ['quality_events.project_id', 'quality_events.id'],
             ondelete='CASCADE'
         ),
+        # CheckConstraint('file_size <= 26214400', name='check_file_size_limit') # 25MB
     )
+
+class EvidenceAccessLog(Base, UUIDMixin, TimestampMixin, ProjectMixin):
+    __tablename__ = "evidence_access_logs"
+    evidence_id = Column(String(36), ForeignKey('evidence.id', ondelete='CASCADE'), nullable=False, index=True)
+    accessed_by = Column(String(36), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    action = Column(String(50), nullable=False) # 'view' | 'download'
 
 class Rebuttal(Base, UUIDMixin, TimestampMixin, ProjectMixin):
     __tablename__ = "rebuttals"
