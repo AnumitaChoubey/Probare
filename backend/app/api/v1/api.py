@@ -49,3 +49,6 @@ api_router.include_router(admin_taxonomy.router, prefix="/admin/taxonomy", tags=
 from app.api.v1.routers import admin_ai
 api_router.include_router(admin_ai.router, prefix="/admin", tags=["admin_ai"])
 
+from app.api.v1.routers import bulk
+api_router.include_router(bulk.router)
+
