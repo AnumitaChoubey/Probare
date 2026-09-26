@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import uuid
 import hashlib
 import json
+import os
 from typing import Any, Dict
 
 from app.models.quality import QualityEvent
@@ -18,23 +19,14 @@ from app.services.timeline_service import TimelineService
 from app.services.outbox_service import OutboxService
 from app.services.sla_service import SLAService
 
+# Load declarative state machine
+config_path = os.path.join(os.path.dirname(__file__), '..', 'core', 'state_machine.json')
+with open(config_path, 'r') as f:
+    STATE_MACHINE_CONFIG = json.load(f)
+
 class WorkflowService:
-    # State transition map
-    VALID_TRANSITIONS = {
-        "Draft": ["Logged"],
-        "Logged": ["Under Review"],
-        "Under Review": ["Rebuttal Pending", "Upheld", "Escalated"],
-        "Rebuttal Pending": ["QA Review"],
-        "QA Review": ["Upheld", "Overturned", "Partially Accepted"],
-        "Partially Accepted": ["Corrective Action"],
-        "Upheld": ["Root Cause Analysis"],
-        "Root Cause Analysis": ["Corrective Action"],
-        "Corrective Action": ["Effectiveness Review"],
-        "Effectiveness Review": ["Closed", "Reopened", "Root Cause Analysis"],
-        "Reopened": ["Root Cause Analysis", "Corrective Action"],
-        "Escalated": ["Under Review", "QA Review", "Upheld", "Closed"], # Based on resolution
-        "Overturned": ["Closed"],
-    }
+    VALID_TRANSITIONS = STATE_MACHINE_CONFIG["transitions"]
+    ROLES = STATE_MACHINE_CONFIG["roles"]
 
     def __init__(
         self,

@@ -1,0 +1,24 @@
+{
+  "transitions": {
+    "Draft": ["Logged"],
+    "Logged": ["Under Review"],
+    "Under Review": ["Rebuttal Pending", "Upheld", "Escalated"],
+    "Rebuttal Pending": ["QA Review"],
+    "QA Review": ["Upheld", "Partially Upheld", "Overturned", "Withdrawn"],
+    "Partially Upheld": ["Root Cause Analysis"],
+    "Upheld": ["Root Cause Analysis"],
+    "Root Cause Analysis": ["Corrective Action"],
+    "Corrective Action": ["Effectiveness Review"],
+    "Effectiveness Review": ["Closed", "Root Cause Analysis"],
+    "Closed": ["Reopened"],
+    "Reopened": ["Root Cause Analysis", "Corrective Action"],
+    "Escalated": ["Under Review", "QA Review", "Upheld", "Closed"],
+    "Overturned": ["Closed"],
+    "Withdrawn": ["Closed"]
+  },
+  "roles": {
+    "QA Review": ["Admin", "QA Manager", "QA Lead"],
+    "Effectiveness Review": ["Admin", "QA Manager", "Quality Director"],
+    "Reopen": ["Admin", "QA Manager", "Quality Director", "Investigator"]
+  }
+}
