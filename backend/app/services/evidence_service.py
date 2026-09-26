@@ -16,7 +16,7 @@ from app.services.timeline_service import TimelineService
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Constants
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB (enforced per spec Section 9)
 ALLOWED_EXTENSIONS = {
     ".pdf": "application/pdf",
     ".png": "image/png",
@@ -143,12 +143,14 @@ class EvidenceService:
                 quality_event_id=event_id,
                 title=title,
                 file_name=sanitized_filename,
-                file_size=str(size),
+                file_size=size,  # Integer, not str
                 mime_type=mime_type,
                 storage_path=object_key,
+                storage_key=object_key,  # Both populated for transition period
                 uploaded_by_id=user_id,
                 description=description,
-                checksum=checksum
+                checksum=checksum,
+                status="active"
             )
             self.db.add(evidence)
             
@@ -218,9 +220,15 @@ class EvidenceService:
     async def delete_evidence(self, tenant_id: str, project_id: str, event_id: str, evidence_id: str, user_id: str):
         evidence = await self.get_evidence(project_id, event_id, evidence_id)
         
-        # 1. Delete from DB first
+        if evidence.status == "soft_deleted":
+            raise HTTPException(status_code=410, detail="Evidence already deleted")
+        
+        from datetime import datetime, timezone
+        # Soft delete ONLY — file stays in storage, access log is preserved (spec Section 9)
         try:
-            await self.evidence_repo.remove(self.db, id=evidence_id)
+            evidence.status = "soft_deleted"
+            evidence.soft_deleted_at = datetime.now(timezone.utc)
+            evidence.soft_deleted_by = user_id
             
             await self.timeline_service.record_event(
                 session=self.db,
@@ -228,7 +236,7 @@ class EvidenceService:
                 project_id=project_id,
                 tenant_id=tenant_id,
                 event_type="EVIDENCE_DELETED",
-                description=f"Deleted evidence: {evidence.file_name}",
+                description=f"Soft-deleted evidence: {evidence.file_name}",
                 actor_id=user_id
             )
 
@@ -238,19 +246,14 @@ class EvidenceService:
                 project_id=project_id,
                 entity_type="Evidence",
                 entity_id=evidence_id,
-                action="DELETE",
+                action="SOFT_DELETE",
                 actor_id=user_id,
-                old_value={"file_name": evidence.file_name, "storage_path": evidence.storage_path}
+                old_value={"status": "active"},
+                new_value={"status": "soft_deleted", "soft_deleted_at": evidence.soft_deleted_at.isoformat()}
             )
             
             await self.db.commit()
         except Exception as e:
-            logger.error(f"Failed to delete Evidence metadata: {e}")
+            logger.error(f"Failed to soft-delete Evidence: {e}")
             await self.db.rollback()
             raise HTTPException(status_code=500, detail="Could not delete evidence")
-            
-        # 2. Delete from storage (If this fails, it's just orphaned, but data is safe/inaccessible)
-        try:
-            await self.storage.delete_file(evidence.storage_path)
-        except Exception as e:
-            logger.error(f"Failed to delete Evidence object from storage. Orphaned key: {evidence.storage_path}. Error: {e}")

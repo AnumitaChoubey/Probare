@@ -455,12 +455,13 @@ class WorkflowService:
         )
         session.add(reopen_rec)
         
-        await self.transition_event(session, event, "Reopened", actor_id, expected_version, reason)
+        # Reopening always returns the event to "Under Review" to start a new decision cycle
+        await self.transition_event(session, event, "Under Review", actor_id, expected_version, f"Reopened: {reason}")
         
-        await self.audit_service.record_action(session, event.tenant_id, event.project_id, "ReopenEvent", reopen_rec.id, "CREATE", actor_id, new_value={"reason": reason})
+        await self.audit_service.record_action(session, event.tenant_id, event.project_id, "ReopenEvent", reopen_rec.id, "CREATE", actor_id, new_value={"reason": reason, "previous_status": reopen_rec.previous_status})
         await self.timeline_service.record_event(session, event.id, event.project_id, event.tenant_id, "EVENT_REOPENED", f"Event reopened: {reason}", actor_id)
 
-        result = {"id": reopen_rec.id, "reason": reason}
+        result = {"id": reopen_rec.id, "reason": reason, "new_status": "Under Review"}
         if idempotency_key:
             await self._save_idempotency(session, scoped_key, payload_hash, 201, result)
         return result

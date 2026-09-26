@@ -67,7 +67,8 @@ async def download_evidence(
     event_id: str,
     evidence_id: str,
     auth: AuthContext = Depends(get_current_user),
-    service: EvidenceService = Depends(get_evidence_service)
+    service: EvidenceService = Depends(get_evidence_service),
+    session: AsyncSession = Depends(get_db)
 ):
     if project_id not in auth.accessible_projects:
         raise HTTPException(status_code=403, detail="Project access denied")
@@ -75,6 +76,20 @@ async def download_evidence(
         raise HTTPException(status_code=403, detail="Permission denied")
     
     url = await service.get_download_url(project_id, event_id, evidence_id)
+    
+    # Immutably log access per spec Section 9
+    from app.models.quality import EvidenceAccessLog
+    import uuid
+    log = EvidenceAccessLog(
+        id=str(uuid.uuid4()),
+        project_id=project_id,
+        evidence_id=evidence_id,
+        accessed_by=auth.qems_user_id,
+        action="download"
+    )
+    session.add(log)
+    await session.commit()
+    
     return {"download_url": url}
 
 @router.delete("/{evidence_id}", status_code=204)

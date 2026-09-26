@@ -75,14 +75,24 @@ async def get_sync_changes(
         events, total = await svc.get_quality_events(auth_context=auth_context, limit=limit)
         
         for event in events:
-            # Add to upserts if updated after 'since'
-            if not since or event.updated_at > since.replace(tzinfo=None):
+            # Use timezone-aware comparison: ensure since is UTC-aware before comparing
+            if since is None:
                 changes["quality_error"]["upserts"].append(event)
+            else:
+                # Make sure both are timezone-aware for comparison
+                event_updated = event.updated_at
+                if event_updated is not None:
+                    if event_updated.tzinfo is None:
+                        from datetime import timezone as tz
+                        event_updated = event_updated.replace(tzinfo=tz.utc)
+                    since_aware = since if since.tzinfo else since.replace(tzinfo=tz.utc)
+                    if event_updated > since_aware:
+                        changes["quality_error"]["upserts"].append(event)
 
     return SyncChangesResponse(
         server_time=server_time,
         changes=changes,
-        has_more=False, # Pagination to be fully implemented
+        has_more=False, # Cursor pagination to be fully implemented
         next_cursor=None
     )
 

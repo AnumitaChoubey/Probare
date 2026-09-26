@@ -2,23 +2,20 @@
   "transitions": {
     "Draft": ["Logged"],
     "Logged": ["Under Review"],
-    "Under Review": ["Rebuttal Pending", "Upheld", "Escalated"],
+    "Under Review": ["Rebuttal Pending", "Decision Recorded", "Escalated"],
     "Rebuttal Pending": ["QA Review"],
-    "QA Review": ["Upheld", "Partially Upheld", "Overturned", "Withdrawn"],
-    "Partially Upheld": ["Root Cause Analysis"],
-    "Upheld": ["Root Cause Analysis"],
-    "Root Cause Analysis": ["Corrective Action"],
-    "Corrective Action": ["Effectiveness Review"],
-    "Effectiveness Review": ["Closed", "Root Cause Analysis"],
-    "Closed": ["Reopened"],
-    "Reopened": ["Root Cause Analysis", "Corrective Action"],
-    "Escalated": ["Under Review", "QA Review", "Upheld", "Closed"],
-    "Overturned": ["Closed"],
-    "Withdrawn": ["Closed"]
+    "QA Review": ["Decision Recorded"],
+    "Decision Recorded": ["CAPA In Progress", "Closed"],
+    "CAPA In Progress": ["Effectiveness Review"],
+    "Effectiveness Review": ["Closed", "CAPA In Progress"],
+    "Closed": ["Under Review"],
+    "Escalated": ["Under Review", "Decision Recorded", "Closed"]
   },
   "roles": {
-    "QA Review": ["Admin", "QA Manager", "QA Lead"],
+    "Decision Recorded": ["Admin", "QA Manager", "QA Lead"],
     "Effectiveness Review": ["Admin", "QA Manager", "Quality Director"],
-    "Reopen": ["Admin", "QA Manager", "Quality Director", "Investigator"]
+    "Reopen": ["Admin", "QA Manager", "Quality Director", "Investigator"],
+    "Escalated": ["Admin", "QA Manager", "QA Lead"]
   }
 }
+

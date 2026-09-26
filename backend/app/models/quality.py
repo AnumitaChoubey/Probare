@@ -112,29 +112,13 @@ class Decision(Base, UUIDMixin, TimestampMixin, ProjectMixin):
     __tablename__ = "decisions"
     quality_event_id = Column(String(36), nullable=False, index=True)
     decision_type = Column(String(100), nullable=False)
-    outcome = Column(String(100), nullable=False) # Enum: Upheld, Partially Upheld, Overturned, Withdrawn
-    rationale = Column(String, nullable=False)
-    decided_by_id = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
-    requires_capa = Column(Integer, nullable=False, default=1) # Boolean stored as Integer 1/0 for sqlite compat but wait, boolean is mapped in SQLAlchemy as Boolean. Let's use Boolean.
-    
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ['project_id', 'quality_event_id'],
-            ['quality_events.project_id', 'quality_events.id'],
-            ondelete='CASCADE'
-        ),
-    )
-
-class Decision(Base, UUIDMixin, TimestampMixin, ProjectMixin):
-    __tablename__ = "decisions"
-    quality_event_id = Column(String(36), nullable=False, index=True)
-    decision_type = Column(String(100), nullable=False)
     outcome = Column(String(100), nullable=False) # Upheld, Partially Upheld, Overturned, Withdrawn
     rationale = Column(String, nullable=False)
     decided_by_id = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+    prior_decision_id = Column(String(36), ForeignKey('decisions.id', ondelete='SET NULL'), nullable=True) # Reopen chain
     requires_capa = Column(Boolean, nullable=False, default=False)
     requires_capa_override_reason = Column(String, nullable=True)
-    
+
     __table_args__ = (
         ForeignKeyConstraint(
             ['project_id', 'quality_event_id'],
