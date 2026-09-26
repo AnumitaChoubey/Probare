@@ -39,3 +39,6 @@ api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
 
 from app.api.v1.routers import config
 api_router.include_router(config.router, prefix="/config", tags=["config"])
+
+from app.api.v1.routers import admin_sla
+api_router.include_router(admin_sla.router, prefix="/admin", tags=["admin_sla"])
