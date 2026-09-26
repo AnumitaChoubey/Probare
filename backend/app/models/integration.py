@@ -261,3 +261,13 @@ class IdempotencyRecord(Base, UUIDMixin, TimestampMixin):
     request_hash = Column(String(255), nullable=False)
     response_status = Column(Integer, nullable=False)
     response_body = Column(JSONB, nullable=False)
+
+class SyncHistoryLog(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "sync_history_logs"
+    project_id = Column(String(36), nullable=True, index=True)
+    entity_type = Column(String(100), nullable=False)
+    entity_id = Column(String(36), nullable=False, index=True)
+    superseded_local_version = Column(JSONB, nullable=False)
+    server_winning_version = Column(JSONB, nullable=False)
+    conflict_reason = Column(String, nullable=False)
+    resolved_by_user_id = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
