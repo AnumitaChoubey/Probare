@@ -1,6 +1,6 @@
 # QEMS (Probare) — Comprehensive System Documentation
 
-> **Document Status:** Living reference | **Last Updated:** 2026-09-20 | **Author:** Generated via full codebase read
+> **Document Status:** Living reference | **Last Updated:** 2026-09-26 | **Author:** Generated via full codebase read
 
 ---
 
@@ -720,18 +720,26 @@ Provider selection: `settings.AI_PROVIDER` → `gemini` uses `GeminiProvider`, `
 
 ### Frontend State Management
 
-- **Server state**: Managed by TanStack React Query. Queries auto-refetch every 60s (events) or 30s (notifications).
-- **UI state**: Managed by `QEMSContext` (React Context) — active section, selected event, theme, density, toast messages, modal open states.
+- **Server state**: Managed by TanStack React Query. Queries auto-refetch every 60s (events) or 30s (notifications). Global `onError` handlers provide robust toast notifications for all API failures.
+- **UI state**: Managed by `QEMSContext` (React Context) — active section, selected event, theme, density, toast messages, modal open states. Includes safety checks against `NaN` zero-data states in dashboards.
 - **Auth state**: Managed by Clerk's `ClerkProvider` — `SignedIn`/`SignedOut` gating.
-- **Active project**: Stored in a module-level variable in `client.ts` (`activeProjectId`), set by `QEMSContext` after `/auth/me` loads.
+- **Active project**: Stored in a module-level variable in `client.ts` (`activeProjectId`), set by `QEMSContext` after `/auth/me` loads. Used dynamically across all API client files (like `communications.ts`) to ensure secure tenant isolation.
 
 ### Permission System
 
 Permissions are strings checked in two places:
 - **Backend**: `require_permissions(["CREATE_QUALITY_EVENT"])` dependency → checks `AuthContext.permissions` list
-- **Frontend**: `hasPermission("canCreateEvent")` → checks `sessionData.permissions` from `/auth/me`
+- **Frontend**: `hasPermission("canCreateEvent")` → checks `sessionData.permissions` from `/api/v1/auth/me`. (No hardcoded roles exist on the frontend; all logic is dynamically driven by the backend).
 
 `AuthService.get_auth_context()` (`auth_service.py`, line 205-268) is the **single authoritative source** that maps role names to permission strings.
+
+### Data Authorization & Isolation
+
+A multi-layered authorization system enforces boundaries:
+1. **Tenant Isolation**: Handled via `AuthContext.external_tenant_id` mapping.
+2. **Project Isolation**: Enforced by `require_project_access` checking `AuthContext.accessible_projects`.
+3. **Event-Level Authorization**: Services (e.g. `QualityEventService`, `CommunicationService`) check if `QualityEvent.project_id` matches the user's `auth_context.accessible_projects`. Unrelated participants are blocked with a `403 Forbidden` response.
+4. **Role Filtering**: The backend strictly parses the `auth_context` to filter fetched resources. Frontend-driven role/project filter overrides have been removed to prevent IDOR.
 
 ---
 
@@ -993,7 +1001,6 @@ cd frontend && npm run dev:electron
 | `backend/app/main.py:38` | `await redis.close()` in lifespan — `redis` variable is **never defined** in the `lifespan` function scope. This will crash on shutdown. **BUG** |
 | `backend/app/models/core.py:19` | `entra_id_sub` column explicitly commented as **deprecated**, still actively used in `get_or_provision_user()` for Entra flow |
 | `backend/app/models/quality.py:140` | `contributing_factors` JSONB on `RootCause` model explicitly marked **DEPRECATED** — replaced by `ContributingFactor` entity but old field still in schema |
-| `frontend/src/context/QEMSContext.tsx:256` | `addDiscussionMessage` logs `console.warn("Discussions API not yet implemented in backend")` — **unimplemented feature** |
 | `frontend/src/context/QEMSContext.tsx:282` | `resetDemoData` logs `console.warn("Reset disabled in production context.")` — dead code |
 | `frontend/src/context/QEMSContext.tsx:285` | `currentUser.email` is hardcoded to `"user@qems.internal"` — should come from Clerk session data |
 | `frontend/src/context/QEMSContext.tsx:286` | `currentUser.team` hardcoded to `"Operations"` |
@@ -1005,7 +1012,6 @@ cd frontend && npm run dev:electron
 
 | Feature | Status |
 |---|---|
-| Discussion/Messaging via API | Frontend method exists, backend `communications.py` router exists, but `addDiscussionMessage` in context is not connected |
 | Notifications API on backend | Frontend calls `/api/v1/notifications` but this returns 404 — **endpoint not registered** in `api.py` |
 | Calibration API | Frontend `calibrationsApi.getCalibrations()` hits an endpoint that returns 404 |
 | CI/CD pipeline | Not implemented |
