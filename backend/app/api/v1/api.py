@@ -36,3 +36,6 @@ api_router.include_router(notifications.router, prefix="/notifications", tags=["
 
 from app.api.v1.routers import sync
 api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
+
+from app.api.v1.routers import config
+api_router.include_router(config.router, prefix="/config", tags=["config"])
