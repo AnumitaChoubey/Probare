@@ -271,3 +271,36 @@ class SyncHistoryLog(Base, UUIDMixin, TimestampMixin, TenantMixin):
     server_winning_version = Column(JSONB, nullable=False)
     conflict_reason = Column(String, nullable=False)
     resolved_by_user_id = Column(String(36), ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+
+from sqlalchemy.dialects.postgresql import ARRAY
+
+class NotificationTemplate(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "notification_templates"
+    channel = Column(String(50), nullable=False)
+    subject = Column(String, nullable=True)
+    body_template = Column(String, nullable=False)
+
+class NotificationRule(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "notification_rules"
+    event_type = Column(String(100), nullable=False)
+    role_id = Column(String(36), ForeignKey('roles.id', ondelete='CASCADE'), nullable=True)
+    user_id = Column(String(36), ForeignKey('users.id', ondelete='CASCADE'), nullable=True)
+    channels = Column(ARRAY(String), nullable=False)
+    template_id = Column(String(36), ForeignKey('notification_templates.id', ondelete='SET NULL'), nullable=True)
+    active = Column(Boolean, nullable=False, default=True)
+
+class NotificationEvent(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "notification_events"
+    event_type = Column(String(100), nullable=False)
+    entity_type = Column(String(100), nullable=False)
+    entity_id = Column(String(36), nullable=False, index=True)
+    payload = Column(JSONB, nullable=False)
+
+class NotificationDelivery(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "notification_deliveries"
+    notification_event_id = Column(String(36), ForeignKey('notification_events.id', ondelete='CASCADE'), nullable=False, index=True)
+    recipient_user_id = Column(String(36), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    channel = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False, default="pending") # 'pending'|'sent'|'failed'|'queued_offline'
+    attempt_count = Column(Integer, nullable=False, default=0)
+    sent_at = Column(DateTime(timezone=True), nullable=True)
