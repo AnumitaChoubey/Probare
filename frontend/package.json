@@ -35,12 +35,14 @@
     "@tanstack/react-query-devtools": "^5.103.1",
     "@vitejs/plugin-react": "^5.0.4",
     "axios": "^1.20.0",
+    "better-sqlite3": "^13.0.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "uuid": "^14.0.2",
     "vite": "^6.2.3"
   },
   "devDependencies": {
