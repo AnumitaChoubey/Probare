@@ -401,7 +401,7 @@ export const CommandCenter: React.FC = () => {
             </span>
             <div className="text-2xl font-bold font-mono text-qems-warning mt-1 tabular-nums">{openEvents}</div>
             <div className="flex items-center space-x-1 text-[11px] text-qems-text-muted mt-1">
-              <span>{Math.round((openEvents / totalEvents) * 100)}% active pipeline</span>
+              <span>{totalEvents > 0 ? Math.round((openEvents / totalEvents) * 100) : 0}% active pipeline</span>
             </div>
           </div>
 
@@ -532,7 +532,7 @@ export const CommandCenter: React.FC = () => {
 
           <div className="mt-3.5 space-y-2.5">
             {topProcesses.map(([proc, count], idx) => {
-              const percent = Math.round((count / totalEvents) * 100);
+              const percent = totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0;
               return (
                 <div
                   key={proc}

@@ -1,4 +1,4 @@
-import { apiClient as api } from './client';
+import { apiClient as api, getActiveProjectId } from './client';
 
 export interface CommunicationMessage {
   id: string;
@@ -24,19 +24,22 @@ export interface PaginatedMessages {
 
 export const communicationsApi = {
   getConversation: async (eventId: string): Promise<Conversation> => {
-    const { data } = await api.get(`/quality-events/${eventId}/conversation`);
+    const projectId = getActiveProjectId();
+    const { data } = await api.get(`/projects/${projectId}/quality-events/${eventId}/conversation`);
     return data;
   },
   
   getMessages: async (eventId: string, skip = 0, limit = 50): Promise<PaginatedMessages> => {
-    const { data } = await api.get(`/quality-events/${eventId}/conversation/messages`, {
+    const projectId = getActiveProjectId();
+    const { data } = await api.get(`/projects/${projectId}/quality-events/${eventId}/conversation/messages`, {
       params: { skip, limit }
     });
     return data;
   },
   
   postMessage: async (eventId: string, body: string, attachmentIds: string[] = []): Promise<CommunicationMessage> => {
-    const { data } = await api.post(`/quality-events/${eventId}/conversation/messages`, {
+    const projectId = getActiveProjectId();
+    const { data } = await api.post(`/projects/${projectId}/quality-events/${eventId}/conversation/messages`, {
       body,
       attachment_ids: attachmentIds
     });
@@ -44,6 +47,7 @@ export const communicationsApi = {
   },
   
   markRead: async (eventId: string, messageId: string): Promise<void> => {
-    await api.post(`/quality-events/${eventId}/conversation/messages/${messageId}/read`);
+    const projectId = getActiveProjectId();
+    await api.post(`/projects/${projectId}/quality-events/${eventId}/conversation/messages/${messageId}/read`);
   }
 };
