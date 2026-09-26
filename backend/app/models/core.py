@@ -49,3 +49,10 @@ class ProjectMember(Base, UUIDMixin, TimestampMixin):
 class Team(Base, UUIDMixin, TimestampMixin, TenantMixin):
     __tablename__ = "teams"
     name = Column(String(255), nullable=False)
+
+class DataScopeRule(Base, UUIDMixin, TimestampMixin, TenantMixin):
+    __tablename__ = "data_scope_rules"
+    user_id = Column(String(36), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
+    entity_type = Column(String(100), nullable=False) # e.g. "team", "process"
+    entity_id = Column(String(36), nullable=False) # the actual team_id or process_id allowed
+    access_level = Column(String(50), nullable=False, default="read") # read, write

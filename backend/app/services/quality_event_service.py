@@ -23,7 +23,12 @@ class QualityEventService:
         project_id: str = None,
         auth_context: AuthContext = None
     ) -> Optional[QualityEvent]:
-        event = await self.repository.get_with_relations(session, id=event_id, tenant_id=tenant_id, project_id=project_id)
+        # Enforce Data Scope at the SQL level
+        if auth_context:
+            event = await self.repository.get_with_scopes(session, id=event_id, user_id=auth_context.qems_user_id, tenant_id=tenant_id, project_id=project_id)
+        else:
+            event = await self.repository.get_with_relations(session, id=event_id, tenant_id=tenant_id, project_id=project_id)
+            
         if event and auth_context:
             authorize_quality_event_access(event, auth_context)
         return event
@@ -40,20 +45,15 @@ class QualityEventService:
     ) -> tuple[list[QualityEvent], int]:
         from sqlalchemy.future import select
         from sqlalchemy import or_, func
+        
+        # Start base query
         stmt = select(QualityEvent).filter_by(tenant_id=tenant_id, project_id=project_id)
         
         user_id = filters.pop("user_id", None) if filters else None
         
-        # Explicit Server-Side Authorization Scope
-        # If the user lacks broad project review permissions, restrict query to events they are directly involved in.
-        if auth_context and "REVIEW_QUALITY_EVENT" not in auth_context.permissions and "MANAGE_PROJECT" not in auth_context.permissions:
-            stmt = stmt.filter(
-                or_(
-                    QualityEvent.owner_id == auth_context.qems_user_id,
-                    QualityEvent.employee_id == auth_context.qems_user_id,
-                    QualityEvent.created_by_id == auth_context.qems_user_id
-                )
-            )
+        # Mandatory Data Scope Rule Enforcement
+        if auth_context:
+            stmt = await self.repository._apply_data_scope(session, stmt, auth_context.qems_user_id)
         
         if filters:
             if filters.pop("assigned_to_me", None) and user_id:
