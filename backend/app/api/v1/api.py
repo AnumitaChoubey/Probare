@@ -45,3 +45,7 @@ api_router.include_router(admin_sla.router, prefix="/admin", tags=["admin_sla"])
 
 from app.api.v1.routers import admin_taxonomy
 api_router.include_router(admin_taxonomy.router, prefix="/admin/taxonomy", tags=["admin_taxonomy"])
+
+from app.api.v1.routers import admin_ai
+api_router.include_router(admin_ai.router, prefix="/admin", tags=["admin_ai"])
+
