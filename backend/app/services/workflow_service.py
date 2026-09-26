@@ -257,10 +257,10 @@ class WorkflowService:
         
         return result
 
-    async def submit_decision(self, session: AsyncSession, event: QualityEvent, decision: str, rationale: str, actor_id: str, expected_version: int, idempotency_key: str = None) -> dict:
+    async def submit_decision(self, session: AsyncSession, event: QualityEvent, decision: str, rationale: str, actor_id: str, expected_version: int, idempotency_key: str = None, requires_capa_override: bool = None, override_reason: str = None) -> dict:
         payload_hash = ""
         if idempotency_key:
-            payload_hash = self._generate_hash({"decision": decision, "rationale": rationale})
+            payload_hash = self._generate_hash({"decision": decision, "rationale": rationale, "override": requires_capa_override})
             scoped_key = f"{event.tenant_id}:{event.project_id}:decision:{idempotency_key}"
             cached = await self._check_idempotency(session, scoped_key, payload_hash)
             if cached: return cached.response_body
@@ -278,6 +278,16 @@ class WorkflowService:
             rebuttal.qa_assessed_by_id = actor_id
             rebuttal.status = decision
 
+        # Default RequiresCAPA logic
+        default_requires_capa = decision in ["Upheld", "Partially Upheld"]
+        final_requires_capa = default_requires_capa
+        
+        if requires_capa_override is not None:
+            if requires_capa_override != default_requires_capa and not override_reason:
+                from fastapi import HTTPException
+                raise HTTPException(status_code=400, detail="A reason must be provided when overriding the default CAPA requirement.")
+            final_requires_capa = requires_capa_override
+
         decision_rec = Decision(
             id=str(uuid.uuid4()),
             project_id=event.project_id,
@@ -285,17 +295,19 @@ class WorkflowService:
             decision_type="Rebuttal Decision",
             outcome=decision,
             rationale=rationale,
-            decided_by_id=actor_id
+            decided_by_id=actor_id,
+            requires_capa=final_requires_capa,
+            requires_capa_override_reason=override_reason
         )
         session.add(decision_rec)
 
-        target_state = "Upheld"
-        if decision == "Overturn": target_state = "Overturned"
-        elif decision == "Partially Accept": target_state = "Partially Accepted"
+        target_state = "Closed" # Default if withdrawn or overturned and no CAPA needed
+        if final_requires_capa:
+            target_state = "Root Cause Analysis"
 
         await self.transition_event(session, event, target_state, actor_id, expected_version, rationale)
 
-        await self.audit_service.record_action(session, event.tenant_id, event.project_id, "Decision", decision_rec.id, "CREATE", actor_id, new_value={"outcome": decision})
+        await self.audit_service.record_action(session, event.tenant_id, event.project_id, "Decision", decision_rec.id, "CREATE", actor_id, new_value={"outcome": decision, "requires_capa": final_requires_capa})
         await self.timeline_service.record_event(session, event.id, event.project_id, event.tenant_id, "DECISION_MADE", f"QA Decision: {decision}", actor_id)
 
         result = {"id": decision_rec.id, "outcome": decision}
@@ -420,6 +432,43 @@ class WorkflowService:
         await self.timeline_service.record_event(session, event.id, event.project_id, event.tenant_id, "EFFECTIVENESS_REVIEW_SUBMITTED", f"Effectiveness Review submitted: {decision}", actor_id)
 
         result = {"id": review.id, "decision": review.decision}
+        if idempotency_key:
+            await self._save_idempotency(session, scoped_key, payload_hash, 201, result)
+        return result
+
+    async def submit_reopen(self, session: AsyncSession, event: QualityEvent, reason: str, actor_id: str, expected_version: int, idempotency_key: str = None) -> dict:
+        payload_hash = ""
+        if idempotency_key:
+            payload_hash = self._generate_hash({"reason": reason})
+            scoped_key = f"{event.tenant_id}:{event.project_id}:reopen:{idempotency_key}"
+            cached = await self._check_idempotency(session, scoped_key, payload_hash)
+            if cached: return cached.response_body
+            
+        if event.status != "Closed":
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="Only Closed events can be reopened.")
+            
+        if not reason or len(reason.strip()) == 0:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=400, detail="A mandatory reason must be provided to reopen.")
+            
+        from app.models.quality import ReopenEvent
+        reopen_rec = ReopenEvent(
+            id=str(uuid.uuid4()),
+            project_id=event.project_id,
+            quality_event_id=event.id,
+            reopened_by_id=actor_id,
+            reason=reason,
+            previous_status=event.status
+        )
+        session.add(reopen_rec)
+        
+        await self.transition_event(session, event, "Reopened", actor_id, expected_version, reason)
+        
+        await self.audit_service.record_action(session, event.tenant_id, event.project_id, "ReopenEvent", reopen_rec.id, "CREATE", actor_id, new_value={"reason": reason})
+        await self.timeline_service.record_event(session, event.id, event.project_id, event.tenant_id, "EVENT_REOPENED", f"Event reopened: {reason}", actor_id)
+
+        result = {"id": reopen_rec.id, "reason": reason}
         if idempotency_key:
             await self._save_idempotency(session, scoped_key, payload_hash, 201, result)
         return result
