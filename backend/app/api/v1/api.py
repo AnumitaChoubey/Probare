@@ -52,3 +52,6 @@ api_router.include_router(admin_ai.router, prefix="/admin", tags=["admin_ai"])
 from app.api.v1.routers import bulk
 api_router.include_router(bulk.router)
 
+from app.api.v1.routers import reports
+api_router.include_router(reports.router)
+
