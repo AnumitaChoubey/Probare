@@ -55,3 +55,5 @@ api_router.include_router(bulk.router)
 from app.api.v1.routers import reports
 api_router.include_router(reports.router)
 
+from app.api.v1.routers import audit
+api_router.include_router(audit.router)
