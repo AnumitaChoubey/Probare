@@ -127,8 +127,9 @@ async def create_quality_event(
 )
 async def list_quality_events(
     project_id: str = Path(...),
-    skip: int = Query(0, ge=0),
+    skip: int = Query(0, ge=0), # Keep for backward compatibility
     limit: int = Query(50, ge=1, le=100),
+    cursor: Optional[datetime] = Query(None, description="Cursor for pagination (created_at)"),
     status_filter: Optional[str] = Query(None, alias="status"),
     severity: Optional[str] = None,
     assigned_to_me: Optional[bool] = Query(False),
@@ -141,6 +142,7 @@ async def list_quality_events(
 ):
     """
     List quality events with pagination and filtering.
+    Prefers cursor pagination for scale, falls back to skip/limit if cursor is omitted.
     """
     filters = {}
     if status_filter:
@@ -159,22 +161,23 @@ async def list_quality_events(
     if awaiting_my_review:
         filters["awaiting_my_review"] = True
         
-    events, total = await workflow_service.event_service.list_events(
+    events, total, next_cursor = await workflow_service.event_service.list_events(
         session=session,
         tenant_id=auth_context.qems_tenant_id,
         project_id=project_id,
         filters=filters,
         skip=skip,
         limit=limit,
+        cursor=cursor,
         auth_context=auth_context
     )
-
     
     return QualityEventList(
         items=events,
         total=total,
         page=(skip // limit) + 1,
-        size=len(events)
+        size=len(events),
+        next_cursor=next_cursor
     )
 
 @router.get(

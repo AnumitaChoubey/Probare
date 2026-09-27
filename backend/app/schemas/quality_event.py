@@ -55,6 +55,7 @@ class QualityEventList(BaseModel):
     total: int
     page: int
     size: int
+    next_cursor: Optional[datetime] = None
 
 class QualityEventTransition(BaseModel):
     target_state: str

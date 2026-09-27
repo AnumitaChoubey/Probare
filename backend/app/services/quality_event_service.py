@@ -39,10 +39,11 @@ class QualityEventService:
         tenant_id: str,
         project_id: str,
         filters: Dict[str, Any] = None,
-        skip: int = 0,
+        skip: int = 0, # Kept for backward compatibility
         limit: int = 50,
+        cursor: Optional[datetime] = None,
         auth_context: AuthContext = None
-    ) -> tuple[list[QualityEvent], int]:
+    ) -> tuple[list[QualityEvent], int, Optional[datetime]]:
         from sqlalchemy.future import select
         from sqlalchemy import or_, func
         
@@ -78,15 +79,27 @@ class QualityEventService:
                 if hasattr(QualityEvent, k):
                     stmt = stmt.filter(getattr(QualityEvent, k) == v)
                     
-        # Get total count before pagination
+        # Get total count before pagination (optional optimization: skip this for deep cursor queries)
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total_result = await session.execute(count_stmt)
         total_count = total_result.scalar() or 0
-                    
+        
+        # Cursor pagination logic
+        if cursor:
+            stmt = stmt.filter(QualityEvent.created_at < cursor)
+            
         stmt = stmt.order_by(QualityEvent.created_at.desc())
-        stmt = stmt.offset(skip).limit(limit)
+        
+        if not cursor and skip > 0:
+            stmt = stmt.offset(skip)
+            
+        stmt = stmt.limit(limit)
         result = await session.execute(stmt)
-        return list(result.scalars().all()), total_count
+        items = list(result.scalars().all())
+        
+        next_cursor = items[-1].created_at if len(items) == limit else None
+        
+        return items, total_count, next_cursor
 
     def create_event(
         self,
