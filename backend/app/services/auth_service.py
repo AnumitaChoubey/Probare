@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from app.models.core import User, Tenant, ProjectMember, Role, UserRole
+from app.models.core import User, Tenant, ProjectMember, Role, UserRole, Project
 from app.schemas.auth import AuthContext
 import uuid
 
