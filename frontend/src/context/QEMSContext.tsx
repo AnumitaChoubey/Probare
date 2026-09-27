@@ -8,6 +8,7 @@ import {
 } from '../types';
 import { authApi, eventsApi, evidenceApi, rebuttalsApi, rcaApi, capaApi, effectivenessApi, notificationsApi, calibrationsApi } from '../services/api';
 import { projectsApi } from '../services/api/projects';
+import { bulkApi } from '../services/api/bulk';
 import { setActiveProjectId } from '../services/api/client';
 
 export type NavSection = 'COMMAND CENTER' | 'MY WORK' | 'QUALITY EVENTS' | 'NEW ERROR' | 'DISPUTE CENTER' | 'EVIDENCE' | 'ROOT CAUSE' | 'CORRECTIVE ACTIONS' | 'CAPA' | 'CALIBRATION' | 'QUALITY INTELLIGENCE' | 'REPORTS' | 'ADMINISTRATION';
@@ -295,16 +296,23 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const bulkAssign = async (errorIds: string[], newOwner: string) => {
-    for (const id of errorIds) await updateEventMutation.mutateAsync({ id, data: { owner: newOwner } });
-    addToast({ type: 'success', title: 'Bulk Assignment Complete' });
+    try {
+      await bulkApi.submitAssignJob(errorIds, newOwner);
+      addToast({ type: 'success', title: 'Bulk Assignment Complete', description: 'Background job queued successfully.' });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Bulk Assignment Failed', description: err?.response?.data?.detail || err.message });
+    }
   };
 
   const bulkUpdateStatus = async (errorIds: string[], newStatus: QualityStatus) => {
-    for (const id of errorIds) {
-      const event = events.find(e => e.id === id);
-      await statusMutation.mutateAsync({ id, status: newStatus, version: event?.version || 1 });
+    try {
+      await bulkApi.submitStatusUpdateJob(errorIds, newStatus);
+      addToast({ type: 'success', title: 'Bulk Status Update Complete', description: 'Background job queued successfully.' });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Bulk Status Failed', description: err?.response?.data?.detail || err.message });
     }
-    addToast({ type: 'success', title: 'Bulk Status Update Complete' });
   };
 
   const resetDemoData = () => { console.warn("Reset disabled in production context."); };

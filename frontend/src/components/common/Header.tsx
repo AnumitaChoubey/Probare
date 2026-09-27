@@ -262,71 +262,16 @@ export const Header: React.FC = () => {
           <UserButton afterSignOutUrl="/" />
         </div>
 
-        {/* Demo Persona Role Switcher */}
-        <div className="relative" ref={roleRef}>
-          <button
-            onClick={() => setIsRoleMenuOpen(!isRoleMenuOpen)}
-            className="flex items-center space-x-2 px-2.5 py-1 bg-qems-bg-surface hover:bg-qems-bg-secondary :bg-slate-700 border border-qems-border rounded-md text-xs font-medium text-qems-text-primary transition"
-            title="Switch Demo Persona / Role"
-          >
-            <div className="w-5 h-5 rounded-full bg-qems-brand text-white flex items-center justify-center text-[10px] font-bold">
-              {currentUser.avatar}
+        {/* Current User Info (Role Switcher Removed per Phase H spec) */}
+        <div className="flex items-center space-x-2 px-2.5 py-1 bg-qems-bg-surface border border-qems-border rounded-md text-xs font-medium text-qems-text-primary transition">
+          <div className="text-left hidden lg:block">
+            <div className="text-[11px] font-semibold text-qems-text-primary leading-tight">
+              {currentUser.name}
             </div>
-            <div className="text-left hidden lg:block">
-              <div className="text-[11px] font-semibold text-qems-text-primary leading-tight">
-                {currentUser.name}
-              </div>
-              <div className="text-[9px] text-qems-brand-dark font-bold uppercase tracking-wider">
-                {currentRole}
-              </div>
+            <div className="text-[9px] text-qems-brand-dark font-bold uppercase tracking-wider">
+              {currentRole}
             </div>
-            <ChevronDown className="w-3 h-3 text-qems-text-disabled ml-1" />
-          </button>
-
-          {isRoleMenuOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-qems-bg-white border border-qems-border rounded-lg shadow-lg py-2 z-50 animate-in fade-in duration-100">
-              <div className="px-3 pb-2 border-b border-qems-border-light ">
-                <span className="text-[10px] font-bold tracking-wider text-qems-text-disabled uppercase">
-                  Switch Role
-                </span>
-                <p className="text-[11px] text-qems-text-muted mt-0.5">
-                  Changes visible actions, dashboards, and dispute permissions.
-                </p>
-              </div>
-
-              <div className="py-1">
-                {roles.map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => {
-                      setCurrentRole(r);
-                      setIsRoleMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-qems-bg-surface :bg-slate-800 transition ${
-                      currentRole === r
-                        ? 'text-qems-brand-dark font-semibold bg-qems-brand-light/50 '
-                        : 'text-qems-text-secondary '
-                    }`}
-                  >
-                    <span>{r}</span>
-                    {currentRole === r && <CheckCircle className="w-3.5 h-3.5 text-qems-brand-dark " />}
-                  </button>
-                ))}
-              </div>
-
-              <div className="pt-2 border-t border-qems-border-light px-2">
-                <button
-                  onClick={() => {
-                    setIsRoleMenuOpen(false);
-                  }}
-                  className="w-full text-left px-2 py-1.5 text-xs text-qems-text-muted rounded flex items-center space-x-1.5 transition"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Roles are managed in Administration</span>
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
