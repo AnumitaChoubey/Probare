@@ -88,6 +88,10 @@ class QualityEventService:
         if cursor:
             stmt = stmt.filter(QualityEvent.created_at < cursor)
             
+        updated_since = filters.pop("updated_since", None) if filters else None
+        if updated_since:
+            stmt = stmt.filter(QualityEvent.updated_at > updated_since)
+            
         stmt = stmt.order_by(QualityEvent.created_at.desc())
         
         if not cursor and skip > 0:

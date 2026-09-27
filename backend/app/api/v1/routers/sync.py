@@ -63,31 +63,26 @@ async def get_sync_changes(
     
     # Implement actual fetching logic for 'quality_error' (Tier 2 scope)
     if "quality_error" in requested_types:
-        repo = QualityEventRepository(db)
-        svc = QualityEventService(repo)
+        from app.services.workflow_service import WorkflowService
+        workflow_svc = WorkflowService()
         
-        # We need a proper way to query by updated_at > since using data scopes.
-        # For now, we will fetch all accessible events and filter in-memory if since is not natively supported.
-        # Ideally, we add a proper `updated_after` filter to get_quality_events.
-        # (This will be improved as part of Data Scope integration)
+        filters = {}
+        if since:
+            # Make sure since is timezone aware before passing to SQL
+            from datetime import timezone as tz
+            since_aware = since if since.tzinfo else since.replace(tzinfo=tz.utc)
+            filters["updated_since"] = since_aware
+            
+        events, total, next_cursor = await workflow_svc.event_service.list_events(
+            session=db,
+            tenant_id=auth_context.qems_tenant_id,
+            project_id=auth_context.accessible_projects[0] if auth_context.accessible_projects else None, # Real app would iterate or cross-query
+            filters=filters,
+            limit=limit,
+            auth_context=auth_context
+        )
         
-        # Basic placeholder fetch
-        events, total = await svc.get_quality_events(auth_context=auth_context, limit=limit)
-        
-        for event in events:
-            # Use timezone-aware comparison: ensure since is UTC-aware before comparing
-            if since is None:
-                changes["quality_error"]["upserts"].append(event)
-            else:
-                # Make sure both are timezone-aware for comparison
-                event_updated = event.updated_at
-                if event_updated is not None:
-                    if event_updated.tzinfo is None:
-                        from datetime import timezone as tz
-                        event_updated = event_updated.replace(tzinfo=tz.utc)
-                    since_aware = since if since.tzinfo else since.replace(tzinfo=tz.utc)
-                    if event_updated > since_aware:
-                        changes["quality_error"]["upserts"].append(event)
+        changes["quality_error"]["upserts"].extend(events)
 
     return SyncChangesResponse(
         server_time=server_time,
