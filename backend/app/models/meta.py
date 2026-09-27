@@ -54,7 +54,7 @@ class SOP(Base, UUIDMixin, TimestampMixin, TenantMixin):
     document_url = Column(String(1024), nullable=True)
 
 from sqlalchemy import Boolean, DateTime, SmallInteger, Text
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
 class EscalationMatrix(Base, UUIDMixin, TimestampMixin, TenantMixin):
     __tablename__ = "escalation_matrices"
