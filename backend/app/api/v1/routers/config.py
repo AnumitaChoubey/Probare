@@ -4,7 +4,7 @@ import os
 
 router = APIRouter()
 
-config_path = os.path.join(os.path.dirname(__file__), '..', '..', 'core', 'state_machine.json')
+config_path = os.path.join(os.path.dirname(__file__), '..', '..', '..', 'core', 'state_machine.json')
 with open(config_path, 'r') as f:
     STATE_MACHINE_CONFIG = json.load(f)
 
