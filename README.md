@@ -2,57 +2,60 @@
 
 Probare is an enterprise-grade Quality Event Management System designed to orchestrate the complete lifecycle of quality incidents, rebuttals, root cause analyses (RCA), corrective actions (CAPA), and effectiveness reviews. 
 
-Built with an offline-capable, desktop-class React/Electron frontend and powered by a highly concurrent Python FastAPI backend, Probare prioritizes data integrity, strict optimistic concurrency, and idempotency guarantees.
-
-## 🏗️ Architecture
-
-The system utilizes a fully decoupled architecture:
-
-### Frontend
-- **Frameworks:** React (Vite) & Electron
-- **Language:** TypeScript
-- **State Management:** `@tanstack/react-query`
-- **Data Layer:** `axios` centralized API client
-- **Styling:** Tailwind CSS (Immutable visual design)
-- **Features:** Desktop-native experience, offline capability, command palette, and rich visualization.
-
-### Backend
-- **Framework:** Python / FastAPI
-- **Database:** PostgreSQL (managed via SQLAlchemy / Alembic)
-- **Storage:** MinIO (S3-compatible object storage for evidence files)
-- **Cache / Rate Limiting:** Redis
-- **Security:** Strict RBAC, runtime tenant/project isolation (`/auth/me`), and Idempotency guarantees.
-- **Concurrency:** Optimistic Concurrency Control (OCC) using explicitly tracked `version` integers to prevent state-overwrite collisions (HTTP 409).
+The application has been upgraded to a fully cloud-connected architecture, using a modern React frontend hosted on Vercel and a highly concurrent Python FastAPI backend hosted on Render.
 
 ## 🌐 Deployment & Live Links
 
-Probare has been successfully deployed to the cloud for immediate team access:
+Probare is fully deployed to the cloud for immediate enterprise access:
 
 - **Product Landing Page:** [https://probare-website.vercel.app/](https://probare-website.vercel.app/)
 - **Live Web Application (Vercel):** *Deployed via Vercel for instant browser access.*
 - **Live Backend API (Render):** *Hosted Python FastAPI backend with a managed PostgreSQL database.*
 - **Desktop Application (Windows):** Download the `.exe` installer directly from the [GitHub Releases](#). The desktop shell securely connects to the live Render backend.
 
-## 🚀 Getting Started
+## 🏗️ Architecture
+
+The system utilizes a fully decoupled cloud-native architecture:
+
+### Frontend (Vite / React)
+- **Frameworks:** React (Vite) for the web, Electron for the Windows Desktop wrapper.
+- **Language:** TypeScript
+- **State Management:** `@tanstack/react-query` for aggressive caching and optimistic UI updates.
+- **Authentication:** Clerk React SDK for enterprise single sign-on (SSO) and identity management.
+- **Styling:** Tailwind CSS with a strict, immutable visual design system.
+- **Features:** Desktop-native experience, global command palette (Ctrl+K), and rich Recharts visualizations.
+
+### Backend (Python FastAPI)
+- **Framework:** Python / FastAPI
+- **Database:** Live PostgreSQL managed via Render (schema managed via SQLAlchemy / Alembic).
+- **Authentication:** Validates Clerk JWT tokens and auto-provisions QEMS roles and tenant identities on the fly.
+- **Security:** Strict RBAC, runtime tenant/project isolation (`/auth/me`), and Idempotency guarantees.
+- **Concurrency:** Optimistic Concurrency Control (OCC) using explicitly tracked `version` integers to prevent state-overwrite collisions (HTTP 409).
+
+## 🚀 Getting Started (Local Development)
 
 ### Prerequisites
 - Node.js (v18+)
 - Python (3.10+)
-- Docker & Docker Compose
 
-### 1. Start Infrastructure & Backend
-The backend services (PostgreSQL, Redis, MinIO, and FastAPI) are containerized for local development.
+### 1. Start the Backend API
+The backend connects directly to your live Render PostgreSQL database via the `.env` file connection string.
 
 ```bash
-# Start all background services and the FastAPI backend
-docker compose up -d
+# Navigate to the backend directory
+cd backend
 
-# Check backend health
-curl http://localhost:8000/api/v1/health/ready
+# Activate your virtual environment and install dependencies
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+
+# Start the FastAPI server (Hot-reloading enabled)
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### 2. Frontend Setup
-Navigate to the frontend directory, install dependencies, and start the development server.
+### 2. Start the Frontend
+The frontend uses Clerk for authentication and connects to the backend API.
 
 ```bash
 # Navigate to the frontend directory
@@ -64,38 +67,21 @@ npm install
 # Start the Vite React app in the browser
 npm run dev
 
-# OR start the Electron desktop app
+# OR start the Electron desktop shell (Make sure to run `npx electron-builder install-app-deps` first if needed)
 npm run dev:electron
 ```
 
 ## 🔐 Environment Variables & Security
 
-### Frontend (`.env`)
-- `VITE_API_URL`: Points to your FastAPI backend (e.g., `http://localhost:8000/api/v1`).
-- `VITE_DEV_TOKEN`: Development-only JWT override for local bypassing of MSAL / Entra ID. *Note: The build pipeline securely tree-shakes this token entirely out of production builds.*
+### Frontend (`.env.local`)
+- `VITE_API_URL`: Points to your FastAPI backend (e.g., `https://probare.onrender.com/api/v1` or `http://localhost:8000/api/v1`).
+- `VITE_CLERK_PUBLISHABLE_KEY`: Your Clerk Public Key for the login flow.
+- `VITE_USE_REAL_AI`: Set to `true` to enable live LLM categorization features.
 
 ### Backend (`.env`)
-- `APPLICATION_ENV`: Set to `production`, `development`, or `testing`. Controls seeding safety and scheduler execution.
-- `SQLALCHEMY_DATABASE_URI`: Connection string for PostgreSQL.
-- `REDIS_URL`: Connection string for Redis cache & rate limiting.
-
-## 🧪 Testing and Verification
-
-### Frontend
-```bash
-# Type-checking and Linting
-npm run lint
-
-# Production Build Verification
-npm run build
-```
-
-### Backend
-Backend tests are executed via `pytest`, ensuring isolated environments and idempotency guarantees.
-```bash
-# Run backend tests inside the container
-docker exec -it qems-backend pytest tests/
-```
+- `APPLICATION_ENV`: Set to `production` or `development`.
+- `SQLALCHEMY_DATABASE_URI`: Connection string for your live PostgreSQL database on Render.
+- `CLERK_ISSUER_URL`: The well-known JWKS issuer URL from your Clerk dashboard for secure token validation.
 
 ## 📂 Project Structure
 
@@ -105,23 +91,20 @@ docker exec -it qems-backend pytest tests/
 │   ├── app/
 │   │   ├── api/v1/routers/   # REST API Endpoints
 │   │   ├── models/           # SQLAlchemy DB Models
-│   │   ├── repositories/     # Database access layer
 │   │   ├── schemas/          # Pydantic validation schemas
-│   │   └── services/         # Core business logic & Idempotency
+│   │   └── services/         # Core business logic & Auth provisioning
 │   └── tests/                # Pytest integration & unit tests
 ├── frontend/                 # React & Electron Frontend
 │   ├── src/                  # React Source Code
 │   │   ├── components/       # UI Components
 │   │   ├── context/          # QEMSContext & Providers
-│   │   ├── services/api/     # Centralized Axios Client & Domain APIs
-│   │   └── types/            # TypeScript Interfaces
+│   │   └── services/api/     # Centralized Axios Client & Domain APIs
 │   ├── electron/             # Electron main & preload scripts
 │   └── package.json          # Frontend dependencies and scripts
-├── local_tests/              # Ignored folder for temporary scripts and tests
-└── docker-compose.yml        # Infrastructure declaration
+└── README.md                 # Project Documentation
 ```
 
 ## ⚠️ Important Rules
 1. **Visual Immutable Source of Truth:** The UI is strictly governed by pre-approved designs. No layout DOM, Tailwind classes, or global CSS should be organically modified during backend integration tasks.
-2. **Production Seeding Disabled:** The `seed.py` utility strictly refuses execution (`sys.exit(1)`) if `APPLICATION_ENV=production` to protect critical data.
-3. **Idempotency Standards:** Critical mutation endpoints (RCA, CAPA, Transitions) utilize `Idempotency-Key` tracking and `expected_version` checks to safely handle duplicate network calls and overlapping user edits.
+2. **Production Database:** Local backend instances connect directly to the live production database. Be careful when running destructive migrations.
+3. **Idempotency Standards:** Critical mutation endpoints utilize `expected_version` checks to safely handle duplicate network calls and overlapping user edits.
