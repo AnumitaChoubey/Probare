@@ -15,6 +15,35 @@ class NotificationService:
     V2 Notification Engine: Handles fan-out of NotificationEvents to NotificationDeliveries across 5 channels.
     Channels: 'in_app', 'email', 'teams', 'desktop'
     """
+    def __init__(self, outbox_service=None):
+        self.outbox_service = outbox_service
+
+    async def create_notification(
+        self,
+        session: AsyncSession,
+        user_id: str,
+        tenant_id: str,
+        title: str,
+        body: str,
+        notification_type: str,
+        event_id: str,
+        link: str
+    ):
+        """Backwards compatibility for V1 notification calls."""
+        payload = {
+            "title": title,
+            "body": body,
+            "link": link,
+            "user_id": user_id
+        }
+        return await self.create_event(
+            session=session,
+            tenant_id=tenant_id,
+            event_type=notification_type,
+            entity_type="QualityEvent",
+            entity_id=event_id,
+            payload=payload
+        )
     
     @classmethod
     async def create_event(
