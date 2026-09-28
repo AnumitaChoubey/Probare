@@ -125,11 +125,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div
-      className={`flex flex-col h-screen font-sans antialiased overflow-hidden ${
-        theme === 'dark' ? 'dark bg-slate-950 text-slate-100' : 'bg-white text-slate-900'
-      }`}
-    >
+    <div className="flex flex-col h-screen font-sans antialiased overflow-hidden bg-white text-slate-900">
       {/* Skip to main content accessibility link */}
       <a
         href="#main-content"
@@ -148,7 +144,7 @@ const AppContent: React.FC = () => {
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 relative outline-none"
+          className="flex-1 overflow-y-auto bg-slate-50 text-slate-900 relative outline-none"
         >
           <ErrorBoundary>
             {renderMainContent()}
