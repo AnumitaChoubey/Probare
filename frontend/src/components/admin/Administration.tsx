@@ -15,9 +15,11 @@ import {
 } from 'lucide-react';
 import { useQEMS } from '../../context/QEMSContext';
 import { adminApi, projectsApi } from '../../services/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const Administration: React.FC = () => {
   const { addToast, sessionData } = useQEMS();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'projects' | 'users' | 'taxonomy'>('projects');
 
   const [projects, setProjects] = useState<any[]>([]);
@@ -76,6 +78,10 @@ export const Administration: React.FC = () => {
       await projectsApi.create(newProjectName);
       setNewProjectName('');
       loadProjects();
+      // Force the global context to realize we have a new project so Taxonomy and Users populate instantly
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['taxonomy'] });
+      queryClient.invalidateQueries({ queryKey: ['projectUsers'] });
       addToast({ type: 'success', title: 'Project Created', description: 'New project configured.' });
     } catch (e) {
       addToast({ type: 'error', title: 'Failed to create project' });
@@ -111,6 +117,8 @@ export const Administration: React.FC = () => {
     try {
       await adminApi.assignRole(roleUserId, selectedProjectId, roleName);
       loadProjectUsers(selectedProjectId);
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['projectUsers'] });
       addToast({ type: 'success', title: 'Role Assigned' });
     } catch (e) {
       addToast({ type: 'error', title: 'Failed to assign role' });
