@@ -13,7 +13,7 @@ python-dotenv>=1.0.1
 loguru>=0.7.2
 PyJWT>=2.8.0
 cryptography>=42.0.0
-fastapi-limiter>=0.1.6
+fastapi-limiter==0.1.6
 aioboto3>=12.3.0
 python-multipart>=0.0.9
 python-magic>=0.4.27
