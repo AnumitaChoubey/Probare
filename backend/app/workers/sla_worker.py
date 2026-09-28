@@ -15,6 +15,9 @@ class SLAWorker:
     1. Starts new SLA clocks when an event enters a new workflow stage.
     2. Processes active clocks: updates elapsed minutes, triggers breach / warning events.
     """
+    def __init__(self, notification_service=None, workflow_service=None):
+        self.notification_service = notification_service
+        self.workflow_service = workflow_service
 
     async def run_sla_monitoring_cycle(self, session: AsyncSession, tenant_id: str) -> None:
         """
