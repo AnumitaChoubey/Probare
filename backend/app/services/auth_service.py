@@ -239,14 +239,20 @@ class AuthService:
             .join(UserRole, UserRole.role_id == Role.id)
             .filter(UserRole.user_id == user.id)
         )
-        roles = roles_res.scalars().all()
+        roles = list(roles_res.scalars().all())
         
-        # Fetch project memberships
+        # Fetch project memberships and roles
         projects_res = await session.execute(
-            select(ProjectMember.project_id)
+            select(ProjectMember)
             .filter(ProjectMember.user_id == user.id)
         )
-        accessible_projects = list(projects_res.scalars().all())
+        pms = projects_res.scalars().all()
+        accessible_projects = [pm.project_id for pm in pms]
+        
+        # Add project roles to the global roles list so the UI knows they have them
+        for pm in pms:
+            if pm.role not in roles:
+                roles.append(pm.role)
         
         # Self-healing: if user is an orphan (0 projects), add them to Default Project
         if not accessible_projects:

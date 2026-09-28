@@ -150,6 +150,25 @@ async def get_taxonomy(
         
     config = project.taxonomy_config or {}
     
+    if not config.get("processes"):
+        config = {
+            "teams": ["Claims Operations", "Card Services", "Fraud & Risk", "Customer Care"],
+            "processes": {
+                "Payment Verification": {
+                    "subCategories": ["Account Validation", "Threshold Exceedance", "Refund Processing", "Two-Factor Match"],
+                    "errorTypes": ["Missing Secondary Auth", "Skipped Payout Limit Check", "Incorrect Routing Number", "Failure to Read Disclaimer"],
+                    "defaultSop": {"id": "SOP-PAY-014", "title": "Payment Verification & Wire Thresholds v3.4"}
+                },
+                "Identity Authentication": {
+                    "subCategories": ["Voice Biometrics", "ID Document Check", "Out-of-Band Auth", "Security Questions"],
+                    "errorTypes": ["Unverified Caller Override", "Expired ID Acceptance", "Security Answer Hinting", "Incomplete KYC Log"],
+                    "defaultSop": {"id": "SOP-SEC-102", "title": "Identity & Authentication Assurance Protocol v4.1"}
+                }
+            },
+            "root_causes": ["Training Gap", "Process Gap", "SOP Ambiguity", "System Issue"],
+            "sla_policies": [{"id": "SLA-POL-01", "name": "Standard Operational Quality SLA", "processArea": "All Standard Operations", "rebuttalWindowHours": 48, "qaResponseHours": 24, "escalationWindowHours": 24, "warningThresholdPercent": 75}]
+        }
+    
     return TaxonomyConfig(
         processes=config.get("processes", {}),
         teams=config.get("teams", []),
