@@ -24,6 +24,15 @@ The system utilizes a fully decoupled architecture:
 - **Security:** Strict RBAC, runtime tenant/project isolation (`/auth/me`), and Idempotency guarantees.
 - **Concurrency:** Optimistic Concurrency Control (OCC) using explicitly tracked `version` integers to prevent state-overwrite collisions (HTTP 409).
 
+## 🌐 Deployment & Live Links
+
+Probare has been successfully deployed to the cloud for immediate team access:
+
+- **Product Landing Page:** [https://probare-website.vercel.app/](https://probare-website.vercel.app/)
+- **Live Web Application (Vercel):** *Deployed via Vercel for instant browser access.*
+- **Live Backend API (Render):** *Hosted Python FastAPI backend with a managed PostgreSQL database.*
+- **Desktop Application (Windows):** Download the `.exe` installer directly from the [GitHub Releases](#). The desktop shell securely connects to the live Render backend.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
