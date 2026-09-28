@@ -118,7 +118,11 @@ async def run_sla_job():
     async def _sla_inner():
         async with AsyncSessionLocal() as session:
             try:
-                await sla_worker.run_sla_monitoring_cycle(session)
+                from sqlalchemy.future import select
+                from app.models.core import Tenant
+                tenants = (await session.execute(select(Tenant.id))).scalars().all()
+                for t_id in tenants:
+                    await sla_worker.run_sla_monitoring_cycle(session, tenant_id=t_id)
                 await session.commit()
             except Exception as e:
                 await session.rollback()
