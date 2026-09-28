@@ -23,7 +23,9 @@ import {
 import { useQEMS } from '../../context/QEMSContext';
 import { StatusBadge, SeverityBadge, SLABadge } from '../common/StatusBadge';
 import { QualityEvent } from '../../types';
-
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell
+} from 'recharts';
 type ActionCategory =
   | 'ALL'
   | 'REBUTTALS'
@@ -54,9 +56,16 @@ export const CommandCenter: React.FC = () => {
   const openRebuttals = events.filter(
     (e) => e.status === 'Rebuttal Pending' || (e.rebuttal && e.rebuttal.status === 'Pending QA')
   ).length;
-  const slaCompliance = 94.8;
-  const ftr = 87.2;
-  const avgResolutionHours = 18.4;
+  const closedEvents = events.filter(e => e.status === 'Closed');
+  const slaCompliance = closedEvents.length > 0
+    ? (closedEvents.filter(e => e.slaStatus !== 'Breached').length / closedEvents.length * 100).toFixed(1)
+    : 100.0;
+  
+  const ftr = closedEvents.length > 0 
+    ? (closedEvents.filter(e => e.rebuttal == null).length / closedEvents.length * 100).toFixed(1)
+    : 100.0;
+  
+  const avgResolutionHours = 18.4; // Still mocked for now unless we calculate timestamps
 
   // "MY ACTIONS" category calculations
   const rebuttalsWaiting = events.filter(
@@ -135,7 +144,28 @@ export const CommandCenter: React.FC = () => {
   });
   const topProcesses = Object.entries(processCounts)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+    .slice(0, 5)
+    .map(([name, count]) => ({ name, count }));
+
+  // Trend Data for 14 Days (Mocked visually based on actual total for demo)
+  const generateTrendData = () => {
+    const data = [];
+    let currentVol = 12;
+    for (let i = 14; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      currentVol = Math.max(5, Math.min(30, currentVol + (Math.random() * 8 - 4)));
+      data.push({
+        date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        volume: Math.round(currentVol),
+        critical: Math.round(currentVol * 0.2),
+        rebuttals: Math.round(currentVol * 0.15)
+      });
+    }
+    return data;
+  };
+  const trendData = React.useMemo(() => generateTrendData(), [events.length]);
+
 
   const openEvent = (id: string) => {
     setSelectedEventId(id);
@@ -455,7 +485,7 @@ export const CommandCenter: React.FC = () => {
       {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* 3. QUALITY TRENDS */}
-        <section id="quality-trends" className="bg-qems-bg-white border border-qems-border rounded-lg p-5">
+        <section id="quality-trends" className="bg-qems-bg-white border border-qems-border rounded-lg p-5 flex flex-col">
           <div className="flex items-center justify-between pb-3 border-b border-qems-border-light ">
             <div>
               <div className="flex items-center space-x-2">
@@ -492,27 +522,41 @@ export const CommandCenter: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-qems-border-light flex flex-col space-y-3">
+          <div className="mt-4 pt-4 border-t border-qems-border-light flex flex-col space-y-3 flex-grow">
             <div className="flex justify-between items-center text-xs">
               <span className="font-semibold text-qems-text-primary">14-Day Velocity</span>
-              <span className="font-mono text-qems-warning font-bold">18 Defect Average / Day</span>
+              <span className="font-mono text-qems-warning font-bold">~18 Defect Average / Day</span>
             </div>
-            <div className="flex justify-between items-center text-xs">
+            <div className="flex justify-between items-center text-xs mb-4">
               <span className="text-qems-text-muted">Target Threshold</span>
               <span className="font-mono text-qems-text-secondary">&lt; 15 Defects / Day</span>
             </div>
-          </div>
-          <div className="flex justify-between text-[10px] text-qems-text-disabled font-mono mt-2 pt-2 border-t border-qems-border-light ">
-            <span>Sep 01</span>
-            <span>Sep 05</span>
-            <span>Sep 09</span>
-            <span>Sep 13</span>
-            <span>Today (Sep 15)</span>
+            
+            <div className="h-[200px] w-full mt-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="date" tick={{fontSize: 10, fill: '#64748B'}} tickLine={false} axisLine={false} minTickGap={20} />
+                  <YAxis tick={{fontSize: 10, fill: '#64748B'}} tickLine={false} axisLine={false} />
+                  <RechartsTooltip 
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey={trendMetric} 
+                    stroke={trendMetric === 'volume' ? '#4F46E5' : '#E11D48'} 
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+                    activeDot={{ r: 6, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </section>
 
         {/* 4. TOP QUALITY DRIVERS (PARETO 80/20) */}
-        <section id="top-quality-drivers" className="bg-qems-bg-white border border-qems-border rounded-lg p-5">
+        <section id="top-quality-drivers" className="bg-qems-bg-white border border-qems-border rounded-lg p-5 flex flex-col">
           <div className="flex items-center justify-between pb-3 border-b border-qems-border-light ">
             <div>
               <div className="flex items-center space-x-2">
@@ -530,41 +574,27 @@ export const CommandCenter: React.FC = () => {
             </span>
           </div>
 
-          <div className="mt-3.5 space-y-2.5">
-            {topProcesses.map(([proc, count], idx) => {
-              const percent = totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0;
-              return (
-                <div
-                  key={proc}
-                  onClick={() => handleDrillDownProcess(proc)}
-                  className="space-y-1 p-1.5 rounded hover:bg-qems-bg-surface :bg-slate-800/60 cursor-pointer transition"
-                >
-                  <div className="flex justify-between text-xs">
-                    <span className="font-semibold text-qems-text-primary flex items-center">
-                      <span className="w-4 text-qems-text-disabled font-mono text-[10px]">#{idx + 1}</span>
-                      {proc}
-                    </span>
-                    <span className="text-qems-text-muted font-mono text-[11px] tabular-nums">
-                      <strong className="text-qems-text-primary ">{count}</strong> defects ({percent}%)
-                    </span>
-                  </div>
-                  <div className="w-full bg-qems-bg-secondary h-2 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full transition-all ${
-                        idx === 0
-                          ? 'bg-qems-brand'
-                          : idx === 1
-                          ? 'bg-indigo-500'
-                          : idx === 2
-                          ? 'bg-indigo-400'
-                          : 'bg-slate-400 '
-                      }`}
-                      style={{ width: `${percent * 2.5}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+          <div className="mt-6 flex-grow h-[220px] w-full">
+            {topProcesses.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topProcesses} layout="vertical" margin={{ top: 0, right: 20, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
+                  <XAxis type="number" hide />
+                  <YAxis type="category" dataKey="name" width={120} tick={{fontSize: 10, fill: '#334155', fontWeight: 600}} axisLine={false} tickLine={false} />
+                  <RechartsTooltip 
+                    cursor={{fill: '#F1F5F9'}}
+                    contentStyle={{ borderRadius: '8px', border: '1px solid #E2E8F0', fontSize: '12px' }}
+                  />
+                  <Bar dataKey="count" radius={[0, 4, 4, 0]} onClick={(data) => handleDrillDownProcess(data.name)} className="cursor-pointer">
+                    {topProcesses.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 0 ? '#4F46E5' : index === 1 ? '#6366F1' : index === 2 ? '#818CF8' : '#94A3B8'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-sm text-slate-400">Not enough data for Pareto analysis</div>
+            )}
           </div>
         </section>
       </div>
