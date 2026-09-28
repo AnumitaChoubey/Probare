@@ -51,11 +51,9 @@ function createWindow() {
   });
 }
 
-import { initSchema, getQualityErrors, createQualityError, updateQualityError } from './database.js';
 import { saveOfflineSession, getOfflineSession, clearOfflineSession } from './auth.js';
 
 app.whenReady().then(() => {
-  initSchema();
   createWindow();
 
   app.on('activate', () => {
@@ -68,18 +66,6 @@ app.on('window-all-closed', () => {
 });
 
 // --- IPC Handlers ---
-
-ipcMain.handle('qems:db:getErrors', (event, filters) => {
-  return getQualityErrors(filters);
-});
-
-ipcMain.handle('qems:db:createError', (event, errorData, localId, idempotencyKey) => {
-  return createQualityError(errorData, localId, idempotencyKey);
-});
-
-ipcMain.handle('qems:db:updateError', (event, localId, errorData, idempotencyKey) => {
-  return updateQualityError(localId, errorData, idempotencyKey);
-});
 
 ipcMain.handle('qems:auth:saveSession', (event, sessionData) => {
   saveOfflineSession(sessionData);

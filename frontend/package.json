@@ -35,7 +35,6 @@
     "@tanstack/react-query-devtools": "^5.103.1",
     "@vitejs/plugin-react": "^5.0.4",
     "axios": "^1.20.0",
-    "better-sqlite3": "^13.0.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "lucide-react": "^0.546.0",
