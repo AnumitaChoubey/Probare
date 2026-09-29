@@ -11,7 +11,7 @@ Probare is fully deployed to the cloud for immediate enterprise access:
 - **Product Landing Page:** [https://probare-website.vercel.app/](https://probare-website.vercel.app/)
 - **Live Web Application (Vercel):** *Deployed via Vercel for instant browser access.*
 - **Live Backend API (Render):** *Hosted Python FastAPI backend with a managed PostgreSQL database.*
-- **Desktop Application (Windows):** Download the `.exe` installer directly from the [GitHub Releases](#). The desktop shell securely connects to the live Render backend.
+- **Desktop Application (Windows):** Download the `.exe` installer directly from the [GitHub Releases](https://github.com/AnumitaChoubey/Probare/releases/download/v1.0.0/QEMS.Desktop.Setup.0.0.0.exe). The desktop shell securely connects to the live Render backend.
 
 ## 🏗️ Architecture
 
