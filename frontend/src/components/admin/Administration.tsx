@@ -29,6 +29,7 @@ export const Administration: React.FC = () => {
   
   const [newProjectName, setNewProjectName] = useState('');
   const [roleUserId, setRoleUserId] = useState('');
+  const [otherRoleUserId, setOtherRoleUserId] = useState('');
   const [roleName, setRoleName] = useState('Frontline Employee');
 
   useEffect(() => {
@@ -113,9 +114,16 @@ export const Administration: React.FC = () => {
   };
 
   const handleAssignRole = async () => {
-    if (!roleUserId || !selectedProjectId) return;
+    if ((!roleUserId && !otherRoleUserId) || !selectedProjectId) return;
+    
+    const actualUserId = roleUserId === 'Other' ? otherRoleUserId : roleUserId;
+    if (!actualUserId.trim()) {
+      addToast({ type: 'warning', title: 'Specify User', description: 'Please specify a name for the new user.' });
+      return;
+    }
+    
     try {
-      await adminApi.assignRole(roleUserId, selectedProjectId, roleName);
+      await adminApi.assignRole(actualUserId, selectedProjectId, roleName);
       loadProjectUsers(selectedProjectId);
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       queryClient.invalidateQueries({ queryKey: ['projectUsers'] });
@@ -242,7 +250,17 @@ export const Administration: React.FC = () => {
                   >
                     <option value="" disabled>Select User</option>
                     {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                    <option value="Other">Other (Create New)</option>
                   </select>
+                  {roleUserId === 'Other' && (
+                    <input
+                      type="text"
+                      placeholder="Specify user name..."
+                      value={otherRoleUserId}
+                      onChange={e => setOtherRoleUserId(e.target.value)}
+                      className="border border-qems-border rounded p-1.5 text-sm w-48"
+                    />
+                  )}
                   <select 
                     value={roleName} 
                     onChange={e => setRoleName(e.target.value)}
