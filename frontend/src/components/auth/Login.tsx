@@ -6,7 +6,7 @@ export const Login: React.FC = () => {
   return (
     <AuthLayout
       title="Sign in to your account"
-      subtitle="Access the Quality Error Management System"
+      subtitle="Access the Probare Platform"
     >
       <div className="w-full">
         <SignIn 

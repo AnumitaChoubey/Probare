@@ -148,7 +148,7 @@ export const Administration: React.FC = () => {
             </span>
           </div>
           <h1 className="text-base font-bold text-qems-text-primary mt-1 tracking-tight">
-            QEMS Administration
+            Probare Administration
           </h1>
           <p className="text-xs text-qems-text-muted mt-0.5">
             Manage projects, RBAC assignments, and system taxonomy.

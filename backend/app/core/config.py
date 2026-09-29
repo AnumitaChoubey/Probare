@@ -9,12 +9,12 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    PROJECT_NAME: str = "QEMS Enterprise Backend"
+    PROJECT_NAME: str = "Probare Enterprise Backend"
     API_V1_STR: str = "/api/v1"
     APPLICATION_ENV: str = "development"
     AUTH_PROVIDER: str = "entra"
     
-    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000", "https://probare.onrender.com"]
+    CORS_ORIGINS: List[str] = ["http://localhost:5173", "http://localhost:3000", "https://probare.onrender.com", "https://probare-website.vercel.app"]
     
     DATABASE_URL: str
     REDIS_URL: str

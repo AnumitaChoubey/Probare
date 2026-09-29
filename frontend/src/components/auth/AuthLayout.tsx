@@ -8,7 +8,7 @@ export const AuthLayout: React.FC<{ children: React.ReactNode; title: string; su
       <div className="hidden lg:flex lg:w-1/2 bg-qems-bg-secondary border-r border-qems-border relative flex-col justify-between p-12">
         <div className="relative z-10">
           <div className="flex items-center space-x-3 mb-8">
-            <span className="text-2xl font-bold tracking-tight text-qems-text-primary uppercase">QEMS Enterprise</span>
+            <span className="text-2xl font-bold tracking-tight text-qems-text-primary uppercase">Probare Enterprise</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-qems-text-primary leading-tight mt-12 max-w-lg tracking-tight">
             Quality Operations & Continuous Improvement
@@ -30,7 +30,7 @@ export const AuthLayout: React.FC<{ children: React.ReactNode; title: string; su
             <div className="p-2 bg-qems-brand-light rounded-lg">
               <Activity className="h-6 w-6 text-qems-brand-dark " />
             </div>
-            <span className="text-xl font-bold text-qems-text-primary ">QEMS</span>
+            <span className="text-xl font-bold text-qems-text-primary ">Probare</span>
           </div>
 
           <div>

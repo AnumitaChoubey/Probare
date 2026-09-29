@@ -6,7 +6,7 @@ export const Register: React.FC = () => {
   return (
     <AuthLayout
       title="Create an account"
-      subtitle="Register to access the Quality Error Management System"
+      subtitle="Register to access the Probare Platform"
     >
       <div className="w-full">
         <SignUp 

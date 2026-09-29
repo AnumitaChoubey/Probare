@@ -88,12 +88,12 @@ export const Header: React.FC = () => {
         <div
           onClick={() => setActiveSection('COMMAND CENTER')}
           className="flex items-center space-x-2 cursor-pointer group"
-          title="QEMS Command Center"
+          title="Probare Command Center"
         >
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
               <span className="font-bold text-lg tracking-tight text-qems-text-primary leading-none group-hover:text-qems-brand-dark transition-colors">
-                QEMS
+                Probare
               </span>
               <span className="text-[10px] px-1.5 py-0.2 bg-qems-bg-secondary text-qems-text-secondary font-bold rounded border border-qems-border uppercase">
                 ENTERPRISE
@@ -314,7 +314,7 @@ export const Header: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-qems-border-light ">
               <div className="flex items-center space-x-2">
                 <LifeBuoy className="w-5 h-5 text-qems-brand-dark" />
-                <h3 className="font-bold text-sm text-qems-text-primary ">QEMS Operating Framework</h3>
+                <h3 className="font-bold text-sm text-qems-text-primary ">Probare Operating Framework</h3>
               </div>
               <button
                 onClick={() => setIsHelpOpen(false)}
@@ -340,7 +340,7 @@ export const Header: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-qems-text-muted ">Disputed Reference Case</span>
-                  <span className="text-qems-brand-dark font-semibold">QEMS-2026-001284</span>
+                  <span className="text-qems-brand-dark font-semibold">PROBARE-2026-001284</span>
                 </div>
               </div>
               <p className="text-[11px] text-qems-text-muted ">

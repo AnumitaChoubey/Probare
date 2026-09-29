@@ -134,7 +134,7 @@ export const CommandPalette: React.FC = () => {
           <input
             autoFocus
             type="text"
-            placeholder="Type a command or search records (e.g. QEMS-2026-001284, Sarah, SOP-PAY-014, RCA)..."
+            placeholder="Type a command or search records (e.g. PROBARE-2026-001284, Sarah, SOP-PAY-014, RCA)..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1 bg-transparent text-xs text-qems-text-primary placeholder-slate-400 focus:outline-none"
@@ -180,10 +180,10 @@ export const CommandPalette: React.FC = () => {
             <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'} (D)</span>
           </button>
           <button
-            onClick={() => handleSelectEvent('QEMS-2026-001284')}
+            onClick={() => handleSelectEvent('PROBARE-2026-001284')}
             className="px-2 py-1 bg-qems-bg-secondary text-qems-text-secondary font-medium rounded hover:bg-slate-200 :bg-slate-700 flex items-center space-x-1 shrink-0 font-mono border border-qems-border "
           >
-            <span>Hero Case QEMS-001284</span>
+            <span>Hero Case PROBARE-001284</span>
           </button>
         </div>
 

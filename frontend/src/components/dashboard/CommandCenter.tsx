@@ -206,11 +206,11 @@ export const CommandCenter: React.FC = () => {
 
           <div className="flex items-center space-x-2 shrink-0">
             <button
-              onClick={() => openEvent('QEMS-2026-001284')}
+              onClick={() => openEvent('PROBARE-2026-001284')}
               className="px-3 py-1.5 bg-qems-brand-light hover:bg-qems-brand-light :bg-indigo-900/50 text-qems-brand-dark border border-qems-brand rounded-md text-xs font-semibold flex items-center space-x-1.5 transition"
             >
               <Zap className="w-3.5 h-3.5 text-qems-brand-dark " />
-              <span>Sample Case: QEMS-2026-001284</span>
+              <span>Sample Case: PROBARE-2026-001284</span>
             </button>
             <button
               onClick={() => setActiveSection('QUALITY EVENTS')}

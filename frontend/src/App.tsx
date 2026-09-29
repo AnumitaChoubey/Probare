@@ -218,7 +218,7 @@ export default function App() {
   return (
     <ClerkProvider publishableKey={clerkPubKey}>
       <QueryClientProvider client={queryClient}>
-        <ErrorBoundary fallbackTitle="Quality Error Management System Error">
+        <ErrorBoundary fallbackTitle="Probare Platform Error">
           <SignedIn>
             <QEMSProvider>
               <AppContent />
