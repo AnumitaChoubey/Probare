@@ -87,20 +87,39 @@ export const Header: React.FC = () => {
       <div className="flex items-center space-x-3">
         <div
           onClick={() => setActiveSection('COMMAND CENTER')}
-          className="flex items-center space-x-2 cursor-pointer group"
+          className="flex items-center space-x-2.5 cursor-pointer group"
           title="Probare Command Center"
         >
+          <div className="w-9 h-9 flex items-center justify-center transition drop-shadow-sm group-hover:scale-105">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#14b8a6" />
+                  <stop offset="100%" stopColor="#0f766e" />
+                </linearGradient>
+                <linearGradient id="navyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#0f172a" />
+                  <stop offset="100%" stopColor="#020617" />
+                </linearGradient>
+              </defs>
+              <path d="M25 45 C25 10 45 5 70 5 C95 5 95 30 95 45 C95 70 80 85 60 85 C40 85 30 75 25 65 Z" fill="url(#tealGrad)" />
+              <path d="M25 95 V 20 C25 15 35 15 45 25 V 80 C45 95 35 100 25 95 Z" fill="url(#navyGrad)" />
+              <path d="M45 80 C60 80 80 75 80 50 C80 30 65 25 45 25 C30 25 25 35 25 45 C25 60 30 80 45 80 Z" fill="url(#navyGrad)" />
+              <path d="M42 45 L 50 53 L 68 32 L 75 38 L 50 65 L 35 50 Z" fill="#ffffff" />
+            </svg>
+          </div>
           <div className="flex flex-col">
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg tracking-tight text-qems-text-primary leading-none group-hover:text-qems-brand-dark transition-colors">
-                Probare
+              <span className="font-bold text-xl tracking-tight text-qems-text-primary leading-none group-hover:text-qems-brand-dark transition-colors lowercase" style={{ fontFamily: 'sans-serif' }}>
+                probare
               </span>
               <span className="text-[10px] px-1.5 py-0.2 bg-qems-bg-secondary text-qems-text-secondary font-bold rounded border border-qems-border uppercase">
                 ENTERPRISE
               </span>
             </div>
-            <span className="text-[10px] text-qems-text-muted font-medium leading-tight tracking-wide uppercase mt-0.5">
-              Quality Operations & Continuous Improvement
+            <span className="text-[9px] font-bold tracking-[0.1em] mt-0.5">
+              <span className="text-[#14b8a6]">PROACTIVE. PRECISE. </span>
+              <span className="text-qems-text-primary">QUALITY.</span>
             </span>
           </div>
         </div>
