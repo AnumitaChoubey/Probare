@@ -47,6 +47,11 @@ export const NewErrorModal: React.FC = () => {
   const [processArea, setProcessArea] = useState(processKeys[0] || '');
   const [sopId, setSopId] = useState(initialSop);
   const [errorType, setErrorType] = useState(errorTypesList[0] || 'Unclassified');
+  
+  const [otherEmployee, setOtherEmployee] = useState('');
+  const [otherProcessArea, setOtherProcessArea] = useState('');
+  const [otherSopId, setOtherSopId] = useState('');
+  const [otherErrorType, setOtherErrorType] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [expectedOutcome, setExpectedOutcome] = useState('');
@@ -207,6 +212,11 @@ export const NewErrorModal: React.FC = () => {
     if (!employee) {
       newErrors.employee = 'Please select an employee.';
     }
+    if (employee === 'Other' && !otherEmployee.trim()) newErrors.otherEmployee = 'Please specify the employee.';
+    if (processArea === 'Other' && !otherProcessArea.trim()) newErrors.otherProcessArea = 'Please specify the process area.';
+    if (sopId === 'Other' && !otherSopId.trim()) newErrors.otherSopId = 'Please specify the SOP.';
+    if (errorType === 'Other' && !otherErrorType.trim()) newErrors.otherErrorType = 'Please specify the error type.';
+
     if (!sopId) {
       newErrors.sopId = 'Please select an applicable SOP standard.';
     }
@@ -230,12 +240,12 @@ export const NewErrorModal: React.FC = () => {
       const newEv = await addQualityEvent({
         title,
         description,
-        employee,
+        employee: employee === 'Other' ? otherEmployee : employee,
         employeeId: empObj?.id || 'EMP-101',
         team,
-        processArea,
+        processArea: processArea === 'Other' ? otherProcessArea : processArea,
         subCategory: 'Procedural Compliance',
-        errorType,
+        errorType: errorType === 'Other' ? otherErrorType : errorType,
         severity: currentSeverity,
         status: 'Logged',
         owner: currentUser.name,
@@ -246,8 +256,8 @@ export const NewErrorModal: React.FC = () => {
           .replace('T', ' ')
           .substring(0, 16),
         slaHoursRemaining: 48,
-        sopId,
-        sopTitle: sopObj?.name || 'Operational SOP Standard',
+        sopId: sopId === 'Other' ? 'SOP-CUSTOM' : sopId,
+        sopTitle: sopId === 'Other' ? otherSopId : (sopObj?.name || 'Operational SOP Standard'),
         financialImpact: finImpact > 0 ? `$${finImpact.toLocaleString()}` : undefined,
         customerImpact: custImpact,
         evidence: uploadedFiles.map((name, i) => ({
@@ -324,7 +334,17 @@ export const NewErrorModal: React.FC = () => {
                     {emp.name} ({emp.project_role})
                   </option>
                 ))}
+                <option value="Other">Other (Specify)</option>
               </select>
+              {employee === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="Specify employee..."
+                  value={otherEmployee}
+                  onChange={(e) => setOtherEmployee(e.target.value)}
+                  className={`mt-2 w-full px-2.5 py-1.5 bg-qems-bg-surface border rounded text-qems-text-primary focus:bg-qems-bg-white transition ${errors.otherEmployee ? 'border-rose-500 ring-1 ring-rose-500' : 'border-qems-border focus:border-qems-brand'}`}
+                />
+              )}
             </div>
 
             <div>
@@ -338,7 +358,17 @@ export const NewErrorModal: React.FC = () => {
                   <option key={p} value={p}>{p}</option>
                 ))}
                 {processKeys.length === 0 && <option value="General">General</option>}
+                <option value="Other">Other (Specify)</option>
               </select>
+              {processArea === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="Specify process area..."
+                  value={otherProcessArea}
+                  onChange={(e) => setOtherProcessArea(e.target.value)}
+                  className={`mt-2 w-full px-2.5 py-1.5 bg-qems-bg-surface border rounded text-qems-text-primary focus:bg-qems-bg-white transition ${errors.otherProcessArea ? 'border-rose-500 ring-1 ring-rose-500' : 'border-qems-border focus:border-qems-brand'}`}
+                />
+              )}
             </div>
 
             <div>
@@ -354,7 +384,17 @@ export const NewErrorModal: React.FC = () => {
                   </option>
                 ))}
                 <option value="SOP-GEN-001">SOP-GEN-001 - General Quality Standard</option>
+                <option value="Other">Other (Specify)</option>
               </select>
+              {sopId === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="Specify SOP title..."
+                  value={otherSopId}
+                  onChange={(e) => setOtherSopId(e.target.value)}
+                  className={`mt-2 w-full px-2.5 py-1.5 bg-qems-bg-surface border rounded text-qems-text-primary focus:bg-qems-bg-white transition ${errors.otherSopId ? 'border-rose-500 ring-1 ring-rose-500' : 'border-qems-border focus:border-qems-brand'}`}
+                />
+              )}
             </div>
           </div>
 
@@ -430,7 +470,17 @@ export const NewErrorModal: React.FC = () => {
                   </option>
                 ))}
                 {errorTypesList.length === 0 && <option value="Unclassified">Unclassified</option>}
+                <option value="Other">Other (Specify)</option>
               </select>
+              {errorType === 'Other' && (
+                <input
+                  type="text"
+                  placeholder="Specify error type..."
+                  value={otherErrorType}
+                  onChange={(e) => setOtherErrorType(e.target.value)}
+                  className={`mt-2 w-full px-2.5 py-1.5 bg-qems-bg-surface border rounded text-qems-text-primary focus:bg-qems-bg-white transition ${errors.otherErrorType ? 'border-rose-500 ring-1 ring-rose-500' : 'border-qems-border focus:border-qems-brand'}`}
+                />
+              )}
             </div>
           </div>
 
