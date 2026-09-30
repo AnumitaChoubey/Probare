@@ -23,8 +23,9 @@ import {
 import { useQEMS } from '../../context/QEMSContext';
 import { UserRole } from '../../types';
 import { UserButton } from '@clerk/clerk-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectsApi } from '../../services/api/projects';
+import { setActiveProjectId } from '../../services/api/client';
 
 export const Header: React.FC = () => {
   const {
@@ -76,6 +77,7 @@ export const Header: React.FC = () => {
   ];
   const roles = backendRoles.includes('System Administrator') ? allRoles : backendRoles;
   
+  const queryClient = useQueryClient();
   const { data: projects = [] } = useQuery({
     queryKey: ['myProjects'],
     queryFn: projectsApi.list
@@ -131,10 +133,14 @@ export const Header: React.FC = () => {
             <select
               className="text-xs py-1 px-2 bg-qems-bg-surface border border-qems-border rounded focus:outline-none focus:border-qems-brand text-qems-text-primary font-mono"
               onChange={(e) => {
-                // To actually change the project we would update the API client active project ID and refetch.
-                // For now, let's just reload the page with a query param or assume the backend context knows it.
-                // In a real app we'd call setActiveProjectId() and invalidate queries.
-                window.location.reload();
+                const newProjectId = e.target.value;
+                if (newProjectId) {
+                  // Update the active project in the API client
+                  setActiveProjectId(newProjectId);
+                  // Invalidate all cached queries so they refetch with the new project
+                  queryClient.invalidateQueries();
+                  addToast({ type: 'success', title: 'Project Switched', description: `Now viewing project: ${e.target.options[e.target.selectedIndex].text}` });
+                }
               }}
               defaultValue={sessionData?.accessible_projects?.[0]}
             >
