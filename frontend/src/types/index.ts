@@ -219,7 +219,7 @@ export interface QualityEvent {
   createdBy: string;
   description: string;
   customerImpact: string;
-  financialImpact?: string;
+  financialImpact?: number | string;
   complianceImpact?: string;
   expectedOutcome?: string;
   actualOutcome?: string;
