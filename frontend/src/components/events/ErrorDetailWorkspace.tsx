@@ -67,6 +67,7 @@ export const ErrorDetailWorkspace: React.FC = () => {
 
   // Rebuttal form state (Frontline)
   const [disputeCategory, setDisputeCategory] = useState<DisputeCategory>('System Issue');
+  const [otherDisputeCategory, setOtherDisputeCategory] = useState('');
   const [disputeExplanation, setDisputeExplanation] = useState('');
 
   // QA Arbitration form state
@@ -93,6 +94,7 @@ export const ErrorDetailWorkspace: React.FC = () => {
   const [primaryCause, setPrimaryCause] = useState<string>(
     event?.rootCause || 'System Issue'
   );
+  const [otherPrimaryCause, setOtherPrimaryCause] = useState('');
   const [rcaRecurrence, setRcaRecurrence] = useState<number>(
     typeof event?.rca?.recurrenceRisk === 'number' ? event.rca.recurrenceRisk : 3
   );
@@ -104,6 +106,7 @@ export const ErrorDetailWorkspace: React.FC = () => {
   const [newCapaOwner, setNewCapaOwner] = useState(currentUser.name);
   const [newCapaDueDate, setNewCapaDueDate] = useState('2026-09-30');
   const [newCapaType, setNewCapaType] = useState<CorrectiveAction['type']>('System Validation');
+  const [otherCapaType, setOtherCapaType] = useState('');
   const [newCapaMethod, setNewCapaMethod] = useState('');
 
   // Effectiveness review state
@@ -152,7 +155,8 @@ export const ErrorDetailWorkspace: React.FC = () => {
       addToast({ type: 'warning', title: 'Explanation required', description: 'Please explain the grounds for dispute.' });
       return;
     }
-    submitRebuttal(event.id, disputeCategory, disputeExplanation, []);
+    const finalCategory = disputeCategory === 'Other' ? (otherDisputeCategory || 'Other') : disputeCategory;
+    submitRebuttal(event.id, finalCategory as DisputeCategory, disputeExplanation, []);
     setDisputeExplanation('');
   };
 
@@ -182,7 +186,7 @@ export const ErrorDetailWorkspace: React.FC = () => {
         answer: whyText,
       })),
       fishboneCategory: selectedFishbone,
-      primaryCategory: primaryCause,
+      primaryCategory: primaryCause === 'Other' ? (otherPrimaryCause || 'Other') : primaryCause,
       contributingFactors: [
         'High ticket volume during shift surge',
         'UI collapsed mandatory swift input element',
@@ -246,7 +250,7 @@ export const ErrorDetailWorkspace: React.FC = () => {
       priority: event.severity,
       dueDate: newCapaDueDate,
       status: 'Open',
-      type: newCapaType,
+      type: newCapaType === 'Other' ? (otherCapaType || 'Other') : newCapaType,
       verificationMethod: newCapaMethod || 'Peer audit verification sample of 10 cases',
       evidenceRequired: ['Audit Log Sign-off', 'Process Verification Record'],
     });
@@ -737,7 +741,17 @@ export const ErrorDetailWorkspace: React.FC = () => {
                             <option value="Evidence Discrepancy">Evidence Discrepancy</option>
                             <option value="Customer-Induced Error">Customer-Induced Error</option>
                             <option value="Policy Change Latency">Policy Change Latency</option>
+                            <option value="Other">Other (Specify)</option>
                           </select>
+                          {disputeCategory === 'Other' && (
+                            <input
+                              type="text"
+                              placeholder="Specify dispute category..."
+                              value={otherDisputeCategory}
+                              onChange={(e) => setOtherDisputeCategory(e.target.value)}
+                              className="w-full mt-2 px-2.5 py-1.5 bg-qems-bg-white border border-qems-border rounded text-xs text-qems-text-primary placeholder-slate-400 focus:outline-none focus:border-qems-brand"
+                            />
+                          )}
                         </div>
 
                         <div>
@@ -988,7 +1002,17 @@ export const ErrorDetailWorkspace: React.FC = () => {
                         <option value="Training Gap">Training Gap</option>
                         <option value="Cognitive Overload">Surge Volume / Cognitive Fatigue</option>
                         <option value="Tool Misconfiguration">Tool Misconfiguration</option>
+                        <option value="Other">Other (Specify)</option>
                       </select>
+                      {primaryCause === 'Other' && (
+                        <input
+                          type="text"
+                          placeholder="Specify primary root cause..."
+                          value={otherPrimaryCause}
+                          onChange={(e) => setOtherPrimaryCause(e.target.value)}
+                          className="w-full mt-2 px-2.5 py-1.5 bg-qems-bg-white border border-qems-border rounded text-xs text-qems-text-primary placeholder-slate-400 focus:outline-none focus:border-qems-brand"
+                        />
+                      )}
                     </div>
 
                     <div>
@@ -1095,7 +1119,17 @@ export const ErrorDetailWorkspace: React.FC = () => {
                             <option value="Training Module">Training Module</option>
                             <option value="Coaching Session">1-on-1 Coaching</option>
                             <option value="Process Checkpoint">Process Checkpoint</option>
+                            <option value="Other">Other (Specify)</option>
                           </select>
+                          {newCapaType === 'Other' && (
+                            <input
+                              type="text"
+                              placeholder="Specify CAPA type..."
+                              value={otherCapaType}
+                              onChange={(e) => setOtherCapaType(e.target.value)}
+                              className="w-full mt-2 px-2 py-1.5 bg-qems-bg-white border border-qems-border rounded text-qems-text-primary placeholder-slate-400 focus:outline-none focus:border-qems-brand"
+                            />
+                          )}
                         </div>
                         <div>
                           <label className="block font-semibold text-qems-text-secondary mb-1">Owner</label>

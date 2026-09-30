@@ -11,6 +11,7 @@ export const Register: React.FC = () => {
       <div className="w-full">
         <SignUp 
           signInUrl="/login"
+          forceRedirectUrl="/"
           appearance={{
             elements: {
               formButtonPrimary: 
