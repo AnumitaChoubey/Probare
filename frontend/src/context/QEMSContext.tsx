@@ -90,8 +90,22 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    // Other session side-effects if needed
-  }, [sessionData]);
+    // Listen for API-level toast events dispatched from the apiClient interceptor
+    const handleApiToast = (e: Event) => {
+      const { type, title, description } = (e as CustomEvent).detail;
+      addToast({ type, title, description });
+    };
+    const handleUnauthorized = () => {
+      // Force re-auth by clearing session - Clerk will redirect to sign-in
+      window.location.href = '/login';
+    };
+    window.addEventListener('probare:toast', handleApiToast);
+    window.addEventListener('probare:unauthorized', handleUnauthorized);
+    return () => {
+      window.removeEventListener('probare:toast', handleApiToast);
+      window.removeEventListener('probare:unauthorized', handleUnauthorized);
+    };
+  }, []);
 
   const [currentRole, setCurrentRole] = useState<UserRole>('System Administrator');
 

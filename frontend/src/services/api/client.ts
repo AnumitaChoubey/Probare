@@ -73,19 +73,37 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response) {
       const status = error.response.status;
+      const detail = error.response.data?.detail || error.message;
       if (status === 401) {
-        console.error('Unauthorized access - please login.');
+        console.error('Unauthorized access - redirecting to login.');
+        // Dispatch event so the app can redirect to login
+        window.dispatchEvent(new CustomEvent('probare:unauthorized'));
       } else if (status === 403) {
-        console.error('Permission denied.');
+        console.error('Permission denied:', detail);
+        window.dispatchEvent(new CustomEvent('probare:toast', {
+          detail: { type: 'error', title: 'Permission Denied', description: detail }
+        }));
       } else if (status === 409) {
-        console.error('CONCURRENT_MODIFICATION: Another user has modified this record. State will not be overwritten silently.');
-        if (window.qems?.notifications) {
-          window.qems.notifications.show('Concurrent Modification', 'The record was modified by another user. Please refresh.');
-        } else {
-          // A naive alert for non-electron fallback
-          alert('CONCURRENT_MODIFICATION: Record modified by another user. Please refresh.');
-        }
+        console.error('CONCURRENT_MODIFICATION: Another user modified this record.');
+        window.dispatchEvent(new CustomEvent('probare:toast', {
+          detail: {
+            type: 'warning',
+            title: 'Concurrent Modification',
+            description: 'This record was modified by another user. Please refresh to see the latest version.'
+          }
+        }));
+      } else if (status === 503 || status === 502) {
+        console.error('Backend service unavailable:', detail);
+        window.dispatchEvent(new CustomEvent('probare:toast', {
+          detail: { type: 'error', title: 'Service Unavailable', description: 'The backend service is temporarily unavailable. Please try again.' }
+        }));
       }
+    } else if (error.request) {
+      // Network error - no response received
+      console.error('Network error:', error.message);
+      window.dispatchEvent(new CustomEvent('probare:toast', {
+        detail: { type: 'error', title: 'Network Error', description: 'Unable to reach the server. Check your connection.' }
+      }));
     }
     return Promise.reject(error);
   }
