@@ -133,10 +133,12 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Real taxonomy and users based on active project
   const activeProjectId = sessionData?.accessible_projects?.[0] || '';
   
-  // Set synchronously so API client has the ID before queries fire
-  if (activeProjectId) {
-    setActiveProjectId(activeProjectId);
-  }
+  // Synchronize the API client's active project ID in an effect (not during render)
+  useEffect(() => {
+    if (activeProjectId) {
+      setActiveProjectId(activeProjectId);
+    }
+  }, [activeProjectId]);
 
   // Data fetching
   const { data: events = [] } = useQuery({ 
