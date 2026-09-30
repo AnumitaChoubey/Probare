@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from app.core.database import get_db
-from app.api.deps.auth import get_current_user
+from app.api.deps.auth import get_current_user, require_permissions
 from app.schemas.auth import AuthContext
 from app.models.core import User, ProjectMember, Project
 
@@ -24,13 +24,12 @@ class AssignRoleRequest(BaseModel):
 class AssignRoleResponse(BaseModel):
     message: str
 
-@router.get("/users", response_model=List[UserResponse])
+@router.get("/users", response_model=List[UserResponse], dependencies=[Depends(require_permissions(["MANAGE_USERS"]))])
 async def list_all_users(
     auth_context: AuthContext = Depends(get_current_user),
     session: AsyncSession = Depends(get_db)
 ):
-    """List all users in the tenant."""
-    # Relaxed RBAC for demo purposes so anyone can assign roles
+    """List all users in the tenant. Requires MANAGE_USERS permission."""
     result = await session.execute(
         select(User).filter(User.tenant_id == auth_context.qems_tenant_id)
     )
