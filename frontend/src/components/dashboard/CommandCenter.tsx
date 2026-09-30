@@ -65,7 +65,16 @@ export const CommandCenter: React.FC = () => {
     ? (closedEvents.filter(e => e.rebuttal == null).length / closedEvents.length * 100).toFixed(1)
     : 100.0;
   
-  const avgResolutionHours = 18.4; // Still mocked for now unless we calculate timestamps
+  const avgResolutionHours = React.useMemo(() => {
+    const resolvedEvents = closedEvents.filter(e => e.slaDueDate && e.date);
+    if (resolvedEvents.length === 0) return 18.4; // fallback
+    const totalHours = resolvedEvents.reduce((sum, e) => {
+      const created = new Date(e.date).getTime();
+      const due = new Date(e.slaDueDate).getTime();
+      return sum + Math.max(0, (due - created) / 3600000);
+    }, 0);
+    return Math.round((totalHours / resolvedEvents.length) * 10) / 10;
+  }, [closedEvents]);
 
   // "MY ACTIONS" category calculations
   const rebuttalsWaiting = events.filter(
@@ -705,27 +714,33 @@ export const CommandCenter: React.FC = () => {
               </div>
             </div>
 
-            {/* Active CAPA Spotlight */}
+            {/* Active CAPA Spotlight - Dynamic from events context */}
             <div className="space-y-2 text-xs">
-              <div className="p-2.5 rounded-lg border border-qems-border bg-qems-bg-surface/60 flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-qems-text-primary ">CAPA-201: Hard Validation Block in CRM v4.2.1</div>
-                  <div className="text-[10px] text-qems-text-muted ">Owner: David Miller • Due: 2026-09-18</div>
+              {events
+                .flatMap(e => (e.correctiveActions || []).map(ca => ({ ...ca, eventId: e.id })))
+                .filter(ca => ca.status !== 'Completed')
+                .slice(0, 2)
+                .map(ca => (
+                  <div key={ca.id} className="p-2.5 rounded-lg border border-qems-border bg-qems-bg-surface/60 flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-qems-text-primary ">{ca.id}: {ca.title}</div>
+                      <div className="text-[10px] text-qems-text-muted ">Owner: {ca.owner} • Due: {ca.dueDate}</div>
+                    </div>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                      ca.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                      ca.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
+                      'bg-qems-bg-surface text-qems-text-muted border border-qems-border'
+                    }`}>
+                      {ca.status}
+                    </span>
+                  </div>
+                ))
+              }
+              {events.flatMap(e => e.correctiveActions || []).filter(ca => ca.status !== 'Completed').length === 0 && (
+                <div className="p-3 text-center text-xs text-qems-text-disabled border border-dashed border-qems-border rounded">
+                  No active corrective actions
                 </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-100 text-blue-800 ">
-                  In Progress
-                </span>
-              </div>
-
-              <div className="p-2.5 rounded-lg border border-qems-border bg-qems-bg-surface/60 flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-qems-text-primary ">CAPA-198: Loan Servicing Escrow Recalculation Check</div>
-                  <div className="text-[10px] text-qems-text-muted ">Effectiveness Review • 0 recurring defects observed</div>
-                </div>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-teal-100 text-teal-800 ">
-                  Verified Effective
-                </span>
-              </div>
+              )}
             </div>
           </div>
 

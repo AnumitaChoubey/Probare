@@ -459,8 +459,12 @@ export const ErrorDetailWorkspace: React.FC = () => {
                   Financial Impact
                 </span>
                 <span className="font-mono font-bold text-qems-text-primary tabular-nums">
-                  {event.financialImpact !== undefined
-                    ? `$${event.financialImpact.toLocaleString()}`
+                  {event.financialImpact !== undefined && event.financialImpact !== null
+                    ? (typeof event.financialImpact === 'number'
+                      ? `$${event.financialImpact.toLocaleString()}`
+                      : String(event.financialImpact).startsWith('$')
+                        ? event.financialImpact
+                        : `$${event.financialImpact}`)
                     : '$0'}
                 </span>
               </div>
