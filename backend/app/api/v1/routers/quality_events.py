@@ -104,20 +104,24 @@ async def create_quality_event(
     await session.commit()
     await session.refresh(event)
     
-    # Create notification for owner (even if same as creator, for demo purposes)
-    # In this router, we can reuse workflow_service.outbox_service or instantiate a new one
-    notif_service = NotificationService(outbox_service=workflow_service.outbox_service)
-    await notif_service.create_notification(
-        session=session,
-            user_id=owner_id,
-            tenant_id=auth_context.qems_tenant_id,
-            title="New Quality Event Assigned",
-            body=f"You have been assigned to Quality Event {event.event_number}: {event.title}",
-            notification_type="SYSTEM_ALERT",
-            event_id=event.id,
-            link=event.id
-    )
-    await session.commit()
+    # Create notification for owner — wrap in try/except to prevent notification
+    # failures from rolling back the event creation transaction.
+    try:
+        notif_service = NotificationService(outbox_service=workflow_service.outbox_service)
+        await notif_service.create_notification(
+            session=session,
+                user_id=owner_id,
+                tenant_id=auth_context.qems_tenant_id,
+                title="New Quality Event Assigned",
+                body=f"You have been assigned to Quality Event {event.event_number}: {event.title}",
+                notification_type="SYSTEM_ALERT",
+                event_id=event.id,
+                link=event.id
+        )
+        await session.commit()
+    except Exception as notif_err:
+        import logging
+        logging.getLogger(__name__).warning(f"Notification creation failed (non-fatal): {notif_err}")
 
     return event
 
