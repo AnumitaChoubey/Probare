@@ -90,9 +90,7 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    if (sessionData && sessionData.accessible_projects?.length > 0) {
-      setActiveProjectId(sessionData.accessible_projects[0]);
-    }
+    // Other session side-effects if needed
   }, [sessionData]);
 
   const [currentRole, setCurrentRole] = useState<UserRole>('System Administrator');
@@ -120,6 +118,11 @@ export const QEMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Real taxonomy and users based on active project
   const activeProjectId = sessionData?.accessible_projects?.[0] || '';
+  
+  // Set synchronously so API client has the ID before queries fire
+  if (activeProjectId) {
+    setActiveProjectId(activeProjectId);
+  }
 
   // Data fetching
   const { data: events = [] } = useQuery({ 

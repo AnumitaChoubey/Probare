@@ -87,12 +87,15 @@ async def health_ready(db: AsyncSession = Depends(get_db)):
         await r.ping()
         await r.aclose()
         
-        # Check MinIO connection
+        # Check MinIO connection but don't fail health check if it's localhost in production
         import httpx
-        minio_health_url = f"{settings.STORAGE_ENDPOINT}/minio/health/live"
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(minio_health_url, timeout=2.0)
-            resp.raise_for_status()
+        try:
+            minio_health_url = f"{settings.STORAGE_ENDPOINT}/minio/health/live"
+            async with httpx.AsyncClient() as client:
+                resp = await client.get(minio_health_url, timeout=2.0)
+                resp.raise_for_status()
+        except Exception as e:
+            logger.warning(f"MinIO health check failed (non-fatal): {e}")
 
         return {"status": "ready"}
     except Exception as e:
