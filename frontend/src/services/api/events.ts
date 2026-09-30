@@ -19,7 +19,8 @@ function mapEventFromApi(e: any): QualityEvent {
     subCategory: e.sub_process_id || '',
     errorType: e.error_type_id || '',
     sopId: e.sop_id || '',
-    sopTitle: e.sop_id || '',
+    sopTitle: e.sop_title || e.sop_id || '',
+    sopExcerpt: e.sop_excerpt || undefined,
     severity: e.severity || 'MEDIUM',
     status: e.status || 'Logged',
     owner: e.owner_name || e.owner_id || 'Unassigned',
@@ -58,7 +59,7 @@ export const eventsApi = {
     const payload = {
       title: data.title,
       description: data.description,
-      severity: data.severity || 'Medium',
+      severity: data.severity || 'MEDIUM',
       employee_id: data.employeeId || data.employee_id || 'system',
       team_id: data.teamId || data.team_id,
       process_id: data.processArea || data.processId || data.process_id,
