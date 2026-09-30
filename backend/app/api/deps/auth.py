@@ -72,7 +72,7 @@ class ClerkAuthProvider(AuthenticationProvider):
                 await session.commit()
                 
             context = await AuthService.get_auth_context(session, user, external_tenant_id=user.tenant_id)
-            print(f"DEBUG: Returning AuthContext for user {user.id}. user_name: {context.user_name}, qems_user_id: {context.qems_user_id}")
+            logger.debug(f"AuthContext resolved for user_id={user.id}, roles={context.roles}")
             return context
             
         except jwt.PyJWTError as e:
@@ -85,17 +85,10 @@ class ClerkAuthProvider(AuthenticationProvider):
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Authentication Error (Clerk): {e}")
-            # Fallback to Admin for local dev
-            from app.models.core import User
-            user_res = await session.execute(select(User).filter(User.email == 'charanchandra200623@gmail.com'))
-            user = user_res.scalars().first()
-            if user:
-                context = await AuthService.get_auth_context(session, user, external_tenant_id=user.tenant_id)
-                return context
+            logger.error(f"Authentication Error (Clerk): {e}", exc_info=True)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Authentication failed."
+                detail="Authentication failed. Please sign in again."
             )
 
 
