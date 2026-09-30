@@ -100,4 +100,9 @@ async def health_ready(db: AsyncSession = Depends(get_db)):
         return {"status": "ready"}
     except Exception as e:
         logger.error(f"Readiness check failed: {e}")
-        return {"status": "error", "message": "Dependency connection failed", "details": str(e)}
+        from fastapi import Response
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "Dependency connection failed", "details": str(e)}
+        )
