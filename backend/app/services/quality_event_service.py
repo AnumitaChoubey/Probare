@@ -57,11 +57,17 @@ class QualityEventService:
             stmt = await self.repository._apply_data_scope(session, stmt, auth_context.qems_user_id)
         
         if filters:
-            if filters.pop("assigned_to_me", None) and user_id:
+            assigned_to_me = filters.pop("assigned_to_me", None)
+            created_by_me = filters.pop("created_by_me", None)
+            involving_me = filters.pop("involving_me", None)
+            awaiting_my_review = filters.pop("awaiting_my_review", None)
+            updated_since = filters.pop("updated_since", None)
+
+            if assigned_to_me and user_id:
                 stmt = stmt.filter(QualityEvent.owner_id == user_id)
-            if filters.pop("created_by_me", None) and user_id:
+            if created_by_me and user_id:
                 stmt = stmt.filter(QualityEvent.created_by_id == user_id)
-            if filters.pop("involving_me", None) and user_id:
+            if involving_me and user_id:
                 stmt = stmt.filter(
                     or_(
                         QualityEvent.owner_id == user_id,
@@ -69,12 +75,14 @@ class QualityEventService:
                         QualityEvent.created_by_id == user_id
                     )
                 )
-            if filters.pop("awaiting_my_review", None) and user_id:
+            if awaiting_my_review and user_id:
                 stmt = stmt.filter(
                     QualityEvent.status.in_(["QA Review", "Manager Review"])
                 )
+            if updated_since:
+                stmt = stmt.filter(QualityEvent.updated_at > updated_since)
                 
-            # Generic remaining filters
+            # Generic remaining filters (safe now that special keys are popped)
             for k, v in filters.items():
                 if hasattr(QualityEvent, k):
                     stmt = stmt.filter(getattr(QualityEvent, k) == v)
@@ -87,10 +95,6 @@ class QualityEventService:
         # Cursor pagination logic
         if cursor:
             stmt = stmt.filter(QualityEvent.created_at < cursor)
-            
-        updated_since = filters.pop("updated_since", None) if filters else None
-        if updated_since:
-            stmt = stmt.filter(QualityEvent.updated_at > updated_since)
             
         stmt = stmt.order_by(QualityEvent.created_at.desc())
         
