@@ -234,7 +234,8 @@ export const Header: React.FC = () => {
                       key={notif.id}
                       onClick={() => {
                         markNotificationRead(notif.id);
-                        if (notif.linkId) {
+                        // Validate linkId format before using it to navigate
+                        if (notif.linkId && /^[A-Z0-9\-_]{6,60}$/i.test(notif.linkId)) {
                           setSelectedEventId(notif.linkId);
                           setActiveSection('QUALITY EVENTS');
                         }
@@ -255,9 +256,9 @@ export const Header: React.FC = () => {
                       <p className="text-[11px] text-qems-text-muted mt-1 leading-relaxed">
                         {notif.message}
                       </p>
-                      {notif.linkId && (
+                      {notif.linkId && /^[A-Z0-9\-]{6,40}$/i.test(notif.linkId) && (
                         <div className="mt-1.5 flex items-center text-[10px] text-qems-brand-dark font-medium">
-                          <span>View record {notif.linkId}</span>
+                          <span>View record</span>
                           <ExternalLink className="w-2.5 h-2.5 ml-1" />
                         </div>
                       )}
